@@ -34,7 +34,7 @@ SQLite files do not persist on Vercel serverless. Use **Turso** (free tier):
 3. In Vercel project settings, set environment variables:
    - `TURSO_DATABASE_URL` — libsql connection URL
    - `TURSO_AUTH_TOKEN` — Turso auth token
-   - `JWT_SECRET` — random secret string
+   - `AUTH_SECRET` — random secret string
 4. Connect the GitHub repo and deploy (build runs `prisma migrate deploy` automatically)
 
 ## Scripts
