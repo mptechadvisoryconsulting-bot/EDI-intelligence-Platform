@@ -10,6 +10,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createClient } from "@libsql/client";
+import { loadProductionEnv } from "./load-production-env";
+
+loadProductionEnv();
 
 const migrationsDir = path.join(process.cwd(), "prisma", "migrations");
 
