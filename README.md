@@ -36,20 +36,21 @@ SQLite files do not persist on Vercel serverless. Use **Turso** (free tier):
 3. Open the database → copy **Database URL** (`libsql://...`)
 4. **Create token** → copy the auth token
 
-### 2. Migrate and seed production
+### 2. Save credentials locally
+
+Copy `env.production.template` → `.env.production.local` and fill in your Turso URL, token, and an `AUTH_SECRET`.
+
+### 3. Migrate and seed production
 
 ```powershell
-$env:TURSO_DATABASE_URL="libsql://your-db.turso.io"
-$env:TURSO_AUTH_TOKEN="your-token"
 npm run db:prod-setup
 ```
 
-### 3. Push secrets to Vercel and redeploy
+(Reads from `.env.production.local`, or set `$env:TURSO_*` manually.)
+
+### 4. Push secrets to Vercel and redeploy
 
 ```powershell
-$env:TURSO_DATABASE_URL="libsql://..."
-$env:TURSO_AUTH_TOKEN="..."
-$env:AUTH_SECRET="random-secret-or-omit-to-auto-generate"
 npm run deploy:env
 ```
 
