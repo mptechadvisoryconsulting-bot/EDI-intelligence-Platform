@@ -25,6 +25,7 @@
 *.pem
 /uploads
 /dev.db
+.tools
 
 # debug
 npm-debug.log*
@@ -43,3 +44,5 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+.vercel

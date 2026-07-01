@@ -29,13 +29,41 @@ Demo login (after seed): see `prisma/seed.ts`.
 
 SQLite files do not persist on Vercel serverless. Use **Turso** (free tier):
 
-1. Create a database at [turso.tech](https://turso.tech)
-2. Apply migrations: `turso db shell <db-name> < prisma/migrations/...` or use Turso CLI with `DATABASE_URL` pointed at Turso for `prisma migrate deploy`
-3. In Vercel project settings, set environment variables:
-   - `TURSO_DATABASE_URL` — libsql connection URL
-   - `TURSO_AUTH_TOKEN` — Turso auth token
-   - `AUTH_SECRET` — random secret string
-4. Connect the GitHub repo and deploy (build runs `prisma migrate deploy` automatically)
+### 1. Create Turso database
+
+1. Sign up at [turso.tech/app](https://turso.tech/app)
+2. **Create database** → name it `edi-intelligence-platform`
+3. Open the database → copy **Database URL** (`libsql://...`)
+4. **Create token** → copy the auth token
+
+### 2. Migrate and seed production
+
+```powershell
+$env:TURSO_DATABASE_URL="libsql://your-db.turso.io"
+$env:TURSO_AUTH_TOKEN="your-token"
+npm run db:prod-setup
+```
+
+### 3. Push secrets to Vercel and redeploy
+
+```powershell
+$env:TURSO_DATABASE_URL="libsql://..."
+$env:TURSO_AUTH_TOKEN="..."
+$env:AUTH_SECRET="random-secret-or-omit-to-auto-generate"
+npm run deploy:env
+```
+
+Or set these manually in Vercel → Project → Settings → Environment Variables:
+
+| Variable | Description |
+|----------|-------------|
+| `TURSO_DATABASE_URL` | libsql connection URL from Turso dashboard |
+| `TURSO_AUTH_TOKEN` | Database auth token |
+| `AUTH_SECRET` | Random string for session signing |
+
+Then redeploy from the Vercel dashboard or run `vercel --prod`.
+
+**Production login** (after seed): `Marcellis20` / `DecodeEncode2026`
 
 ## Scripts
 

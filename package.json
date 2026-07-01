@@ -9,6 +9,9 @@
     "lint": "eslint",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
+    "db:prod-setup": "tsx scripts/prod-db-setup.ts",
+    "db:turso-migrate": "tsx scripts/apply-turso-migrations.ts",
+    "deploy:env": "tsx scripts/push-vercel-env.ts",
     "db:setup": "prisma migrate dev --name init && tsx prisma/seed.ts",
     "postinstall": "prisma generate"
   },
