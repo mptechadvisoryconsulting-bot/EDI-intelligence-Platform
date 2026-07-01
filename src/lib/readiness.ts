@@ -22,6 +22,15 @@ export type TransactionReadiness = {
   blockers: string[];
 };
 
+export type AccountReadinessContext = {
+  hasLayout: boolean;
+  layoutValid: boolean;
+  fieldCount: number;
+  missingPositionCount: number;
+  hasSampleOutput: boolean;
+  sampleIssueCount: number;
+};
+
 export type ReadinessReport = {
   score: number;
   label: string;
@@ -33,7 +42,10 @@ export type ReadinessReport = {
   approvalBlockers: string[];
 };
 
-export function buildReadinessReport(project: ProjectForReadiness): ReadinessReport {
+export function buildReadinessReport(
+  project: ProjectForReadiness,
+  account?: AccountReadinessContext | null
+): ReadinessReport {
   const packs = resolveTransactionPacks(project.transactions);
   const unsupported = getUnsupportedCodes(project.transactions);
   const parsedDocs = project.documents.filter((d) => d.status.startsWith("parsed"));
@@ -55,7 +67,44 @@ export function buildReadinessReport(project: ProjectForReadiness): ReadinessRep
   const nextActions: string[] = [];
   const approvalBlockers: string[] = [];
 
+  const accountChecks =
+    account != null
+      ? [
+          {
+            label: "Account ERP layout configured",
+            passed: account.hasLayout,
+            detail: account.hasLayout
+              ? `${account.fieldCount} field(s) on account`
+              : "Upload layout at Account → ERP layout",
+          },
+          {
+            label: "Layout Rec/Start/Width complete",
+            passed: account.hasLayout && account.layoutValid,
+            detail: account.missingPositionCount
+              ? `${account.missingPositionCount} field(s) missing position`
+              : account.hasLayout
+                ? "All positional fields complete"
+                : "No account layout",
+          },
+          {
+            label: "Sample output verified",
+            passed:
+              !account.hasLayout ||
+              !account.hasSampleOutput ||
+              account.sampleIssueCount === 0,
+            detail: account.hasSampleOutput
+              ? account.sampleIssueCount
+                ? `${account.sampleIssueCount} sample issue(s)`
+                : "Sample matches layout positions"
+              : account.hasLayout
+                ? "Optional — upload sample flat file"
+                : "N/A",
+          },
+        ]
+      : [];
+
   const checks = [
+    ...accountChecks,
     {
       label: "Documents uploaded",
       passed: project.documents.length > 0,
@@ -154,6 +203,20 @@ export function buildReadinessReport(project: ProjectForReadiness): ReadinessRep
     blockers.push(`Unsupported transaction code(s): ${unsupported.join(", ")}.`);
   }
 
+  if (account && !account.hasLayout) {
+    blockers.push("Account ERP layout not configured — MRS Rec/Start/Width may be incomplete.");
+    nextActions.push("Upload account ERP layout (Interface Column, Rec, Start, Width).");
+    approvalBlockers.push("Configure account ERP layout before approval.");
+  } else if (account && account.hasLayout && !account.layoutValid) {
+    blockers.push(`${account.missingPositionCount} account layout field(s) missing Rec/Start/Width.`);
+    nextActions.push("Fix account ERP layout position columns.");
+  }
+
+  if (account?.hasSampleOutput && account.sampleIssueCount > 0) {
+    blockers.push(`${account.sampleIssueCount} sample output position mismatch(es).`);
+    nextActions.push("Review sample verification on Account → ERP layout.");
+  }
+
   let score = 100;
   if (project.documents.length === 0) score -= 25;
   if (!hasGuide) score -= 15;
@@ -163,6 +226,11 @@ export function buildReadinessReport(project: ProjectForReadiness): ReadinessRep
   if (pending > 0) score -= Math.min(10, pending * 2);
   if (rejected > 0) score -= 10;
   if (lowConfidence > 0) score -= Math.min(10, lowConfidence * 2);
+  if (account && !account.hasLayout) score -= 10;
+  if (account && account.hasLayout && !account.layoutValid) score -= 8;
+  if (account?.hasSampleOutput && account.sampleIssueCount > 0) {
+    score -= Math.min(8, account.sampleIssueCount * 2);
+  }
   score = Math.max(0, Math.min(100, score));
 
   const label =

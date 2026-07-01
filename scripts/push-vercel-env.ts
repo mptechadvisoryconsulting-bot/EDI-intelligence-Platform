@@ -43,8 +43,7 @@ function main() {
 
   console.log("\nRedeploying production...");
   execSync("vercel --prod --yes", { stdio: "inherit" });
-  console.log("\nDone. Login at https://edi-intelligence-platform.vercel.app/login");
-  console.log("User: Marcellis20 / DecodeEncode2026");
+  console.log("\nDone. Credentials in .production-credentials.json");
 }
 
 main();

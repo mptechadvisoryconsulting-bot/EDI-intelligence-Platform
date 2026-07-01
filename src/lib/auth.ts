@@ -2,10 +2,11 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { db } from "./db";
+import { getAuthSecret } from "./auth-secret";
 
-const secret = new TextEncoder().encode(
-  process.env.AUTH_SECRET ?? "edi-intelligence-dev-secret-change-in-production"
-);
+function secretKey() {
+  return getAuthSecret();
+}
 
 export type SessionUser = {
   id: string;
@@ -39,7 +40,7 @@ export async function createSession(user: SessionUser) {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(secret);
+    .sign(secretKey());
 
   const cookieStore = await cookies();
   cookieStore.set("session", token, {
@@ -57,7 +58,7 @@ export async function getSession(): Promise<SessionUser | null> {
   if (!token) return null;
 
   try {
-    const { payload } = await jwtVerify(token, secret);
+    const { payload } = await jwtVerify(token, secretKey());
     return {
       id: payload.id as string,
       username: payload.username as string,

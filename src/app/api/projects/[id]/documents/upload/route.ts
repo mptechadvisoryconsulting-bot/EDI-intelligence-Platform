@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireSession } from "@/lib/auth";
+import { isSessionResponse, requireSessionOr401 } from "@/lib/api-session";
 import { db } from "@/lib/db";
 import {
   buildParseSummary,
   parseUploadedFile,
   saveUploadedFile,
+  validateUpload,
 } from "@/lib/uploads";
 
 type Params = { params: Promise<{ id: string }> };
@@ -14,7 +15,9 @@ async function getOwnedProject(id: string, ownerId: string) {
 }
 
 export async function POST(request: NextRequest, { params }: Params) {
-  const session = await requireSession();
+  const session = await requireSessionOr401();
+  if (isSessionResponse(session)) return session;
+
   const { id } = await params;
 
   const project = await getOwnedProject(id, session.id);
@@ -29,6 +32,11 @@ export async function POST(request: NextRequest, { params }: Params) {
 
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "File is required" }, { status: 400 });
+  }
+
+  const validationError = validateUpload(file.name, file.size);
+  if (validationError) {
+    return NextResponse.json({ error: validationError }, { status: 400 });
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
@@ -76,7 +84,9 @@ export async function POST(request: NextRequest, { params }: Params) {
 }
 
 export async function GET(_request: NextRequest, { params }: Params) {
-  const session = await requireSession();
+  const session = await requireSessionOr401();
+  if (isSessionResponse(session)) return session;
+
   const { id } = await params;
 
   const project = await getOwnedProject(id, session.id);

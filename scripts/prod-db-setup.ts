@@ -30,18 +30,30 @@ async function main() {
   console.log("Applying migrations to Turso...");
   execSync("npx tsx scripts/apply-turso-migrations.ts", {
     stdio: "inherit",
-    env: { ...process.env, TURSO_DATABASE_URL: url, TURSO_AUTH_TOKEN: authToken },
+    env: {
+      ...process.env,
+      TURSO_DATABASE_URL: url,
+      TURSO_AUTH_TOKEN: authToken,
+      TURSO_RESET: process.env.TURSO_RESET ?? "1",
+    },
   });
 
   const adapter = new PrismaLibSql({ url, authToken });
   const prisma = new PrismaClient({ adapter });
 
-  const passwordHash = await bcrypt.hash("DecodeEncode2026", 12);
+  const seedPassword = process.env.SEED_PASSWORD ?? process.env.PROD_PASSWORD;
+  if (!seedPassword) {
+    console.error("Set SEED_PASSWORD or PROD_PASSWORD before running production setup.");
+    process.exit(1);
+  }
+  const seedUsername = process.env.SEED_USERNAME ?? process.env.PROD_USERNAME ?? "Marcellis20";
+
+  const passwordHash = await bcrypt.hash(seedPassword, 12);
   const user = await prisma.user.upsert({
-    where: { username: "Marcellis20" },
+    where: { username: seedUsername },
     update: { password: passwordHash },
     create: {
-      username: "Marcellis20",
+      username: seedUsername,
       password: passwordHash,
       name: "Marcellis",
       role: "analyst",

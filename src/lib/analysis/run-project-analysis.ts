@@ -147,6 +147,8 @@ export async function runProjectAnalysis(
 }
 
 export async function reanalyzeAllUserProjects(userId: string) {
+  const MAX_BATCH = 50;
+
   const projects = await db.implementationProject.findMany({
     where: { ownerId: userId },
     include: { documents: true },
@@ -156,6 +158,17 @@ export async function reanalyzeAllUserProjects(userId: string) {
   const eligible = projects.filter((p) =>
     p.documents.some((d) => d.parsedContent?.trim())
   );
+
+  if (eligible.length > MAX_BATCH) {
+    return {
+      totalProjects: projects.length,
+      analyzed: 0,
+      skipped: projects.length - eligible.length,
+      failed: 0,
+      results: [] as ProjectAnalysisResult[],
+      error: `Too many workspaces to re-analyze at once (${eligible.length}). Run analysis per workspace or limit to ${MAX_BATCH}.`,
+    };
+  }
 
   const results: ProjectAnalysisResult[] = [];
   for (const project of eligible) {

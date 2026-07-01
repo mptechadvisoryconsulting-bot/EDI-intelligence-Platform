@@ -56,7 +56,15 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       transactions: body.transactions ?? undefined,
       status: body.status ?? undefined,
       reviewStatus: body.reviewStatus ?? undefined,
-      description: body.description ?? undefined,
+      description: body.description !== undefined ? (body.description ? String(body.description) : null) : undefined,
+      connectionType: body.connectionType !== undefined ? (body.connectionType ? String(body.connectionType) : null) : undefined,
+      connectionProvider:
+        body.connectionProvider !== undefined
+          ? body.connectionProvider
+            ? String(body.connectionProvider)
+            : null
+          : undefined,
+      ediVersion: body.ediVersion !== undefined ? (body.ediVersion ? String(body.ediVersion) : null) : undefined,
     },
   });
 

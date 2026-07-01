@@ -27,23 +27,23 @@ export default async function KnowledgePage() {
     <AppShell user={session}>
       <div className="mx-auto max-w-4xl px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-slate-900">Knowledge reuse</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-2xl font-semibold ai-gradient-text">Knowledge reuse</h1>
+          <p className="mt-1 text-sm text-slate-400">
             Search prior implementations, ERP patterns, and mapping decisions across workspaces
           </p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-            <Search className="h-5 w-5 text-slate-400" />
+        <div className="glass-panel rounded-2xl p-6">
+          <div className="flex items-center gap-3 rounded-lg border border-slate-700/60 bg-slate-900/40 px-4 py-3">
+            <Search className="h-5 w-5 text-slate-500" />
             <input
               type="text"
               placeholder="Search customers, partners, ERP fields, segments..."
-              className="flex-1 bg-transparent text-sm focus:outline-none"
+              className="flex-1 bg-transparent text-sm text-slate-300 placeholder:text-slate-600 focus:outline-none"
               disabled
             />
           </div>
-          <p className="mt-3 text-xs text-slate-400">
+          <p className="mt-3 text-xs text-slate-500">
             Full-text knowledge search ships in a future release. Below is context from your workspaces.
           </p>
         </div>
@@ -68,14 +68,14 @@ function KnowledgeList({
   empty: string;
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="font-semibold text-slate-900">{title}</h2>
+    <div className="glass-panel rounded-2xl p-5">
+      <h2 className="font-semibold text-slate-100">{title}</h2>
       {items.length === 0 ? (
         <p className="mt-3 text-sm text-slate-500">{empty}</p>
       ) : (
         <ul className="mt-3 space-y-2">
           {items.map((item) => (
-            <li key={item} className="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">
+            <li key={item} className="rounded-lg border border-slate-700/50 bg-slate-900/30 px-3 py-2 text-sm text-slate-300">
               {item}
             </li>
           ))}

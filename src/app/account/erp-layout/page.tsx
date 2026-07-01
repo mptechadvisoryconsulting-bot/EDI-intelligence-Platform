@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { AccountErpLayoutPanel } from "@/components/account-erp-layout-panel";
+import { AccountPasswordPanel } from "@/components/account-password-panel";
 import { getSession } from "@/lib/auth";
 
 export default async function AccountErpLayoutPage() {
@@ -18,6 +19,9 @@ export default async function AccountErpLayoutPage() {
           </p>
         </div>
         <AccountErpLayoutPanel />
+        <div className="mt-8">
+          <AccountPasswordPanel />
+        </div>
       </div>
     </AppShell>
   );

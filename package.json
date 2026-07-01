@@ -12,7 +12,11 @@
     "db:prod-setup": "tsx scripts/prod-db-setup.ts",
     "db:turso-migrate": "tsx scripts/apply-turso-migrations.ts",
     "deploy:env": "tsx scripts/push-vercel-env.ts",
+    "harden:prod": "tsx scripts/harden-production.ts",
+    "rotate:turso-token": "tsx scripts/rotate-turso-token.ts",
+    "push:openai": "tsx scripts/push-openai-env.ts",
     "db:setup": "prisma migrate dev --name init && tsx prisma/seed.ts",
+    "test": "tsx --test src/lib/__tests__/**/*.test.ts",
     "postinstall": "prisma generate"
   },
   "prisma": {

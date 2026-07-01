@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -9,6 +9,8 @@ import {
   FileText,
   HelpCircle,
   Loader2,
+  Pencil,
+  Save,
   Sparkles,
   ThumbsDown,
   ThumbsUp,
@@ -17,7 +19,12 @@ import {
 } from "lucide-react";
 import { EdiComparePanel } from "@/components/edi-compare-panel";
 import { FileDropZone } from "@/components/file-drop-zone";
+import { MappingWorkspacePanel } from "@/components/mapping-workspace-panel";
+import { PartnerClonePanel } from "@/components/partner-clone-panel";
 import { PartnerPackBadge } from "@/components/partner-pack-badge";
+import { SpecReviewPanel } from "@/components/spec-review-panel";
+import { WorkspaceSettingsPanel } from "@/components/workspace-settings-panel";
+import { formatConnectionLabel, formatEdiVersionLabel } from "@/lib/industry/connection-labels";
 import { CopilotPanel } from "@/components/copilot-panel";
 import { ApprovalPanel, ReadinessPanel } from "@/components/readiness-panel";
 import { TestScenariosPanel } from "@/components/test-scenarios-panel";
@@ -47,6 +54,9 @@ type Project = {
   erpSystem: string;
   erpVersion: string | null;
   translatorTarget: string;
+  connectionType?: string | null;
+  connectionProvider?: string | null;
+  ediVersion?: string | null;
   transactions: string;
   status: string;
   reviewStatus: string;
@@ -129,6 +139,35 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
   const [uploading, setUploading] = useState(false);
   const [docType, setDocType] = useState("guide");
   const [message, setMessage] = useState("");
+  const [portalUrl, setPortalUrl] = useState<string | null>(null);
+  const [portalName, setPortalName] = useState<string | null>(null);
+  const [editingMappingId, setEditingMappingId] = useState<string | null>(null);
+  const [mappingDraft, setMappingDraft] = useState({
+    interfaceColumn: "",
+    recNumber: "",
+    startPosition: "",
+    charLimit: "",
+  });
+  const [savingMappingId, setSavingMappingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/industry/catalog")
+      .then((r) => r.json())
+      .then((data) => {
+        const partner = (data.tradingPartners ?? []).find(
+          (p: { name: string }) =>
+            p.name.toLowerCase() === project.tradingPartner.toLowerCase()
+        );
+        if (partner?.portalUrl) {
+          setPortalUrl(partner.portalUrl);
+          setPortalName(partner.portal ?? "Partner portal");
+        }
+      })
+      .catch(() => {});
+  }, [project.tradingPartner]);
+
+  const connectionLabel = formatConnectionLabel(project.connectionType, project.connectionProvider);
+  const ediLabel = formatEdiVersionLabel(project.ediVersion);
 
   async function refreshProject() {
     const res = await fetch(`/api/projects/${project.id}`);
@@ -202,6 +241,43 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
     await refreshProject();
   }
 
+  function startEditMapping(m: Project["mappingRecommendations"][number]) {
+    const parsed = parsePositionalFromTransformation(m.transformation);
+    setEditingMappingId(m.id);
+    setMappingDraft({
+      interfaceColumn: String(m.interfaceColumn ?? parsed.interfaceColumn ?? m.sourceField ?? ""),
+      recNumber: String(m.recNumber ?? parsed.recNumber ?? ""),
+      startPosition: String(m.startPosition ?? parsed.startPosition ?? ""),
+      charLimit: String(m.charLimit ?? parsed.charLimit ?? ""),
+    });
+  }
+
+  async function saveMappingEdit(mappingId: string) {
+    setSavingMappingId(mappingId);
+    setMessage("");
+    try {
+      const res = await fetch(`/api/projects/${project.id}/mappings/${mappingId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          interfaceColumn: mappingDraft.interfaceColumn.trim() || null,
+          recNumber: mappingDraft.recNumber.trim() ? Number(mappingDraft.recNumber) : null,
+          startPosition: mappingDraft.startPosition.trim() ? Number(mappingDraft.startPosition) : null,
+          charLimit: mappingDraft.charLimit.trim() ? Number(mappingDraft.charLimit) : null,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setMessage(data.error ?? "Could not save mapping");
+        return;
+      }
+      setEditingMappingId(null);
+      await refreshProject();
+    } finally {
+      setSavingMappingId(null);
+    }
+  }
+
   async function removeDocument(documentId: string, name: string) {
     if (!confirm(`Remove "${name}" from this workspace?`)) return;
     const res = await fetch(`/api/projects/${project.id}/documents/${documentId}`, {
@@ -233,8 +309,14 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
       status: uploading ? "loading" : parsedCount > 0 ? "done" : "current",
     },
     {
+      id: "review",
+      label: "Review specs",
+      hint: "Feasibility vs what we can produce",
+      status: parsedCount > 0 ? (hasMappings ? "done" : "current") : "pending",
+    },
+    {
       id: "analyze",
-      label: "AI analyze",
+      label: "Analyze",
       hint: "Match ERP layout to transaction sets",
       status: analyzing ? "loading" : hasMappings ? "done" : parsedCount > 0 ? "current" : "pending",
     },
@@ -251,13 +333,32 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
       <header className="mb-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-indigo-400">AI workspace</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-indigo-400">Implementation workspace</p>
             <h1 className="mt-1 text-2xl font-semibold ai-gradient-text">{project.name}</h1>
             <p className="mt-2 text-sm text-slate-400">
               {project.customer} · {project.tradingPartner} · {project.erpSystem}
               {project.erpVersion ? ` ${project.erpVersion}` : ""} → {project.translatorTarget}
             </p>
             <p className="mt-1 text-sm text-slate-500">Transactions: {project.transactions}</p>
+            {(connectionLabel || ediLabel) && (
+              <p className="mt-1 text-sm text-slate-500">
+                {connectionLabel}
+                {ediLabel ? ` · ${ediLabel}` : ""}
+              </p>
+            )}
+            {portalUrl && (
+              <p className="mt-1 text-sm">
+                <a
+                  href={portalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-indigo-400 hover:underline"
+                >
+                  {portalName} →
+                </a>
+              </p>
+            )}
+            <WorkspaceSettingsPanel project={project} onSaved={refreshProject} />
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <TransactionPackBadges transactions={project.transactions} />
               <PartnerPackBadge tradingPartner={project.tradingPartner} />
@@ -274,10 +375,10 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
               onClick={runAnalysis}
               disabled={analyzing || parsedCount === 0}
               className="btn-ai-primary inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
-              title={parsedCount === 0 ? "Upload at least one parsed document first" : "Run AI mapping analysis"}
+              title={parsedCount === 0 ? "Upload at least one parsed document first" : "Run mapping analysis"}
             >
               {analyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              Run AI analysis
+              Run analysis
             </button>
             <span className={cn("rounded-full px-3 py-1 text-xs font-medium", statusColor(project.status))}>
               {project.status.replace(/_/g, " ")}
@@ -297,7 +398,7 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
         <WorkflowStepper steps={workflowSteps} />
         {parsedCount === 0 && (
           <p className="mt-3 text-xs text-amber-400/90">
-            Upload customer specs below, then click <strong className="text-amber-200">Run AI analysis</strong> to generate mappings.
+            Upload customer specs below, then click <strong className="text-amber-200">Run analysis</strong> to generate mappings.
           </p>
         )}
       </div>
@@ -315,7 +416,7 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
         <div className="mt-4 rounded-xl border border-indigo-500/20 bg-indigo-500/5 px-4 py-3 text-sm">
           <p className="font-medium text-indigo-200">Quick start samples</p>
           <p className="mt-1 text-slate-500">
-            Download a guide + test spec, upload here, then run AI analysis.
+            Download a guide + test spec, upload here, then run analysis.
           </p>
           <div className="mt-2 flex flex-wrap gap-3">
             {SAMPLE_FILES.slice(0, 6).map((sample) => (
@@ -380,7 +481,7 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
             className="btn-ai-primary inline-flex items-center gap-2 rounded-xl px-5 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
           >
             {analyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            2 · Run AI analysis
+            2 · Run analysis
           </button>
         </div>
 
@@ -431,10 +532,22 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
         <MetricCard icon={CheckCircle2} label="Artifacts" value={project.artifacts.length} />
       </div>
 
+      <SpecReviewPanel projectId={project.id} onMemoryApplied={refreshProject} />
+
+      <PartnerClonePanel
+        projectId={project.id}
+        currentPartner={project.tradingPartner}
+        onCloned={refreshProject}
+      />
+
+      {(project.mappingRecommendations.length > 0 || project.documents.some((d) => d.status.startsWith("parsed"))) && (
+        <MappingWorkspacePanel projectId={project.id} mappings={project.mappingRecommendations} />
+      )}
+
       {project.mappingRecommendations.length > 0 && (
         <section className="glass-panel mb-8 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold text-slate-100">AI mapping recommendations</h2>
-          <p className="mt-1 text-sm text-slate-500">MRS columns (Rec, Start, Width) appear in export when matched to account ERP layout.</p>
+          <h2 className="text-lg font-semibold text-slate-100">Mapping recommendations</h2>
+          <p className="mt-1 text-sm text-slate-500">Edit Interface / Rec / Start / Width before export. Values also come from account ERP layout when matched.</p>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
@@ -452,6 +565,7 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
                   const rec = m.recNumber ?? parsed.recNumber;
                   const start = m.startPosition ?? parsed.startPosition;
                   const width = m.charLimit ?? parsed.charLimit;
+                  const isEditing = editingMappingId === m.id;
                   return (
                   <tr key={m.id} className="border-b border-slate-800/50">
                     <td className="py-3 pr-4 font-mono text-xs text-slate-300">
@@ -459,11 +573,42 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
                       {m.qualifier && <span className="ml-1 text-slate-500">({m.qualifier})</span>}
                     </td>
                     <td className="py-3 pr-4">
-                      <p className="font-medium text-slate-200">{iface ?? "—"}</p>
-                      {(rec != null || start != null || width != null) && (
-                        <p className="mt-0.5 font-mono text-[11px] text-cyan-400/90">
-                          Rec {rec ?? "—"} · Start {start ?? "—"} · Width {width ?? "—"}
-                        </p>
+                      {isEditing ? (
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          <input
+                            value={mappingDraft.interfaceColumn}
+                            onChange={(e) => setMappingDraft((d) => ({ ...d, interfaceColumn: e.target.value }))}
+                            placeholder="Interface column"
+                            className="rounded border border-slate-600 bg-slate-900/60 px-2 py-1 text-xs text-slate-100"
+                          />
+                          <input
+                            value={mappingDraft.recNumber}
+                            onChange={(e) => setMappingDraft((d) => ({ ...d, recNumber: e.target.value }))}
+                            placeholder="Rec"
+                            className="rounded border border-slate-600 bg-slate-900/60 px-2 py-1 text-xs text-slate-100"
+                          />
+                          <input
+                            value={mappingDraft.startPosition}
+                            onChange={(e) => setMappingDraft((d) => ({ ...d, startPosition: e.target.value }))}
+                            placeholder="Start"
+                            className="rounded border border-slate-600 bg-slate-900/60 px-2 py-1 text-xs text-slate-100"
+                          />
+                          <input
+                            value={mappingDraft.charLimit}
+                            onChange={(e) => setMappingDraft((d) => ({ ...d, charLimit: e.target.value }))}
+                            placeholder="Width"
+                            className="rounded border border-slate-600 bg-slate-900/60 px-2 py-1 text-xs text-slate-100"
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          <p className="font-medium text-slate-200">{iface ?? "—"}</p>
+                          {(rec != null || start != null || width != null) && (
+                            <p className="mt-0.5 font-mono text-[11px] text-cyan-400/90">
+                              Rec {rec ?? "—"} · Start {start ?? "—"} · Width {width ?? "—"}
+                            </p>
+                          )}
+                        </>
                       )}
                     </td>
                     <td className={cn("py-3 pr-4 font-semibold", confidenceColor(m.confidence))}>
@@ -474,20 +619,55 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
                         <span className={cn("rounded-full px-2 py-0.5 text-xs", statusColor(m.reviewStatus))}>
                           {m.reviewStatus}
                         </span>
-                        <button
-                          onClick={() => reviewMapping(m.id, "approved")}
-                          className="rounded p-1 text-emerald-400 hover:bg-emerald-500/10"
-                          title="Approve"
-                        >
-                          <ThumbsUp className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => reviewMapping(m.id, "rejected")}
-                          className="rounded p-1 text-red-400 hover:bg-red-500/10"
-                          title="Reject"
-                        >
-                          <ThumbsDown className="h-4 w-4" />
-                        </button>
+                        {isEditing ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => saveMappingEdit(m.id)}
+                              disabled={savingMappingId === m.id}
+                              className="rounded p-1 text-indigo-400 hover:bg-indigo-500/10"
+                              title="Save"
+                            >
+                              {savingMappingId === m.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Save className="h-4 w-4" />
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditingMappingId(null)}
+                              className="rounded px-1 text-xs text-slate-500 hover:text-slate-300"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => startEditMapping(m)}
+                              className="rounded p-1 text-slate-400 hover:bg-slate-700/50"
+                              title="Edit MRS fields"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => reviewMapping(m.id, "approved")}
+                              className="rounded p-1 text-emerald-400 hover:bg-emerald-500/10"
+                              title="Approve"
+                            >
+                              <ThumbsUp className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => reviewMapping(m.id, "rejected")}
+                              className="rounded p-1 text-red-400 hover:bg-red-500/10"
+                              title="Reject"
+                            >
+                              <ThumbsDown className="h-4 w-4" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -501,15 +681,15 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
 
       <div className="grid gap-8 lg:grid-cols-2">
         {project.openQuestions.length > 0 && (
-          <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
-              <HelpCircle className="h-5 w-5 text-amber-500" />
+          <section className="glass-panel rounded-2xl p-6">
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-100">
+              <HelpCircle className="h-5 w-5 text-amber-400" />
               Open questions
             </h2>
             <ul className="mt-4 space-y-3">
               {project.openQuestions.map((q) => (
-                <li key={q.id} className="rounded-lg bg-amber-50 px-4 py-3 text-sm">
-                  <p className="font-medium text-slate-800">{q.question}</p>
+                <li key={q.id} className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm">
+                  <p className="font-medium text-slate-200">{q.question}</p>
                   <p className="mt-1 text-xs text-slate-500">
                     {q.category.replace(/_/g, " ")} · {q.priority} priority
                   </p>
@@ -520,15 +700,15 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
         )}
 
         {project.assumptions.length > 0 && (
-          <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
-              <AlertTriangle className="h-5 w-5 text-orange-500" />
+          <section className="glass-panel rounded-2xl p-6">
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-100">
+              <AlertTriangle className="h-5 w-5 text-orange-400" />
               Assumptions & risks
             </h2>
             <ul className="mt-4 space-y-3">
               {project.assumptions.map((a) => (
-                <li key={a.id} className="rounded-lg bg-orange-50 px-4 py-3 text-sm">
-                  <p className="text-slate-800">{a.assumption}</p>
+                <li key={a.id} className="rounded-lg border border-orange-500/20 bg-orange-500/5 px-4 py-3 text-sm">
+                  <p className="text-slate-200">{a.assumption}</p>
                   <p className="mt-1 text-xs text-slate-500">{a.risk} risk</p>
                 </li>
               ))}

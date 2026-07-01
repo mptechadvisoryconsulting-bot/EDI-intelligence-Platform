@@ -14,7 +14,7 @@ export type PartnerPack = {
   id: string;
   name: string;
   retailer: string;
-  category: "big_box" | "ecommerce" | "grocery" | "general";
+  category: "big_box" | "ecommerce" | "grocery" | "pharmacy" | "distribution" | "specialty" | "general";
   searchTerms: string[];
   rules: PartnerRule[];
   certificationChecklist: string[];

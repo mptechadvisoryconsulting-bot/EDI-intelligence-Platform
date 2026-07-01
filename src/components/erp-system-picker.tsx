@@ -71,7 +71,7 @@ export function ErpSystemPicker({
           }}
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
-          placeholder="Search SAP, NetSuite, Dynamics, or type any ERP..."
+          placeholder="Select ERP — SAP, NetSuite, Dynamics, JD Edwards..."
           className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
           autoComplete="off"
         />

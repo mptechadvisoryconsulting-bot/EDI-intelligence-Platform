@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runProjectAnalysis } from "@/lib/analysis/run-project-analysis";
-import { requireSession } from "@/lib/auth";
+import { isSessionResponse, requireSessionOr401 } from "@/lib/api-session";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function POST(_request: NextRequest, { params }: Params) {
-  const session = await requireSession();
+  const session = await requireSessionOr401();
+  if (isSessionResponse(session)) return session;
+
   const { id } = await params;
 
   const result = await runProjectAnalysis(id, session.id);

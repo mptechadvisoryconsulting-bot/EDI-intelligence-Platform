@@ -14,6 +14,7 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
+import { ErpSystemPicker } from "@/components/erp-system-picker";
 import { FileDropZone } from "@/components/file-drop-zone";
 import { cn } from "@/lib/utils";
 import type { ErpLayoutField, InterfaceStyle } from "@/lib/erp-layout/types";
@@ -63,7 +64,7 @@ export function AccountErpLayoutPanel() {
   const [reanalyzing, setReanalyzing] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
-  const [erpSystem, setErpSystem] = useState("Oracle Fusion Cloud ERP");
+  const [erpSystem, setErpSystem] = useState("");
   const [erpVersion, setErpVersion] = useState("");
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "warning">("success");
@@ -267,10 +268,10 @@ export function AccountErpLayoutPanel() {
           <div>
             <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-100">
               <Database className="h-5 w-5 text-indigo-400" />
-              Account ERP layout
+              Account ERP / source layout
             </h2>
             <p className="mt-1 max-w-2xl text-sm text-slate-400">
-              Upload once for your account. Supports positional flat files (Oracle, SAP IDoc, JDE), plus XML, SOAP, and REST/JSON — column headers are auto-detected.
+              Pick your ERP or source platform, then upload layout once. Supports positional flat files, SAP IDoc, JD Edwards, XML, SOAP, REST/JSON — any vendor.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -281,13 +282,8 @@ export function AccountErpLayoutPanel() {
         </div>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-300">ERP system</label>
-            <input
-              value={erpSystem}
-              onChange={(e) => setErpSystem(e.target.value)}
-              className="w-full rounded-lg border border-slate-600/50 bg-slate-900/50 px-3 py-2 text-sm text-slate-100"
-            />
+          <div className="[&_label]:text-slate-300 [&_input]:border-slate-600/50 [&_input]:bg-slate-900/50 [&_input]:text-slate-100 [&_p]:text-slate-500">
+            <ErpSystemPicker value={erpSystem} onChange={setErpSystem} />
           </div>
           <div>
             <label className="mb-1.5 block text-sm font-medium text-slate-300">ERP version</label>

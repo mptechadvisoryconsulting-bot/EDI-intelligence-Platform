@@ -46,6 +46,9 @@ model ImplementationProject {
   erpSystem        String
   erpVersion       String?
   translatorTarget String
+  connectionType     String?
+  connectionProvider String?
+  ediVersion         String?
   transactions     String
   status           String   @default("draft")
   reviewStatus     String   @default("pending")

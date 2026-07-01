@@ -21,11 +21,30 @@ function listMigrationFolders(): string[] {
     .sort();
 }
 
-function splitSqlStatements(sql: string): string[] {
+function stripLineComments(sql: string): string {
   return sql
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .filter((line) => !line.trim().startsWith("--"))
+    .join("\n")
+    .trim();
+}
+
+function splitSqlStatements(sql: string): string[] {
+  const normalized = sql.replace(/\r\n/g, "\n");
+  return normalized
     .split(/;\s*\n/)
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0 && !s.startsWith("--"));
+    .map(stripLineComments)
+    .filter((s) => s.length > 0);
+}
+
+async function resetMigrationState(client: ReturnType<typeof createClient>) {
+  try {
+    await client.execute(`DELETE FROM "_prisma_migrations"`);
+    console.log("Cleared _prisma_migrations for fresh apply.");
+  } catch {
+    /* table may not exist yet */
+  }
 }
 
 async function ensureMigrationsTable(client: ReturnType<typeof createClient>) {
@@ -71,6 +90,10 @@ async function main() {
 
   const client = createClient({ url, authToken });
   await ensureMigrationsTable(client);
+
+  if (process.env.TURSO_RESET === "1") {
+    await resetMigrationState(client);
+  }
 
   const folders = listMigrationFolders();
   console.log(`Applying ${folders.length} migration(s) to Turso...`);

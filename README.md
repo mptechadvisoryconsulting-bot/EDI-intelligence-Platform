@@ -12,17 +12,19 @@ AI-assisted EDI implementation workspace: upload customer specs, run analysis, e
 ```bash
 npm install
 cp .env.example .env.local
+# Set SEED_PASSWORD in .env.local, then:
 npm run db:setup    # migrate + seed demo user
 npm run dev         # http://localhost:3001
+npm test            # unit tests
 ```
 
-Demo login (after seed): see `prisma/seed.ts`.
+Demo login uses `SEED_USERNAME` / `SEED_PASSWORD` from `.env.local` (see `.env.example`).
 
 ## Account workflow
 
 1. **Account → ERP layout** — upload positional layout once (Oracle, SAP IDoc, JDE, etc.)
 2. **Sample ERP output** — upload a flat sample file to verify Rec/Start/Width (not used for EDI mapping)
-3. **Workspace** — upload customer specs → **Run AI analysis**
+3. **Workspace** — upload customer specs → **Run analysis**
 4. **Export** — Sterling MRS Excel/CSV by transaction set (850, 856, …)
 
 ## Deploy to Vercel
@@ -43,6 +45,7 @@ Copy `env.production.template` → `.env.production.local` and fill in your Turs
 ### 3. Migrate and seed production
 
 ```powershell
+# Set SEED_PASSWORD or PROD_PASSWORD in .env.production.local first
 npm run db:prod-setup
 ```
 
@@ -64,7 +67,7 @@ Or set these manually in Vercel → Project → Settings → Environment Variabl
 
 Then redeploy from the Vercel dashboard or run `vercel --prod`.
 
-**Production login** (after seed): `Marcellis20` / `DecodeEncode2026`
+Production login uses the username/password you set when running `db:prod-setup` (`SEED_USERNAME` / `SEED_PASSWORD` or `PROD_*` env vars).
 
 ## Scripts
 
@@ -74,3 +77,4 @@ Then redeploy from the Vercel dashboard or run `vercel --prod`.
 | `npm run build` | Production build |
 | `npm run db:migrate` | Run Prisma migrations |
 | `npm run db:seed` | Seed demo data |
+| `npm test` | Run unit tests |

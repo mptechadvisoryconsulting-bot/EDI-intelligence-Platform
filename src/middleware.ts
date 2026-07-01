@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
-
-const secret = new TextEncoder().encode(
-  process.env.AUTH_SECRET ?? "edi-intelligence-dev-secret-change-in-production"
-);
+import { getAuthSecret } from "@/lib/auth-secret";
 
 const publicPaths = ["/login", "/api/auth/login"];
 
@@ -21,7 +18,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     try {
-      await jwtVerify(token, secret);
+      await jwtVerify(token, getAuthSecret());
       return NextResponse.next();
     } catch {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -34,7 +31,7 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    await jwtVerify(token, secret);
+    await jwtVerify(token, getAuthSecret());
     return NextResponse.next();
   } catch {
     return NextResponse.redirect(new URL("/login", request.url));

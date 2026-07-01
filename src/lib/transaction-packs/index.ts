@@ -1,8 +1,11 @@
 import { PACK_810 } from "./810";
+import { PACK_820 } from "./820";
 import { PACK_846 } from "./846";
 import { PACK_850 } from "./850";
 import { PACK_855 } from "./855";
 import { PACK_856 } from "./856";
+import { PACK_860 } from "./860";
+import { PACK_997 } from "./997";
 import type { TransactionPack } from "./types";
 
 export const TRANSACTION_PACKS: Record<string, TransactionPack> = {
@@ -11,6 +14,9 @@ export const TRANSACTION_PACKS: Record<string, TransactionPack> = {
   "855": PACK_855,
   "856": PACK_856,
   "810": PACK_810,
+  "997": PACK_997,
+  "860": PACK_860,
+  "820": PACK_820,
 };
 
 /** Common retail / supplier onboarding bundle */
