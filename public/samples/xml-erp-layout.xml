@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layout name="Oracle XML Interface" erp="Oracle">
+  <Field name="purchase_order_number" interfaceColumn="PO_NUMBER" style="xml" xpath="//PurchaseOrder/Header/PONumber" type="string" description="850 BEG03"/>
+  <Field name="order_date" interfaceColumn="PO_DATE" style="xml" xpath="//PurchaseOrder/Header/OrderDate" type="date"/>
+  <Field name="quantity" interfaceColumn="ORDER_QTY" style="xml" xpath="//PurchaseOrder/Line/Quantity" type="number"/>
+  <Field name="ship_to_name" interfaceColumn="SHIP_TO_NAME" style="xml" xpath="//PurchaseOrder/ShipTo/Name" type="string"/>
+  <Field name="invoice_number" interfaceColumn="INVOICE_NO" style="soap" soapPath="//Invoice/Header/InvoiceNumber" soapOperation="PostInvoice" type="string"/>
+</Layout>

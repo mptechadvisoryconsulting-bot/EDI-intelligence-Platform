@@ -1,0 +1,7 @@
+Interface Column,Field Name,Interface Style,JSON Path,Data Type,Description
+PO_NUMBER,purchase_order_number,rest,$.purchaseOrder.header.number,string,850 BEG03 PO number
+ORDER_QTY,quantity,rest,$.purchaseOrder.lines[].quantity,number,PO1 quantity
+UOM_CODE,uom,rest,$.purchaseOrder.lines[].unitOfMeasure,string,PO1 UOM
+UNIT_PRICE,unit_price,rest,$.purchaseOrder.lines[].unitPrice,number,PO1 unit price
+SHIP_TO_NAME,ship_to_name,rest,$.purchaseOrder.shipTo.name,string,N1 ship-to
+INVOICE_NO,invoice_number,rest,$.invoice.header.number,string,810 invoice number

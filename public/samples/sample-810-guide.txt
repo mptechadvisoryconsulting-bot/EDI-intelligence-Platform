@@ -1,0 +1,18 @@
+810 Invoice Implementation Guide (Sample)
+
+Required segments and elements:
+- ST01 Transaction Set = 810 (required)
+- BIG02 Invoice date (required)
+- BIG04 Invoice number (required)
+- BIG07 Purchase order number (optional, partner-specific)
+- REF*IV*02 Internal vendor number (optional)
+- N1*BT*02 Bill-to name (optional)
+- IT102 Quantity invoiced (required)
+- IT103 Unit of measure (required)
+- IT104 Unit price (required)
+- TDS01 Total invoice amount (required)
+
+Notes:
+Line totals must roll up to TDS01.
+Confirm whether tax and freight are separate segments or embedded in line totals.
+Invoice number must be unique per trading partner relationship.

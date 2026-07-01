@@ -1,0 +1,13 @@
+Interface Column,Field Name,Rec Number,Start Column,Width,Interface Style,Data Type,Table,Description
+PO_NUMBER,purchase_order_number,1,1,22,positional,string,SALES_ORDER,Customer purchase order number
+PO_DATE,order_date,1,23,8,positional,date,SALES_ORDER,PO date CCYYMMDD
+SHIP_TO_NAME,ship_to_name,1,31,35,positional,string,SALES_ORDER,Ship-to party name
+VENDOR_REF,vendor_reference,1,66,15,positional,string,PURCHASE_ORDER,Vendor reference REF*VN
+ORDER_QTY,quantity,2,1,10,positional,number,SALES_ORDER_LINE,Ordered quantity PO1*02
+UOM_CODE,uom,2,11,2,positional,string,SALES_ORDER_LINE,Unit of measure PO1*03
+UNIT_PRICE,unit_price,2,13,12,positional,number,SALES_ORDER_LINE,Unit price PO1*04
+SENDER_ID,sender_id,1,1,15,positional,string,EDI_PROFILE,ISA06 interchange sender
+RECEIVER_ID,receiver_id,1,16,15,positional,string,EDI_PROFILE,ISA08 interchange receiver
+INVOICE_NO,invoice_number,1,1,22,positional,string,INVOICE,810 invoice number BIG*02
+INVOICE_DATE,invoice_date,1,23,8,positional,date,INVOICE,810 invoice date BIG*07
+SHIPMENT_ID,shipment_id,1,1,20,positional,string,SHIPMENT,856 BSN02 shipment ID

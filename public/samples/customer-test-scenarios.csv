@@ -1,0 +1,6 @@
+Scenario Name,Description,Preconditions,Expected Result,Transaction
+Standard PO with ship-to,Send a valid 850 with header ship-to N1*ST segment,ERP order with ship-to address on header,Trading partner accepts PO with correct N1*ST.02 name,850
+Drop-ship PO with vendor ref,850 order routed to vendor with REF*VN qualifier,Drop-ship flag enabled on order line,REF*VN*02 populated with vendor account number,850
+Multi-line PO quantity check,850 with three PO1 lines at different quantities,Order with 3 lines and mixed UOM,All PO1*02 quantities match ERP ordered qty,850
+Cancel PO line scenario,850 change order canceling one line,Existing open PO with partial ship,Cancelled line omitted or flagged per partner rules,850
+Invalid date format rejection,850 with BEG05 date not in CCYYMMDD,Test harness sends malformed date,997 or partner rejection with date error,850

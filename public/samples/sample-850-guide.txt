@@ -1,0 +1,32 @@
+850 Purchase Order Implementation Guide (Sample)
+
+Required segments and elements:
+- ISA06 Interchange Sender ID (required)
+- ISA08 Interchange Receiver ID (required)
+- GS02 Application Sender Code (required)
+- GS03 Application Receiver Code (required)
+- ST01 Transaction Set = 850 (required)
+- BEG03 Purchase Order Number (required)
+- REF*VN*02 Vendor reference when drop-ship orders are used (optional)
+- N1*ST*02 Ship-to name (optional)
+- PO1*02 Quantity ordered (required)
+- PO1*03 Unit of measure (required)
+- PO1*04 Unit price (optional)
+
+Notes:
+All dates must be sent in CCYYMMDD format.
+Ship-to address should come from order header unless line-level override exists.
+
+Test Scenarios
+
+Scenario 1: Standard purchase order
+Preconditions: ERP order with single line item and header ship-to
+Expected: Valid 850 with BEG03 PO number PO1*02 quantity and PO1*03 UOM
+
+Scenario 2: Drop-ship with vendor reference
+Preconditions: Order flagged as drop-ship with vendor account on line
+Expected: REF*VN*02 populated when drop-ship orders are used
+
+Scenario 3: Multi-line quantity validation
+Preconditions: Order with three lines at different quantities
+Expected: Each PO1*02 matches ERP ordered quantity

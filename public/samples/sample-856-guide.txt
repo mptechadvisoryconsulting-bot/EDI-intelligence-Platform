@@ -1,0 +1,19 @@
+856 Ship Notice / ASN Implementation Guide (Sample)
+
+Required segments and elements:
+- ST01 Transaction Set = 856 (required)
+- BSN02 Shipment identification (required)
+- BSN03 Shipment date (required)
+- PRF01 Purchase order number (required)
+- LIN03 Buyer's part number (optional)
+- SN102 Quantity shipped (required)
+- SN103 Unit of measure (required)
+- MAN02 Tracking number (optional, per partner)
+
+Hierarchy notes:
+HL structure typically Shipment > Order > Pack > Item (S-O-P-I).
+Confirm with partner whether pack level is mandatory.
+
+Notes:
+Partial shipments must reference original PO line numbers.
+Carrier SCAC and tracking rules vary by retailer.

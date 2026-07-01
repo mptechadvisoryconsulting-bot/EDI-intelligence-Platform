@@ -1,0 +1,13 @@
+field_name,table,data_type,description
+invoice_number,invoice_header,string,Invoice number
+invoice_date,invoice_header,date,Invoice date
+bill_date,invoice_header,date,Billing date
+purchase_order_number,sales_order,string,Related PO number
+vendor_number,vendor_profile,string,Internal vendor ID
+bill_to_name,invoice_header,string,Bill-to party name
+quantity,invoice_line,number,Invoiced quantity
+qty_invoiced,invoice_line,number,Alternate invoiced qty
+uom,invoice_line,string,Unit of measure
+unit_price,invoice_line,number,Item unit price
+invoice_total,invoice_header,number,Total invoice amount
+total_amount,invoice_header,number,Alternate total field

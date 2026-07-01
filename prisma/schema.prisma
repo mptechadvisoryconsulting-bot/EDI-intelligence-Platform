@@ -1,0 +1,181 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  name      String?
+  role      String   @default("analyst")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projects         ImplementationProject[]
+  approvals        ApprovalRecord[]
+  mappingReviews   MappingRecommendation[] @relation("ReviewedBy")
+  erpLayout        ErpLayoutProfile?
+}
+
+model ErpLayoutProfile {
+  id                   String   @id @default(cuid())
+  erpSystem            String
+  erpVersion           String?
+  originalFileName     String?
+  fieldCount           Int      @default(0)
+  layoutContent        String
+  sampleOutputFileName String?
+  sampleOutputContent  String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ImplementationProject {
+  id               String   @id @default(cuid())
+  name             String
+  customer         String
+  tradingPartner   String
+  erpSystem        String
+  erpVersion       String?
+  translatorTarget String
+  transactions     String
+  status           String   @default("draft")
+  reviewStatus     String   @default("pending")
+  description      String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id])
+
+  documents              Document[]
+  mappingRecommendations MappingRecommendation[]
+  openQuestions          OpenQuestion[]
+  assumptions            Assumption[]
+  artifacts              GeneratedArtifact[]
+  approvals              ApprovalRecord[]
+  copilotMessages        CopilotMessage[]
+  testScenarios          TestScenario[]
+}
+
+model Document {
+  id               String    @id @default(cuid())
+  name             String
+  type             String
+  filePath         String?
+  originalFileName String?
+  mimeType         String?
+  fileSize         Int?
+  parsedContent    String?
+  parseSummary     String?
+  status           String    @default("uploaded")
+  parsedAt         DateTime?
+  createdAt        DateTime  @default(now())
+
+  projectId String
+  project   ImplementationProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model MappingRecommendation {
+  id              String   @id @default(cuid())
+  targetSegment   String
+  targetElement   String
+  sourceField     String?
+  interfaceColumn String?
+  recNumber       Int?
+  startPosition   Int?
+  charLimit       Int?
+  transformation  String?
+  qualifier       String?
+  confidence      Float    @default(0)
+  rationale       String?
+  reviewStatus    String   @default("pending")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  projectId  String
+  project    ImplementationProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  reviewerId String?
+  reviewer   User?  @relation("ReviewedBy", fields: [reviewerId], references: [id])
+}
+
+model OpenQuestion {
+  id        String   @id @default(cuid())
+  question  String
+  category  String   @default("general")
+  priority  String   @default("medium")
+  status    String   @default("open")
+  createdAt DateTime @default(now())
+
+  projectId String
+  project   ImplementationProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Assumption {
+  id         String   @id @default(cuid())
+  assumption String
+  risk       String   @default("medium")
+  status     String   @default("active")
+  createdAt  DateTime @default(now())
+
+  projectId String
+  project   ImplementationProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model GeneratedArtifact {
+  id        String   @id @default(cuid())
+  type      String
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+
+  projectId String
+  project   ImplementationProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model ApprovalRecord {
+  id        String   @id @default(cuid())
+  action    String
+  notes     String?
+  createdAt DateTime @default(now())
+
+  projectId String
+  project   ImplementationProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User @relation(fields: [userId], references: [id])
+}
+
+model CopilotMessage {
+  id        String   @id @default(cuid())
+  role      String
+  content   String
+  createdAt DateTime @default(now())
+
+  projectId String
+  project   ImplementationProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model TestScenario {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  source          String
+  transactionCode String?
+  preconditions   String?
+  expectedOutcome String?
+  relatedSegments String?
+  coveredMappings String?
+  coverageStatus  String   @default("uncovered")
+  createdAt       DateTime @default(now())
+
+  projectId String
+  project   ImplementationProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}

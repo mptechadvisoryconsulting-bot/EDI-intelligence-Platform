@@ -1,0 +1,12 @@
+field_name,table,data_type,description
+shipment_id,shipment_header,string,ASN / shipment number
+ship_date,shipment_header,date,Shipment date
+ship_time,shipment_header,time,Shipment time
+purchase_order_number,sales_order,string,Related PO number
+tracking_number,shipment_header,string,Carrier tracking number
+pro_number,shipment_header,string,PRO / freight number
+buyer_part_number,sales_order_line,string,Customer item number
+qty_shipped,sales_order_line,number,Quantity shipped
+quantity_shipped,sales_order_line,number,Alternate shipped qty field
+uom,sales_order_line,string,Unit of measure
+unit_of_measure,sales_order_line,string,Alternate UOM field

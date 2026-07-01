@@ -1,0 +1,12 @@
+field_name,table,data_type,description
+sender_id,edi_profile,string,Interchange sender ID
+receiver_id,edi_profile,string,Interchange receiver ID
+application_sender,edi_profile,string,Functional group sender
+application_receiver,edi_profile,string,Functional group receiver
+purchase_order_number,sales_order,string,Customer PO number
+vendor_reference,purchase_order,string,Vendor reference number
+ship_to_name,sales_order,string,Ship-to party name
+order_date,sales_order,date,PO date
+quantity,sales_order_line,number,Ordered quantity
+uom,sales_order_line,string,Unit of measure
+unit_price,sales_order_line,number,Item unit price

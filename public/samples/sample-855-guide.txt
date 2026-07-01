@@ -1,0 +1,21 @@
+855 Purchase Order Acknowledgment Implementation Guide (Sample)
+
+Required segments and elements:
+- ST01 Transaction Set = 855 (required)
+- BAK01 Acknowledgment type (required)
+- BAK03 Purchase order number (required)
+- BAK04 Purchase order date (required)
+- ACK01 Line item status code (required)
+- ACK02 Quantity acknowledged (required)
+- ACK03 Unit of measure (required)
+- PO107 Buyer's part number (optional)
+- REF*VN*02 Vendor reference (optional)
+
+Acknowledgment types:
+- Accept entire PO with no changes
+- Accept with changes (quantity, date, price)
+- Reject PO
+
+Notes:
+855 must reference the inbound 850 PO number.
+Line status codes must map to ERP order confirmation workflow.

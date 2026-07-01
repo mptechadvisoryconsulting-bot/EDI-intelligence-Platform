@@ -1,0 +1,13 @@
+field_name,table,data_type,description
+ack_type,po_ack_header,string,Acknowledgment type code
+purchase_order_number,sales_order,string,PO number being acknowledged
+order_date,sales_order,date,Original PO date
+vendor_reference,purchase_order,string,Vendor reference number
+ship_to_name,sales_order,string,Ship-to party name
+line_number,sales_order_line,string,PO line number
+buyer_part_number,sales_order_line,string,Customer item number
+line_status,sales_order_line,string,Line acknowledgment status
+ack_line_status,sales_order_line,string,Alternate line status field
+qty_acknowledged,sales_order_line,number,Confirmed quantity
+ack_quantity,sales_order_line,number,Alternate acknowledged qty
+uom,sales_order_line,string,Unit of measure

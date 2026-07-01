@@ -1,0 +1,17 @@
+846 Inventory Inquiry / Advice Implementation Guide (Sample)
+
+Required segments and elements:
+- ST01 Transaction Set = 846 (required)
+- BIA01 Transaction set purpose code (required)
+- BIA02 Report number (required)
+- BIA03 Report date (required)
+- LIN03 Buyer's part number (required)
+- QTY02 Quantity available (required)
+- QTY03 Unit of measure (required)
+- REF*IO*02 Inventory reference (optional)
+- N1*WH*02 Warehouse name (optional)
+
+Notes:
+Report on-hand quantity as of cutoff time each day.
+Zero-quantity SKUs should still be sent unless partner excludes them.
+Warehouse-level reporting required for vendor-managed inventory programs.

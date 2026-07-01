@@ -1,0 +1,12 @@
+field_name,table,data_type,description
+report_number,inventory_report,string,Inventory report ID
+report_date,inventory_report,date,Inventory snapshot date
+transaction_purpose,inventory_report,string,Report purpose code
+inventory_reference,inventory_report,string,Warehouse or location reference
+warehouse_name,warehouse,string,Warehouse or DC name
+buyer_part_number,inventory_item,string,Customer / retailer SKU
+vendor_part_number,inventory_item,string,Supplier item number
+qty_available,inventory_item,number,Available on-hand quantity
+on_hand_qty,inventory_item,number,Alternate on-hand quantity
+available_quantity,inventory_item,number,Available-to-promise quantity
+uom,inventory_item,string,Unit of measure

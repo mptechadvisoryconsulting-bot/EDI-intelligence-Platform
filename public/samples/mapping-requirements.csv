@@ -1,0 +1,12 @@
+segment,element,qualifier,description,required
+ISA,06,,Interchange sender ID,M
+ISA,08,,Interchange receiver ID,M
+GS,02,,Functional group sender,M
+GS,03,,Functional group receiver,M
+ST,01,,Transaction set identifier,M
+BEG,03,,Purchase order number,M
+REF,02,VN,Vendor reference,O
+N1,02,,Ship-to name,O
+PO1,02,,Quantity ordered,M
+PO1,03,,Unit of measure,M
+PO1,04,,Unit price,O
