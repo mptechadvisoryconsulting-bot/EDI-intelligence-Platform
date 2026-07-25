@@ -386,7 +386,7 @@ export function runImplementationAnalysis(input: {
         erpProfile.schemaNotes ?? "",
         `Profile: ${erpProfile.name} (${erpProfile.vendor})`,
         erpProfile.id === "custom"
-          ? "Tip: Select a named ERP when creating the workspace, or upload your exact field list CSV."
+          ? "Tip: Select a named ERP when creating the implementation, or upload your exact field list CSV."
           : `${Object.keys(erpProfile.fieldAliases).length} EDI target keys enriched with ${erpProfile.name} field aliases.`,
       ]
         .filter(Boolean)

@@ -72,7 +72,6 @@ export function AccountErpLayoutPanel() {
   const [sampleVerification, setSampleVerification] = useState<SampleVerificationReport | null>(null);
 
   async function load() {
-    setLoading(true);
     try {
       const res = await fetch("/api/account/erp-layout");
       const data = await res.json().catch(() => ({}));
@@ -99,7 +98,10 @@ export function AccountErpLayoutPanel() {
   }
 
   useEffect(() => {
-    load();
+    const timer = window.setTimeout(() => {
+      void load();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const uploadFiles = useCallback(
@@ -187,7 +189,7 @@ export function AccountErpLayoutPanel() {
   async function reanalyzeAll() {
     if (
       !confirm(
-        "Re-run AI analysis on all workspaces with uploaded documents? Existing mappings will be replaced."
+        "Re-run AI analysis on all implementations with uploaded documents? Existing mappings will be replaced."
       )
     ) {
       return;
@@ -204,7 +206,7 @@ export function AccountErpLayoutPanel() {
       }
       setMessageType("success");
       setMessage(
-        `Re-analyzed ${data.analyzed} workspace(s) — ${data.skipped} skipped (no documents), ${data.failed} failed.`
+        `Re-analyzed ${data.analyzed} implementation(s) — ${data.skipped} skipped (no documents), ${data.failed} failed.`
       );
     } catch {
       setMessageType("error");

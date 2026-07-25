@@ -1,248 +1,273 @@
-# EDI Implementation Lifecycle Platform
+# EDI Implementation Platform
 
-## Product Requirements Document
+## Operations and Software Blueprint
 
-**Version:** 1.0  
-**Status:** Baseline for engineering  
+**Version:** 2.0
+**Status:** Production product baseline
 **Date:** July 25, 2026  
 **Product owner:** MP Tech Advisory Consulting  
 **System of record:** This document and the supporting files in `/docs`
 
 ---
 
-## 1. Executive Summary
+## 1. Platform Vision
 
-The EDI Intelligence Platform will evolve from an implementation workspace into an EDI Implementation Lifecycle Management Platform. The platform will manage the complete customer relationship from the first specification received through technical assessment, business approval, implementation, testing, production, and every future change request.
+### 1.1 Mission statement
 
-The primary business object is **Customer**. A project is created only after a request has passed technical assessment and business approval. Initial implementations and later changes use the same governed lifecycle, retain permanent history, and produce comparable operational data.
+The EDI Implementation Platform is designed to manage the complete lifecycle of a customer's EDI implementation—from the moment a customer submits an implementation guide, through technical assessment, business approval, mapping, testing, production deployment, and every future revision. The platform is not an EDI mapper or a project management system. It is the operational system used by Business Analysts, EDI Analysts, QA, and Management to implement and maintain EDI trading partners.
 
-The platform is not an EDI translator and is not only a mapping tool. Mapping, validation, comparison, and translator export remain important modules within a larger system of record.
+### 1.2 Product identity
 
-## 2. Product Vision
+The platform models how an EDI department works. It does not organize the work around generic software modules, files, or projects. It organizes the work around customer transaction implementations.
 
-Create the authoritative record for every EDI customer decision, artifact, version, test, deployment, and change from specification intake through long-term maintenance.
+A customer is the long-lived business container. An **Implementation** is the operational object.
 
-The product must answer four questions at any time:
+Examples:
 
-1. What has the customer requested?
-2. What did the technical team determine?
-3. What did the business approve, and why?
-4. What is running in production now, and how did it get there?
+- Target - 850 Purchase Order
+- Target - 856 Advance Ship Notice
+- Target - 810 Invoice
+- Walmart - 850 Purchase Order
 
-## 3. Business Problem
+Each implementation has its own specification, assessment, mapping, validation, testing, production deployment, revisions, documents, activity, approvals, and history.
 
-EDI implementations are commonly coordinated across email, spreadsheets, ticketing systems, shared drives, translator configuration, and individual analyst knowledge. This fragmentation creates recurring problems:
+### 1.3 Product promise
 
-- Work begins before technical scope is understood.
-- Business commitments are made without objective impact analysis.
-- Customer clarifications and approval decisions are difficult to reconstruct.
-- Initial implementations and maintenance changes are tracked differently.
-- Estimates cannot be compared with actual delivery performance.
-- Production versions are not reliably connected to specifications, mappings, and tests.
-- Institutional knowledge leaves when an analyst changes roles.
+At any time, the platform must answer:
 
-The platform will centralize these records and enforce stage gates without replacing translator-specific execution tools.
+1. What did the customer request?
+2. What did EDI determine?
+3. What did Business approve?
+4. What is implemented for each transaction?
+5. What is running in production?
+6. What changed between versions?
+7. Who approved each change?
 
-## 4. Goals
+### 1.4 Non-goals
 
-### 4.1 Primary goals
+The platform does not:
 
-- Make Customer the top-level entity.
-- Separate pre-approval intake and assessment from approved implementation work.
-- Provide repeatable, evidence-based technical assessments.
-- Require business approval before creating implementation projects.
-- Preserve complete customer, project, version, testing, and production history.
-- Apply the same controlled workflow to initial implementations and change requests.
-- Reuse the existing specification parser, ERP layout, mapping, comparison, testing, and export capabilities.
-- Generate measurable lifecycle data for management reporting.
-- Maintain a complete, immutable audit history of material actions.
-
-### 4.2 Success outcomes
-
-- No mapping project is created without a recorded approval or authorized exception.
-- Every production deployment is traceable to an approved request, version, test evidence, and approver.
-- Business users can understand scope, complexity, impact, risk, and recommendation without reading an implementation guide.
-- Analysts can find all specifications, decisions, mappings, tests, and deployments for a customer in one place.
-- Management can compare estimated and actual duration and effort by customer, transaction, ERP, complexity, and reason for change.
-
-## 5. Non-Goals
-
-Version 1 does not attempt to:
-
-- Replace IBM Sterling, Cleo, Boomi, OpenText, or other translators.
+- Replace an EDI translator.
 - Transmit production EDI documents.
-- Replace ERP master data or ERP development tooling.
-- Provide a customer-facing portal unless separately approved.
-- Automatically approve work or deploy mappings without human authorization.
-- Rewrite existing parser, mapping recommendation, EDI comparison, ERP layout, sample verification, authentication, theme, or translator export capabilities.
+- Replace an ERP.
+- Act as a generic task or project management system.
+- Treat mappings as uploaded documents.
+- Automatically approve scope, customer commitments, or production deployment.
+- Rewrite the existing specification parser, ERP layout, mapping, comparison, testing, authentication, theme, navigation, or translator export capabilities without an approved requirement.
 
-## 6. Product Principles
+## 2. How an EDI Analyst Works
 
-1. **Customer first:** all implementations and future changes belong to a customer.
-2. **Assess before committing:** technical review precedes business approval and project creation.
-3. **Evidence over opinion:** decisions cite specifications, findings, assumptions, and interface impact.
-4. **One lifecycle:** initial implementation and maintenance changes use governed, comparable workflows.
-5. **Version everything:** specifications, mappings, interfaces, tests, and production deployments are version-aware.
-6. **Audit every material action:** actors, timestamps, before/after values, comments, and transition reasons are recorded.
-7. **Human approval for commitments:** AI assists analysis but does not silently approve scope, timelines, or production.
-8. **Additive evolution:** existing capabilities are reused and migrated without destructive redesign.
+This operating story is the design authority for the product:
 
-## 7. Personas and Roles
+1. A customer sends an implementation guide.
+2. Business creates or selects the customer and records the request.
+3. Business uploads the guide, samples, questionnaire, transaction list, and requested date.
+4. EDI receives a technical-assessment assignment.
+5. EDI reviews each requested transaction against the organization's interface.
+6. EDI identifies supported fields, missing fields, transformations, ERP changes, risks, complexity, and questions.
+7. EDI records a recommendation.
+8. Business reviews the assessment rather than the raw specification.
+9. Business approves, rejects, delays, or requests more information.
+10. Approval creates one Implementation for each approved transaction.
+11. The analyst opens the transaction workspace, such as Target - 850 Purchase Order.
+12. The analyst builds and reviews one living mapping for that implementation.
+13. Validation runs against the specification, interface, and mapping.
+14. Internal and customer testing are executed and recorded.
+15. Production is approved and deployed.
+16. The implementation receives a production version and go-live record.
+17. Six months later, the customer sends an updated guide.
+18. Business records a revision request against the same implementation.
+19. Assessment, approval, mapping changes, validation, testing, and deployment repeat.
+20. The transaction workspace permanently shows the complete history.
 
-### 7.1 Business Analyst
+Every screen, data relationship, workflow, and permission must support this story.
 
-Creates customer requests, manages customer and contact data, uploads intake documents, supplies requested timelines, responds to clarification requests, and submits work for approval. May not modify mapping rules or approve production.
+## 3. The Real Workflow
 
-### 7.2 EDI Analyst
+### 3.1 Department workflow
 
-Performs technical assessment, records findings, evaluates interface impact, creates and reviews mappings, prepares tests, manages customer testing evidence, and recommends readiness. May not provide final business or production approval unless explicitly granted a separate role.
+```text
+Customer Sends Specification
+        |
+        v
+Business Receives Request
+        |
+        v
+EDI Technical Assessment
+        |
+        v
+Business Reviews Assessment
+        |
+        v
+Business Approval
+        |
+        v
+Implementation Begins
+        |
+        v
+Transaction Implementation
+        |
+        v
+Validation and Testing
+        |
+        v
+Production
+        |
+        v
+Customer Revision Requests
+        |
+        v
+Repeat on the Same Implementation
+```
 
-### 7.3 QA Analyst
+### 3.2 Governing rules
 
-Creates or executes test scenarios, records evidence, manages defects, and approves or rejects testing gates. May not edit approved mappings without reopening the applicable review.
+- No implementation is created before business approval, except an authorized legacy import.
+- Each approved transaction becomes a separate implementation.
+- A multi-transaction customer request may create several implementations.
+- Mapping, validation, testing, production, and revisions belong to the implementation.
+- Every material decision records actor, timestamp, comments, and evidence.
+- Every implementation remains attached to its customer permanently.
+- Revision work updates the same implementation and creates a new version.
 
-### 7.4 Business Manager
+## 4. Business Responsibilities
 
-Approves, rejects, delays, or requests more information for intake requests. Reviews scope, complexity, estimates, risks, missing information, and technical recommendations.
+Business owns:
 
-### 7.5 Production Approver
+- Customer requests
+- Customer communications
+- Receiving specifications
+- Customer contacts
+- Requested timelines
+- Business priority and justification
+- Business approval
+- Customer approvals
+- Production approval
+- Revision requests
+- Business-facing status and escalation
 
-Authorizes production deployment after required evidence and signoffs are complete. This role may be held by a manager but remains a distinct permission.
+Business does not own or edit:
 
-### 7.6 Administrator
+- Mapping rules
+- Technical transformations
+- Interface field assignments
+- Validation configuration
+- Translator exports
 
-Manages users, roles, permissions, reference values, workflow configuration, retention rules, integrations, and system settings. Administrative access does not imply authority to approve business or production work.
+Business may view technical artifacts and must receive a readable assessment summary before approval.
 
-### 7.7 Executive or Auditor
+## 5. EDI Responsibilities
 
-Has read-only access to dashboards, customer history, decision records, metrics, and audit logs within assigned organizational scope.
+EDI owns:
 
-## 8. Authorization Model
+- Technical assessment
+- Interface review
+- Customer specification review
+- Transaction feasibility
+- Mapping
+- Transformation rules
+- Validation
+- Test scenarios
+- Technical customer testing
+- Translator handoff
+- Production deployment execution
+- Technical revision analysis
 
-The system will use role-based access control with optional customer or business-unit scope.
+EDI recommends readiness but does not make the business commitment unless the user also holds the required Business Approver permission.
 
-Material actions require explicit permissions:
+## 6. Operating Hierarchy
 
-- `customer.create`, `customer.update`, `customer.archive`
-- `intake.create`, `intake.submit`, `intake.cancel`
-- `assessment.assign`, `assessment.edit`, `assessment.complete`, `assessment.reopen`
-- `business_approval.decide`
-- `project.create_from_approval`, `project.manage`
-- `mapping.edit`, `mapping.review`
-- `test.execute`, `test.approve`
-- `production.request`, `production.approve`, `production.record`
-- `change_request.create`, `change_request.approve`
-- `audit.view`, `report.view`, `admin.manage`
+### 6.1 Canonical hierarchy
 
-The application must enforce authorization server-side. UI hiding alone is not sufficient.
+```text
+Company
+  |
+  +-- Customer
+        |
+        +-- Implementation Request
+        |     |
+        |     +-- Requested Transaction: 850
+        |     +-- Requested Transaction: 856
+        |     +-- Requested Transaction: 810
+        |
+        +-- Implementation: 850 Purchase Order
+        |     |
+        |     +-- Customer Specification
+        |     +-- Mapping
+        |     +-- Validation
+        |     +-- Testing
+        |     +-- Production
+        |     +-- Revision History
+        |     +-- Documents
+        |     +-- Activity
+        |
+        +-- Implementation: 856 Advance Ship Notice
+        |
+        +-- Implementation: 810 Invoice
+```
 
-## 9. Core Domain Model
+### 6.2 Meaning of each level
 
-### 9.1 Customer
+**Company** represents the organization operating the platform.
 
-Customer is the top-level record and owns:
+**Customer** is the business and trading-partner container. It holds profile, contacts, connectivity, interface assignments, requests, implementations, and aggregate history.
 
-- Profile and identifiers
-- Contacts
-- Trading partner and communication settings
-- ERP and internal interface assignments
-- Transactions
-- Intake requests
-- Implementation projects
-- Change requests
-- Specifications and attachments
-- Versions
-- Test and production history
-- Timeline
-- Comments
-- Audit events
+**Implementation Request** is pre-approval work. It may contain one or more requested transactions.
 
-### 9.2 Request
+**Requested Transaction** is the unit assessed and approved within a request.
 
-A request represents work proposed by the business or customer before a project exists. Types include:
+**Implementation** is the long-lived operational record for one customer transaction and direction.
 
-- Initial implementation
-- New transaction set
-- Customer specification revision
-- Existing mapping change
-- ERP-driven change
-- Compliance or regulatory change
-- Defect correction
-- Decommission
+**Implementation Version** is an immutable approved or production state of the implementation.
 
-### 9.3 Technical Assessment
+### 6.3 Uniqueness
 
-The structured assessment describes scope, feasibility, complexity, interface impact, findings, effort category, risks, missing information, expected duration, and recommendation.
+An implementation is uniquely identified by:
 
-### 9.4 Project
+- Company
+- Customer
+- Transaction set
+- Direction
+- Implementation stream or business context when parallel implementations are required
 
-A project is an approved body of implementation work. It references the originating request and approved assessment snapshot. Existing `ImplementationProject` records will be migrated into this concept without losing current data.
+## 7. Specification Intake
 
-### 9.5 Version
+### 7.1 Purpose
 
-A version is the governed configuration outcome of an initial project or change request. It connects the exact specification set, interface version, mappings, test evidence, approvals, and deployment.
+Capture what the customer is asking for before technical work or business commitment.
 
-### 9.6 Change Request
-
-A change request is a new request attached to an active customer and optionally to a current production version. It must include a required reason for change and follows intake, assessment, approval, implementation, testing, and production stages.
-
-## 10. End-to-End Lifecycle
-
-The lifecycle is:
-
-`Customer Request -> Specification Intake -> Technical Assessment -> Business Approval -> Project Creation -> Mapping -> Validation -> Internal Testing -> Customer Testing -> Production Approval -> Go Live -> Maintenance -> Change Requests`
-
-Every stage must:
-
-- Have an explicit status.
-- Record the responsible actor and assignment.
-- Record entry and completion timestamps.
-- Support comments and attachments.
-- Create audit events.
-- Enforce transition rules.
-- Expose age and service-level indicators.
-
-## 11. Specification Intake
-
-### 11.1 Purpose
-
-Capture the request and supporting evidence before technical or business commitment.
-
-### 11.2 Required intake fields
+### 7.2 Required information
 
 - Customer
 - Request title
 - Request type
-- Requesting business unit
+- Requested transactions and direction
 - Business owner
 - Customer contact
 - Requested go-live date
-- Business priority
+- Priority
 - Business justification
-- Requested transactions
-- Direction for each transaction: inbound or outbound
-- Known EDI version
-- Known translator or connectivity changes
-- Initial notes
+- EDI version when known
+- Connectivity or translator change when known
+- Reason for change for existing implementations
 
-### 11.3 Intake uploads
+### 7.3 Required evidence
 
 - Customer implementation guide or specification
 - Transaction list
-- Sample EDI files
-- Test scenarios
+- Sample EDI when available
+- Test scenarios when available
 - Customer questionnaire
-- Label specifications
+- Label requirements
 - Code lists
-- Timeline or onboarding plan
-- Supporting email or decision record
+- Supporting communication
 
-### 11.4 Intake statuses
+### 7.4 Intake statuses
 
 - Draft
-- New Request
-- Pending Technical Review
-- Technical Review In Progress
+- Submitted
+- Pending Technical Assessment
+- Technical Assessment In Progress
 - Waiting on Customer Information
 - Assessment Complete
 - Waiting Business Approval
@@ -251,102 +276,94 @@ Capture the request and supporting evidence before technical or business commitm
 - Delayed
 - Cancelled
 
-### 11.5 Intake rules
+### 7.5 Rules
 
-- A request may be saved as draft with incomplete data.
-- Submission requires Customer, request type, requested transactions, business owner, requested date, and at least one specification or documented exception.
-- Submission creates a timeline and audit event.
-- Submitted intake documents are versioned; replacement never destroys the prior file.
-- No implementation project is created at intake submission.
+- Submission does not create an implementation.
+- Replacement files create document versions.
+- A request may contain several transactions.
+- Each requested transaction receives its own assessment result.
+- Existing production implementations must be linked when the request is a revision.
 
-## 12. Technical Assessment
+## 8. Technical Assessment
 
-### 12.1 Purpose
+### 8.1 Purpose
 
-Answer what the organization is committing to before implementation begins.
+The technical assessment tells Business what the organization would be committing to for every requested transaction.
 
-### 12.2 Scope classification
+### 8.2 Required answers per transaction
 
-- New customer
-- Existing customer update
-- New transaction
+- Is this a new implementation or a revision?
+- Can the current interface support the customer requirement?
+- Which interface fields already exist?
+- Which customer-required fields are missing?
+- Which mappings can be reused?
+- Which transformations are required?
+- Are new ERP fields or record types required?
+- Are connectivity or translator changes required?
+- What clarifications are needed?
+- What is the estimated complexity?
+- What is the estimated effort?
+- What are the risks and dependencies?
+- What is EDI's recommendation?
+
+### 8.3 Scope classification
+
+- New customer transaction
+- Existing implementation revision
+- New transaction for an existing customer
 - Specification revision
-- New connectivity
 - ERP-driven change
-- Compliance update
-- Defect correction
+- Connectivity change
+- Compliance change
+- Mapping defect correction
+- Decommission
 
-### 12.3 Transaction assessment
-
-For each transaction, record:
-
-- Transaction code and name
-- Direction
-- EDI version
-- Required, optional, or informational
-- Current support status
-- Reusable mapping candidate
-- Specification delta summary
-- Interface coverage
-- Complexity
-- Open questions
-
-### 12.4 Complexity
-
-Allowed overall values are Low, Medium, and High. Complexity is calculated from a configurable rubric and may be overridden with a required explanation.
-
-Rubric inputs include:
-
-- Number and novelty of transactions
-- New segments, loops, qualifiers, and code lists
-- New required data
-- Transformations and conditional business rules
-- Interface coverage
-- ERP development
-- Label or document changes
-- Connectivity changes
-- Customer testing requirements
-- External dependencies
-- Historical performance for similar work
-
-### 12.5 Interface impact
-
-Each assessment selects one or more:
+### 8.4 Interface impact
 
 - Existing Interface
-- Minor Interface Changes
+- Minor Interface Change
 - New Interface Required
 - ERP Changes Required
 - Translator Configuration Only
-- Connectivity Changes Required
-- Unknown - clarification required
+- Connectivity Change Required
+- Unknown - customer clarification required
 
-The assessment records affected interface, version, missing fields, field-level coverage, new record types, and downstream owners.
+### 8.5 Findings
 
-### 12.6 Findings
-
-Findings use typed categories:
+Findings are structured records:
 
 - New required field
 - Removed field
 - New segment
 - Removed segment
-- New loop
-- Changed loop
+- New or changed loop
 - New qualifier
 - Custom code list
 - Business rule change
 - Label change
-- Connectivity change
 - ERP gap
+- Interface gap
+- Connectivity change
 - Ambiguity
 - Reuse opportunity
 
-Every finding records source document, page or section where available, transaction, severity, disposition, owner, and resolution status.
+Each finding records transaction, source document, source location, severity, disposition, owner, and status.
 
-### 12.7 Estimated effort
+### 8.6 Complexity and effort
 
-Version 1 uses categorical estimates:
+Complexity is Low, Medium, or High and uses a configurable rubric based on:
+
+- Number and novelty of segments and loops
+- Required fields and interface gaps
+- Transformations and conditional rules
+- ERP changes
+- Connectivity changes
+- Customer testing requirements
+- External dependencies
+- Reuse availability
+- Historical outcomes for similar implementations
+
+Effort categories:
 
 - Mapping: None, Low, Medium, High
 - Testing: None, Low, Medium, High
@@ -355,13 +372,7 @@ Version 1 uses categorical estimates:
 - Customer coordination: None, Low, Medium, High
 - Overall: Low, Medium, High
 
-The analyst also records estimated duration range, assumptions, dependencies, confidence, and earliest feasible start. Numeric hours may be added later without replacing historical categories.
-
-### 12.8 Risks
-
-Risks record category, description, probability, impact, severity, mitigation, owner, due date, and status.
-
-### 12.9 Recommendation
+### 8.7 Recommendation
 
 Exactly one recommendation is required:
 
@@ -371,97 +382,599 @@ Exactly one recommendation is required:
 - Needs Additional Scope Review
 - Recommend Rejecting
 
-Completion requires transaction assessments, complexity, interface impact, effort, risks, open questions, recommendation, and analyst attestation.
+## 9. Automated Impact Analysis
 
-## 13. Automated Impact Analysis
+The platform compares the customer specification with the selected interface layout and approved mapping history.
 
-### 13.1 Objective
+Required output:
 
-Compare customer requirements with the selected internal interface and known reusable mappings to produce objective assessment evidence.
-
-### 13.2 Required outputs
-
-- Count of customer-required fields
-- Count of interface-covered fields
-- Count of missing interface fields
-- Count of reusable mappings
-- Count of new fields, loops, segments, qualifiers, and code lists
-- New record types required
-- Estimated mapping completeness percentage
+- Total customer-required fields
+- Interface-supported fields
+- Missing interface fields
+- Reusable mapping candidates
+- New segments, loops, qualifiers, and code lists
+- Required transformations
+- New record types
+- ERP gaps
+- Estimated mapping completeness
 - Confidence and evidence coverage
-- Unresolved ambiguities
 - Suggested complexity with rationale
+- Customer clarification questions
 
-### 13.3 Guardrails
+Generated findings are recommendations. Analysts accept, edit, or reject them. Overrides require a reason and create an audit event.
 
-- Generated results are recommendations, not approvals.
-- Every generated finding must link to supporting source content when possible.
-- Analysts can accept, edit, or reject findings.
-- Overrides require a reason and are audited.
-- Low-confidence output must be visibly labeled.
-- Raw customer content is not sent to an external model unless configured and permitted.
+## 10. Business Review and Approval
 
-## 14. Business Review and Approval
+### 10.1 Business review screen
 
-### 14.1 Business review summary
-
-Business users see:
+Business sees:
 
 - Customer and request
-- Requested go-live
-- Transactions
-- Overall complexity
-- Estimated duration
-- Effort categories
+- Requested transactions
+- Requested date
+- New implementation or revision
+- Overall and per-transaction complexity
+- Estimated duration and effort
 - Interface and ERP impact
-- Risk count and severity
+- Risks
 - Missing information
-- Dependencies
 - Technical recommendation
 - Analyst comments
 - Comparable historical implementations when available
 
-### 14.2 Decisions
+### 10.2 Decisions
 
 - Approve
 - Reject
 - Request More Information
 - Delay
 
-### 14.3 Approval rules
+### 10.3 Approval result
 
-- The approver cannot alter the completed technical assessment.
-- Request More Information reopens the assessment or intake with a reason and assigned owner.
-- Approve records the approved scope snapshot and authorizes project creation.
-- Reject requires a reason.
-- Delay requires reason and review date.
-- Decisions record actor, role, timestamp, comments, and assessment version.
-- Self-approval is prohibited where separation-of-duties policy is enabled.
+Approval creates one implementation per approved transaction. It stores an immutable snapshot of:
 
-## 15. Project Creation
-
-An approved request creates a project through a controlled command, not arbitrary manual duplication.
-
-The new project inherits:
-
-- Customer
-- Request
-- Approved assessment snapshot
-- Approved transaction scope
-- Target date
-- Interface assignment
-- ERP context
-- Documents
+- Approved scope
+- Assessment version
 - Risks
 - Assumptions
+- Target date
+- Assigned owners
+- Approval comments
+- Approver identity and timestamp
+
+The command is idempotent and cannot create duplicate implementations.
+
+## 11. Transaction Workspace
+
+### 11.1 Purpose
+
+The Transaction Workspace is the heart of the application and the primary daily screen for EDI Analysts.
+
+Example:
+
+```text
+Target
+850 Purchase Order
+Current Version 2.4
+
+Overview | Customer Specification | Mapping | Validation
+Testing | Production | Revision History | Documents | Activity
+```
+
+### 11.2 Workspace tabs
+
+**Overview**
+
+- Status and owners
+- Current production version
+- Customer and transaction
+- Requested and actual dates
+- Readiness
 - Open questions
-- Business and technical owners
+- Risks
+- Recent activity
 
-Project creation must be idempotent: one approval cannot accidentally create multiple projects.
+**Customer Specification**
 
-## 16. Project Workflow
+- Current specification
+- Prior specification versions
+- Parsed requirements
+- Findings
+- Change comparison
+- Source navigation
 
-Project states are:
+**Mapping**
+
+- One living implementation mapping
+- Segment navigation
+- Interface source
+- Customer requirement
+- Transformation
+- Result
+- Review and completion
+
+**Validation**
+
+- Requirement coverage
+- Interface coverage
+- Mapping completeness
+- Code-list and qualifier checks
+- Business-rule validation
+- Validation history
+
+**Testing**
+
+- Test plan
+- Scenarios
+- Expected EDI
+- Actual EDI
+- Comparison results
+- Defects and retests
+- Customer approvals
+
+**Production**
+
+- Readiness
+- Approval
+- Deployment plan
+- Rollback plan
+- Go-live
+- Production verification
+
+**Revision History**
+
+- Version list
+- Change summary
+- Approval
+- Go-live date
+- Comparison
+
+**Documents**
+
+- Specifications
+- Samples
+- Test evidence
+- Approval evidence
+- Production artifacts
+
+**Activity**
+
+- Complete implementation timeline
+- Comments
+- Assignments
+- Status transitions
+- Audit-relevant actions
+
+### 11.3 Workspace acceptance criteria
+
+- The analyst can reach every artifact for one transaction without leaving the workspace.
+- The current version is always visible.
+- The active tab is deep-linkable.
+- Counts and readiness update after material actions.
+- Permissions control edit actions without hiding readable history.
+- Empty, loading, error, and permission-denied states are provided.
+
+## 12. Mapping
+
+### 12.1 Definition
+
+A mapping is a living implementation artifact that connects the customer's specification to the organization's interface layout.
+
+Mappings are structured data, not uploaded documents. From mapping data, the platform generates:
+
+- Mapping document
+- Validation report
+- Test scenarios
+- Expected EDI
+- Translator export
+- Change comparison
+
+### 12.2 One implementation, one mapping
+
+An implementation has one current mapping composed of versioned rules.
+
+Example:
+
+```text
+850 Purchase Order Mapping
+
+BEG
+REF
+N1
+PO1
+PID
+CTT
+
+Interface Layout -> Customer Requirement -> Transformation -> Result
+```
+
+The user does not manage separate mappings for each segment. Segments are sections within the same mapping.
+
+### 12.3 Mapping rule fields
+
+- Transaction
+- Segment
+- Element
+- Loop context
+- Requirement status
+- Qualifier
+- Source interface field
+- Interface record and position
+- Transformation type
+- Transformation configuration
+- Constant or code translation
+- Condition
+- Result example
+- Confidence
+- Rationale
+- Review status
+- Reviewer
+- Version introduced
+- Version retired
+
+### 12.4 Mapping rules
+
+- Approved production mapping versions are immutable.
+- Mapping edits occur in a draft implementation version.
+- Each rule is traceable to a specification requirement.
+- Reused rules retain their source lineage.
+- Required unresolved rules block readiness.
+- One export generates the complete transaction mapping for the selected translator.
+
+## 13. Validation
+
+Validation evaluates:
+
+- Required-field coverage
+- Customer requirement traceability
+- Interface-field coverage
+- Segment and loop constraints
+- Qualifier and code-list validity
+- Conditional business rules
+- Transformation configuration
+- Positional interface completeness
+- Mapping review status
+- Example output conformance
+
+Every validation run records input version, ruleset version, results, actor, timestamp, and disposition.
+
+## 14. Testing
+
+### 14.1 Test stages
+
+- Mapping validation
+- Internal integration testing
+- QA testing
+- Customer testing
+- Regression testing
+- Production smoke test
+
+### 14.2 Test artifacts
+
+- Test plan
+- Test scenario
+- Input file
+- Expected output
+- Actual output
+- EDI comparison
+- 997 or acknowledgement
+- Defect
+- Retest
+- Customer response
+- Signoff
+
+### 14.3 Testing rules
+
+- Every required transaction requirement has approved coverage.
+- Failed tests block production unless an authorized waiver exists.
+- Test evidence belongs to the implementation version.
+- Customer acceptance is recorded with source evidence.
+- Existing EDI comparison and test-scenario capabilities are reused.
+
+## 15. Production
+
+### 15.1 Production readiness
+
+Required:
+
+- Approved scope
+- Completed mapping
+- Validation passed
+- Required tests passed
+- Customer approval when required
+- High-severity defects resolved or waived
+- Deployment plan
+- Rollback plan
+- Production approval
+
+### 15.2 Deployment record
+
+- Implementation and version
+- Environment
+- Scheduled date
+- Actual date
+- Translator target
+- Deployment owner
+- Production approver
+- Smoke-test result
+- Rollback status
+- Incident links
+- Final outcome
+
+Production creates an immutable version and sets it as current after verification.
+
+## 16. Revisions
+
+### 16.1 Principle
+
+Revisions belong to the implementation, not to a generic project.
+
+Example:
+
+```text
+Target
+850 Purchase Order
+Current Version 2.4
+
+1.0  Initial Implementation
+1.1  Customer Added REF
+1.2  Updated PO1
+2.0  New PID Rules
+2.1  Testing Corrections
+2.2  TD5 Update
+2.3  SCAC Changes
+2.4  Current
+```
+
+### 16.2 Version detail
+
+Selecting any version shows:
+
+- What changed
+- Why it changed
+- Who requested it
+- Who assessed it
+- Who approved it
+- When it went live
+- Specification version
+- Mapping version
+- Validation results
+- Testing evidence
+- Production record
+- Documents
+
+### 16.3 Required reason for change
+
+- Customer implementation guide update
+- New transaction requirement
+- ERP enhancement
+- Mapping defect
+- Customer business process change
+- Internal business process change
+- Compliance or regulatory update
+- Connectivity change
+- Performance improvement
+- Decommission
+- Other with explanation
+
+### 16.4 Revision workflow
+
+```text
+Customer Requests Revision
+        |
+        v
+Business Intake
+        |
+        v
+EDI Technical Assessment
+        |
+        v
+Business Approval
+        |
+        v
+Draft Version Created
+        |
+        v
+Mapping Changes
+        |
+        v
+Validation and Testing
+        |
+        v
+Production
+        |
+        v
+Version Closed
+```
+
+## 17. Timeline
+
+Every implementation has a permanent, filterable timeline:
+
+```text
+Customer Sent Specification
+Technical Assessment Started
+Technical Assessment Completed
+Business Approved
+Implementation Created
+Mapping Started
+Validation Passed
+Testing Started
+Customer Passed
+Production Approved
+Go Live
+Revision 1 Requested
+Revision 1 Deployed
+Revision 2 Requested
+Revision 2 Deployed
+```
+
+Timeline events record type, actor, timestamp, implementation version, comments, attachments, and related entity.
+
+## 18. Dashboards
+
+### 18.1 Business dashboard
+
+- Requests Waiting
+- Technical Assessments
+- Business Approvals
+- Customer Clarifications
+- Upcoming Go Lives
+- Revision Requests
+- Delayed Commitments
+
+### 18.2 EDI dashboard
+
+- My Technical Assessments
+- My Implementations
+- Mappings
+- Validation Failures
+- Testing
+- Production
+- Waiting on Customer
+- Revision Queue
+
+### 18.3 QA dashboard
+
+- Ready for QA
+- Failed Scenarios
+- Retests
+- Coverage Gaps
+- Waiting for Signoff
+
+### 18.4 Manager dashboard
+
+- Average Assessment Time
+- Average Implementation Time
+- Stage Cycle Time
+- Production Success
+- Estimate Accuracy
+- Customers Requiring Most Updates
+- Transaction Sets Taking Longest
+- ERP Systems Driving Most Changes
+- Open Revisions
+
+## 19. Screen Blueprint
+
+### 19.1 Global navigation
+
+Primary navigation:
+
+- Dashboard
+- Customers
+- Requests
+- Implementations
+- Assessments
+- Approvals
+- Reports
+- Administration
+
+The existing Mapping, ERP Layout, Knowledge, comparison, and export capabilities remain accessible in their operational context.
+
+### 19.2 Customer list
+
+Displays customer, status, current implementations, open requests, open revisions, next go-live, risk, and last activity.
+
+Acceptance criteria:
+
+- Search by customer, partner identifier, transaction, and contact.
+- Filter by active status, open work, risk, and ownership.
+- Create Customer is permission-controlled.
+- Archived customers remain discoverable to authorized users.
+
+### 19.3 Customer 360
+
+```text
+Target
+Active Customer
+
+Overview | Implementations | Requests | Contacts
+Documents | Production | Timeline | Metrics
+
+Implementations
+850 Purchase Order       Production  v2.4
+856 Advance Ship Notice  Testing     v1.0
+810 Invoice              Production  v1.3
+```
+
+### 19.4 Request intake
+
+Uses a guided form:
+
+1. Customer and request
+2. Transactions
+3. Timeline and business context
+4. Documents
+5. Review and submit
+
+### 19.5 Technical assessment
+
+Uses a transaction selector and repeated structured assessment:
+
+```text
+Request: Target 2027 EDI Onboarding
+
+Transactions
+[850] [856] [810]
+
+850 Purchase Order
+Support: Partial
+Interface Coverage: 88%
+Missing Fields: 2
+Reusable Rules: 34
+ERP Impact: None
+Complexity: Medium
+Recommendation: Ready to Implement
+```
+
+### 19.6 Business approval
+
+Shows a decision summary, risks, missing information, and per-transaction recommendation. Raw technical detail is available but not required to understand the commitment.
+
+### 19.7 Transaction workspace
+
+The tab design in Chapter 11 is mandatory. Mapping does not replace the workspace.
+
+### 19.8 Revision comparison
+
+Side-by-side comparison:
+
+- Specification requirements added, changed, removed
+- Mapping rules added, changed, retired
+- Validation changes
+- Testing differences
+- Approval and deployment metadata
+
+### 19.9 Screen-wide acceptance rules
+
+Every screen must provide:
+
+- Page title and operational context
+- Current status
+- Owner
+- Primary next action
+- Permission-aware controls
+- Activity or audit access
+- Loading, empty, validation, error, and success states
+- Keyboard operation and accessible labels
+- Deep links
+
+## 20. Workflow and State Model
+
+### 20.1 Request states
+
+- Draft
+- Submitted
+- Technical Assessment
+- Waiting on Customer
+- Assessment Complete
+- Waiting Business Approval
+- Approved
+- Rejected
+- Delayed
+- Cancelled
+
+### 20.2 Implementation states
 
 - Approved
 - Assigned
@@ -473,560 +986,490 @@ Project states are:
 - Production Approval
 - Scheduled
 - Production
-- Closed
 - Maintenance
 - On Hold
-- Cancelled
+- Retired
 
-Project transitions must use a workflow service that validates permissions, prerequisites, and current state. Direct unvalidated status writes are prohibited.
+### 20.3 Version states
 
-## 17. Mapping Module
-
-The existing parser, recommendation engine, mapping workspace, positional data, review actions, and translator exports are preserved.
-
-Enhancements:
-
-- Attach mappings to a customer, project, transaction, and version.
-- Maintain immutable approved mapping revisions.
-- Record mapping rule history and reviewers.
-- Connect mapping rules to requirements and assessment findings.
-- Distinguish reused, modified, and new mappings.
-- Support constants, code translations, conditions, calculations, and lookup dependencies.
-- Track completion and review by transaction.
-- Prevent production readiness when required mappings are unresolved.
-
-## 18. Validation Module
-
-Validation will evaluate:
-
-- Required-field coverage
-- Qualifier and code-list validity
-- Segment and loop constraints
-- Interface position completeness
-- Transformation configuration
-- Cross-field business rules
-- Mapping review status
-- Specification-to-mapping traceability
-
-Every run stores engine version, inputs, results, actor, timestamp, and disposition.
-
-## 19. Testing Module
-
-### 19.1 Test artifacts
-
-- Test plan
-- Test scenarios
-- Test cases
-- Input files
-- Expected outputs
-- Actual outputs
-- EDI comparison results
-- 997 or acknowledgement evidence
-- Customer rejection or acceptance
-- Defects
-- Retest evidence
-- Signoff
-
-### 19.2 Test stages
-
-- Unit or mapping validation
-- Internal integration testing
-- QA testing
-- Customer testing
-- Regression testing
-- Production smoke test
-
-### 19.3 Rules
-
-- Every required transaction has approved test coverage.
-- Failed tests block production unless a documented waiver is approved.
-- Evidence is retained and version-linked.
-- Customer communication may be logged as an event and attachment.
-- Existing EDI compare and test scenario capabilities are reused.
-
-## 20. Production Module
-
-Production readiness requires:
-
-- Approved scope
-- Completed mappings
-- Validation passed
-- Required test scenarios passed
-- Customer signoff where required
-- Open high-severity defects resolved or waived
-- Rollback plan
-- Deployment plan
-- Production approver authorization
-
-Deployment records include scheduled and actual date, environment, deployed version, translator target, deployment owner, validation result, rollback status, incident links, and final outcome.
-
-Go-live creates a production version and moves the customer relationship to active maintenance. Closing the project does not archive the customer.
-
-## 21. Change Request Module
-
-### 21.1 Required reason for change
-
-Every change request must select one:
-
-- Customer implementation guide update
-- New transaction set
-- ERP enhancement
-- Mapping defect
-- Customer business process change
-- Internal business process change
-- Compliance or regulatory update
-- Connectivity change
-- Performance improvement
-- Decommission
-- Other, with explanation
-
-### 21.2 Workflow
-
-`Customer Requests Update -> Business Intake -> EDI Technical Review -> Business Approval -> Version Created -> Mapping Updates -> Testing -> Production -> Version Closed`
-
-### 21.3 Change request rules
-
-- The current production version remains identifiable.
-- The request identifies the proposed base version.
-- Approved scope creates a new version draft.
-- Unrelated changes should not be bundled without documented scope review.
-- Emergency changes use an expedited workflow but require retrospective assessment and approval.
-- Every production version links to one or more approved requests.
-
-## 22. Version Management
-
-Version numbers follow a configurable major/minor policy.
-
-- Initial implementation begins at 1.0 unless migrated from an existing production version.
-- Major versions represent material specification, interface, or process changes.
-- Minor versions represent backward-compatible or limited mapping changes.
-- Version state: Draft, In Development, In Testing, Approved, Scheduled, Production, Superseded, Rolled Back, Retired.
-- Only one version per customer and implementation stream may be current in production unless parallel production is explicitly enabled.
-- Production versions are immutable; corrections create a new version.
-
-## 23. Customer 360 and Timeline
-
-The customer page includes:
-
-- Profile summary
-- Current lifecycle status
-- Current production version
-- Transactions
-- Contacts
-- Interfaces and ERP assignments
-- Active work
-- Pending decisions
-- Risks
-- Projects
-- Change requests
-- Documents
-- Testing
+- Draft
+- In Development
+- In Validation
+- In Testing
+- Approved
+- Scheduled
 - Production
-- Metrics
-- Complete timeline
+- Superseded
+- Rolled Back
+- Retired
 
-Timeline events include creation, assignment, uploads, assessment changes, findings, questions, approvals, mapping milestones, tests, customer responses, deployments, incidents, and version changes. Users can filter by event type, project, transaction, version, and date.
+### 20.4 Transition service
 
-## 24. Dashboards
+All state changes pass through a centralized workflow service that:
 
-### 24.1 Business dashboard
+- Confirms current state
+- Confirms permission
+- Confirms prerequisites
+- Stores reason and comments
+- Creates audit event
+- Emits notification
+- Executes related commands idempotently
 
-- New requests
-- Pending technical reviews
-- Waiting business approval
-- Requests waiting on customer
-- Delayed requests
-- Upcoming target dates
-- Risks requiring business action
+Direct arbitrary status updates are prohibited.
 
-### 24.2 EDI dashboard
+## 21. Roles and Permissions
 
-- My assigned assessments
-- My implementation work
-- Mapping review queue
-- Open technical questions
-- Customer testing
-- Production candidates
-- Aging work and SLA breaches
+### 21.1 Roles
 
-### 24.3 QA dashboard
+- Business Analyst
+- EDI Analyst
+- QA Analyst
+- Business Approver
+- Production Approver
+- Manager
+- Administrator
+- Auditor
 
-- Tests ready to execute
-- Failed tests
-- Retests
-- Coverage gaps
-- Awaiting signoff
+### 21.2 Permission matrix
 
-### 24.4 Management dashboard
+| Capability | Business | EDI | QA | Approver | Production | Admin |
+|---|---:|---:|---:|---:|---:|---:|
+| Create customer | Yes | View | View | View | View | Yes |
+| Submit request | Yes | View | View | View | View | Yes |
+| Complete assessment | View | Yes | View | View | View | Yes |
+| Approve business scope | No | No | No | Yes | No | Configurable |
+| Edit mapping | No | Yes | No | View | View | Configurable |
+| Execute tests | View | Yes | Yes | View | View | Configurable |
+| Approve test gate | No | No | Yes | View | View | Configurable |
+| Approve production | No | No | No | No | Yes | Configurable |
+| Deploy production | No | Yes | No | No | Configurable | Configurable |
+| View audit history | Scoped | Scoped | Scoped | Scoped | Scoped | Yes |
 
-- Active customers
-- Open projects
-- Pending assessments
-- Pending approvals
-- Go-lives this month
-- Average intake, review, development, and testing duration
-- Estimate accuracy
-- Change requests per customer
-- Work by reason for change
-- High-risk work
-- Production success rate
+Permissions are enforced server-side. Separation of duties is configurable and enabled for business and production approval in controlled environments.
 
-## 25. Reporting and Analytics
+## 22. Database Blueprint
 
-Reports must support filtering and export. Minimum reports:
+### 22.1 Core entities
 
-- Estimated versus actual duration and effort
-- Cycle time by stage
-- Customer complexity distribution
-- Transaction implementation duration
-- ERP impact and delay
-- Interface gap frequency
-- Change reason trends
-- Rework and defect trends
-- Customer-specific maintenance volume
-- Approval turnaround
-- Production outcome
-- Analyst workload
-- SLA compliance
+- Company
+- User
+- Role
+- Permission
+- UserRole
+- Customer
+- CustomerContact
+- CustomerIdentifier
+- InterfaceProfile
+- InterfaceVersion
+- InterfaceField
+- ImplementationRequest
+- RequestedTransaction
+- Specification
+- SpecificationVersion
+- TechnicalAssessment
+- TransactionAssessment
+- AssessmentFinding
+- Risk
+- Approval
+- Implementation
+- ImplementationVersion
+- Mapping
+- MappingVersion
+- MappingRule
+- ValidationRun
+- ValidationFinding
+- TestPlan
+- TestScenario
+- TestExecution
+- Defect
+- CustomerApproval
+- ProductionDeployment
+- RevisionRequest
+- Comment
+- Attachment
+- TimelineEvent
+- AuditEvent
+- Notification
 
-Historical metrics must use stored snapshots so later edits do not rewrite prior decisions.
+### 22.2 ERD
 
-## 26. Notifications
+```text
+Company
+  1--* Customer
+  1--* User
 
-Configurable in-app and email notifications include:
+Customer
+  1--* ImplementationRequest
+  1--* Implementation
+  1--* CustomerContact
 
-- Assignment
-- Intake submitted
-- Assessment due or overdue
-- Customer clarification requested
-- Assessment completed
-- Approval requested
-- Decision recorded
-- Target date risk
-- Test failure
-- Customer testing response
-- Production approval requested
-- Deployment scheduled or completed
-- Change request created
+ImplementationRequest
+  1--* RequestedTransaction
+  1--* TechnicalAssessment
+  1--* Approval
 
-Notifications must be deduplicated, auditable, and respect user preferences.
+RequestedTransaction
+  0--1 Implementation
+  1--1 TransactionAssessment
 
-## 27. Search
+Implementation
+  1--* ImplementationVersion
+  1--1 Mapping
+  1--* RevisionRequest
+  1--* TimelineEvent
 
-Global search includes customer, request, project, change request, transaction, version, specification, finding, mapping field, test, and deployment. Results respect authorization scope and provide direct links to the governing record.
+ImplementationVersion
+  1--1 SpecificationVersion
+  1--1 MappingVersion
+  1--* ValidationRun
+  1--* TestExecution
+  0--1 ProductionDeployment
 
-## 28. Documents and Attachments
+Mapping
+  1--* MappingVersion
 
-- Files are stored outside the relational database with secure references.
-- Metadata includes checksum, size, MIME type, uploader, source, created date, and document version.
-- Replacement creates a new version.
-- Files may be attached to multiple contextual records through explicit links.
-- Malware scanning and file-type validation are required for production.
-- Retention and deletion follow configured policy and legal holds.
-- Sensitive content is not exposed through public URLs.
+MappingVersion
+  1--* MappingRule
+```
 
-## 29. Audit and Compliance
+### 22.3 Data rules
 
-The audit log is append-only at the application layer and records:
+- Customer is a container; Implementation owns operational transaction history.
+- One Implementation represents one transaction and direction.
+- One Implementation owns one logical Mapping.
+- MappingVersion and ImplementationVersion are aligned.
+- Production versions are immutable.
+- Documents use versioned metadata and secure object storage.
+- Timeline events are user-readable.
+- Audit events are append-only and system-oriented.
 
-- Actor and effective role
-- Action
-- Entity type and identifier
-- Timestamp
-- Request or correlation identifier
-- Before and after values for material changes
-- Transition reason
-- Source IP and user agent where allowed
-- Automation or AI origin
+## 23. API Blueprint
 
-Audit records cannot be edited through normal application APIs. Administrators may export but not rewrite audit history.
+### 23.1 Resource routes
 
-## 30. Security Requirements
+```text
+/api/customers
+/api/customers/{customerId}
+/api/customers/{customerId}/implementations
+/api/requests
+/api/requests/{requestId}
+/api/requests/{requestId}/submit
+/api/requests/{requestId}/assessment
+/api/requests/{requestId}/approve
+/api/implementations/{implementationId}
+/api/implementations/{implementationId}/mapping
+/api/implementations/{implementationId}/validation-runs
+/api/implementations/{implementationId}/tests
+/api/implementations/{implementationId}/production
+/api/implementations/{implementationId}/revisions
+/api/implementations/{implementationId}/timeline
+```
 
-- Secure, server-side session validation
-- Strong production secret management
-- Role and scope enforcement on every protected API
-- CSRF protection appropriate to the authentication design
-- Rate limiting for authentication and expensive analysis endpoints
-- Secure upload validation and storage
-- Encryption in transit and at rest
-- No secrets in source control, logs, exports, or client bundles
-- Security headers and restrictive content policy
-- Dependency and secret scanning in CI
-- Backup, recovery, and credential rotation procedures
-- Separation of duties for business and production approvals
-- Tenant isolation if multi-organization support is introduced
+### 23.2 API rules
 
-## 31. Nonfunctional Requirements
+- Version contracts.
+- Validate bodies with shared schemas.
+- Return consistent error envelopes.
+- Enforce authorization and scope centrally.
+- Use idempotency keys for approval, implementation creation, and deployment.
+- Use concurrency tokens for critical edits.
+- Create audit events in the same transaction as material changes.
+- Expose commands for transitions rather than generic status mutation.
 
-### 31.1 Availability and recovery
+### 23.3 Legacy compatibility
 
-- Target availability: 99.9% after production launch.
-- Defined recovery point and recovery time objectives before customer production data is stored.
-- Database backups are tested through restoration exercises.
+Existing `/api/projects` routes and `ImplementationProject` storage may remain temporarily behind adapters. They are legacy implementation details and must not drive new product language or domain design.
 
-### 31.2 Performance
+## 24. Architecture Blueprint
 
-- Standard authenticated pages should return usable content within two seconds at the 95th percentile under expected load.
-- Queue or background-process document parsing and AI analysis that may exceed request limits.
-- Paginate high-volume lists and timelines.
+### 24.1 Existing stack
 
-### 31.3 Accessibility
+- Next.js 16
+- React 19
+- Prisma 7
+- SQLite locally
+- Turso/libSQL in production
+- JWT-based authentication
+- Vercel deployment
 
-- Conform to WCAG 2.2 AA for core workflows.
-- All actions are keyboard accessible.
-- Status is never conveyed by color alone.
-- Forms provide labels, error summaries, and focus management.
+### 24.2 Target layers
 
-### 31.4 Observability
+- Presentation: role-specific pages and transaction workspace
+- Application: request, assessment, approval, implementation, mapping, testing, revision commands
+- Domain: implementation lifecycle, versioning, transition rules
+- Data: Prisma repositories and additive migrations
+- Integration: storage, notifications, AI, translator exports
+- Observability: logs, errors, metrics, audit
 
-- Structured logs with correlation IDs
-- Error tracking
-- Health checks
-- Background job monitoring
-- Audit of external model and integration calls
-- Business telemetry for stage transitions and durations
-
-## 32. API Principles
-
-- Version API contracts.
-- Validate request bodies with a shared schema system.
-- Return consistent error structures.
-- Use idempotency keys for project creation, approvals, and deployments.
-- Use optimistic concurrency or version checks for critical edits.
-- Enforce permission and ownership in a shared authorization layer.
-- Record audit events in the same transaction as material state changes.
-- Do not permit arbitrary status updates; expose transition commands.
-
-## 33. Data Migration
-
-The migration from the existing project-centric schema will be additive:
-
-1. Create Customer records from distinct existing customer values.
-2. Link existing projects to customers while retaining the legacy customer text during transition.
-3. Create imported or legacy request records for existing projects.
-4. Mark current approval records as legacy package approvals.
-5. Preserve documents, mappings, questions, assumptions, artifacts, messages, and tests.
-6. Introduce version records and associate existing projects with a baseline version.
-7. Validate counts, ownership, and referential integrity before removing any legacy field.
-
-No production data is deleted as part of the initial migration.
-
-## 34. Existing Capabilities to Preserve
-
-The following current modules are protected unless a later requirement explicitly changes them:
+### 24.3 Existing capabilities to preserve
 
 - Customer specification parser
 - ERP layout module
 - Sample output position verification
 - Mapping recommendation engine
-- Mapping workspace and review
-- Partner and project reuse suggestions
+- Mapping workspace behavior
 - EDI comparison engine
 - Test scenario support
+- Partner and prior-work reuse
 - IBM Sterling MRS export
 - Cleo, Boomi, and OpenText export
-- Existing authentication behavior during the migration
-- Existing theme and navigation style
+- Authentication during migration
+- Existing visual theme
 
-They may be wrapped by new lifecycle navigation and authorization but should not be rewritten without a dedicated design decision.
+These capabilities are connected to the Implementation domain rather than rewritten.
 
-## 35. Current-State Gap Summary
+## 25. Security and Operations
 
-The July 2026 codebase contains project workspaces, documents, mapping recommendations, questions, assumptions, generated artifacts, approval records, copilot messages, test scenarios, ERP layout profiles, readiness evaluation, and translator exports.
+- Server-side session validation
+- Role and scope enforcement for every protected endpoint
+- Strong secret management
+- Secure file validation and private storage
+- Malware scanning for production uploads
+- Encryption in transit and at rest
+- Rate limiting for authentication and expensive analysis
+- Security headers and content policy
+- Dependency and secret scanning
+- Backup and restore testing
+- Credential rotation
+- Separation of duties
+- Structured logs with correlation identifiers
+- Error tracking
+- Health and background-job monitoring
 
-Key gaps:
+Target availability is 99.9% after formal production launch. Recovery objectives and retention requirements must be approved before storing regulated or contractual customer records.
 
-- Customer is stored as project text rather than a durable entity.
-- A project is created before technical and business approval.
-- Approval represents package readiness rather than pre-project business authorization.
-- Status values are strings without a centralized workflow engine.
-- Roles are minimally modeled and permissions are not expressed as capabilities.
-- No structured intake, technical assessment, assessment findings, risk register, change request, version, customer timeline, production deployment, attachment link, notification, or immutable audit model exists.
-- Existing records are primarily owner-scoped, which is insufficient for cross-functional collaboration.
+## 26. UI Standards
 
-## 36. Acceptance Criteria for Release 1
+- Use the existing visual theme and design tokens.
+- Use EDI department language: Customer, Request, Assessment, Implementation, Transaction, Mapping, Testing, Production, Revision.
+- Do not expose the word Project in new user-facing interfaces.
+- Do not use color as the only status signal.
+- Meet WCAG 2.2 AA for core workflows.
+- Keep the implementation identity and current version visible.
+- Show one primary action per state.
+- Use tables only for comparable operational records.
+- Use tabs for stable implementation workspace areas.
+- Use drawers or dialogs only for bounded edits.
+- Preserve URLs for direct navigation.
 
-Release 1 is accepted when:
+## 27. Notifications
 
-- Authorized users can create and manage Customer records.
-- A business user can submit a specification intake without creating a project.
-- An EDI analyst can complete a structured technical assessment.
-- The system generates an impact analysis from the customer specification and internal interface where supported.
-- A business manager can approve, reject, delay, or request information.
-- Approval creates exactly one project linked to the customer, request, and assessment snapshot.
-- Existing mapping and analysis functions operate within the approved project.
-- Every material action creates an audit event.
-- Existing project data is migrated without loss.
-- Role and transition rules are covered by automated tests.
-- The production build passes security, migration, and smoke-test gates.
+Notifications include:
 
-## 37. Delivery Roadmap
+- Request submitted
+- Assessment assigned
+- Assessment due or overdue
+- Customer clarification requested
+- Assessment complete
+- Business approval requested
+- Decision recorded
+- Implementation assigned
+- Validation failed
+- Test failed
+- Customer approved
+- Production approval requested
+- Deployment scheduled
+- Deployment completed
+- Revision requested
 
-### Phase A - Foundation
+Notifications are deduplicated, auditable, preference-aware, and contain direct links.
 
-- Documentation baseline
+## 28. Reporting
+
+Minimum reports:
+
+- Assessment cycle time
+- Implementation cycle time
+- Stage wait time
+- Estimated versus actual duration
+- Complexity accuracy
+- Customer update frequency
+- Revision reason
+- Transaction duration
+- ERP impact and delay
+- Interface gap frequency
+- Test failure and rework
+- Approval turnaround
+- Production success and rollback
+- Analyst workload
+
+Historical reports use stored snapshots so later edits do not rewrite past decisions.
+
+## 29. AI Capabilities
+
+Near-term:
+
+- Parse specifications
+- Compare specification versions
+- Identify interface coverage and gaps
+- Suggest assessment findings
+- Suggest reusable mapping rules
+- Draft clarification questions
+- Suggest complexity and risks
+- Generate test scenarios
+
+Future:
+
+- Estimate duration from historical implementations
+- Predict testing and schedule risk
+- Detect recurring customer and ERP patterns
+- Recommend reusable transformations
+
+AI output retains model version, confidence, evidence links, and human disposition. AI does not approve business scope or production.
+
+## 30. Migration from the Current Application
+
+### 30.1 Current gap
+
+The existing database stores an `ImplementationProject` with customer and transaction strings. It already owns documents, mapping recommendations, questions, assumptions, artifacts, approvals, messages, and test scenarios.
+
+### 30.2 Additive migration
+
+1. Create Customer records from existing customer values.
+2. Create one legacy Implementation for each existing project and transaction.
+3. Split multi-transaction records into transaction implementations with documented lineage.
+4. Preserve original identifiers in migration metadata.
+5. Attach current documents, mappings, questions, assumptions, artifacts, and tests.
+6. Create baseline ImplementationVersion records.
+7. Reclassify current approvals as legacy package approvals.
+8. Introduce adapters for existing `/projects` routes.
+9. Validate record counts and relationships.
+10. Remove legacy fields only in a later approved migration.
+
+No existing production data is deleted.
+
+## 31. Delivery Roadmap
+
+### Phase A - Language and blueprint
+
+- Adopt Implementation terminology
+- Publish operations blueprint
+- Update user-facing labels
+- Preserve legacy internal compatibility
+
+### Phase B - Domain foundation
+
 - Customer model
-- Roles and authorization
-- Audit event framework
-- Shared workflow service
-- Migration tooling
+- Implementation model
+- Roles and permissions
+- Timeline and audit
+- Workflow service
+- Additive migration
 
-### Phase B - Pre-Project Lifecycle
+### Phase C - Pre-implementation lifecycle
 
-- Intake
-- Document versioning
+- Request intake
 - Technical assessment
 - Impact analysis
 - Business approval
-- Controlled project creation
+- Controlled implementation creation
 
-### Phase C - Govern Existing Implementation
+### Phase D - Transaction workspace
 
-- Project status transitions
-- Version-aware mappings
-- Validation and test gates
-- Customer testing evidence
-- Production approval and deployment
+- Workspace shell and tabs
+- Specification area
+- One mapping model
+- Validation history
+- Testing evidence
+- Production record
 
-### Phase D - Maintenance
+### Phase E - Revisions
 
-- Change requests
+- Revision requests
 - Version management
-- Customer timeline
-- Maintenance analytics
+- Version comparison
+- Production history
 
-### Phase E - Operational Intelligence
+### Phase F - Operational intelligence
 
-- Role-specific dashboards
+- Role dashboards
 - Estimate accuracy
-- Cycle-time analytics
-- Risk and change-reason reporting
-- Historical recommendations
+- Cycle-time, customer, and ERP trend reports
+- AI-assisted assessment
 
-## 38. AI Capabilities
+## 32. Release 1 Acceptance Criteria
 
-Near-term AI functions:
+Release 1 is complete when:
 
-- Parse and classify specification content.
-- Compare specification requirements with interface fields.
-- Propose findings, gaps, reuse candidates, complexity, and questions.
-- Summarize risk and business impact.
-- Draft customer clarification messages.
-- Suggest test scenarios.
+- The product uses Implementation instead of Project in user-facing language.
+- Customer is the container for separate transaction implementations.
+- Business can submit a request without creating an implementation.
+- EDI can complete a structured assessment for each requested transaction.
+- Business can approve each transaction.
+- Approval creates exactly one implementation per approved transaction.
+- The Transaction Workspace provides the required nine areas.
+- Each implementation has one living, versioned mapping.
+- Validation and testing belong to the implementation version.
+- Production creates an immutable current version.
+- Revision requests update the same implementation.
+- Every material action appears in timeline and audit history.
+- Existing parser, ERP layout, mapping, comparison, test, and export functions remain operational.
+- Migration, permission, workflow, and failure paths have automated tests.
+- Preview build, migration checks, security checks, and production smoke tests pass.
 
-Future functions:
+## 33. Definition of Done
 
-- Estimate duration using historical outcomes.
-- Detect specification changes between versions.
-- Recommend reusable mappings across customers.
-- Identify recurring ERP gaps and change patterns.
-- Predict schedule and testing risk.
+A screen or capability is complete only when:
 
-All AI output must retain model/version metadata, confidence, evidence links, and human disposition.
-
-## 39. Open Product Decisions
-
-The following decisions should be made before production implementation:
-
-- Single organization versus multi-tenant SaaS architecture
-- External file storage provider
-- Email and notification provider
-- Identity provider and SSO requirements
-- Required retention period
-- Required compliance attestations
-- Approval separation-of-duties policy
-- Version numbering policy
-- SLA definitions by priority
-- Whether customers receive portal access
-- Whether emergency changes may deploy before retrospective approval
-
-## 40. Definition of Done
-
-A feature is complete only when:
-
-- Requirements and acceptance criteria are implemented.
+- Its operational purpose is documented.
+- Acceptance criteria are implemented.
 - Authorization is enforced server-side.
-- Audit behavior is included.
-- Empty, loading, error, and permission-denied states are designed.
+- Timeline and audit behavior are included.
+- Loading, empty, error, success, and permission-denied states exist.
 - Unit and integration tests pass.
-- Migration and rollback are documented.
 - Accessibility checks pass.
 - Observability is present.
-- Documentation is updated.
-- Production build and smoke tests pass.
+- Migration and rollback are documented.
+- The blueprint is updated.
 
-## Appendix A - Canonical Status Sets
+## Appendix A - Transition Gates
 
-### Intake
+### Request to assessment
 
-Draft; New Request; Pending Technical Review; Technical Review In Progress; Waiting on Customer Information; Assessment Complete; Waiting Business Approval; Approved; Rejected; Delayed; Cancelled.
-
-### Assessment
-
-Not Started; Assigned; In Progress; Waiting for Information; Complete; Reopened; Superseded.
-
-### Project
-
-Approved; Assigned; Mapping; Validation; Internal Testing; Customer Testing; Ready for Production; Production Approval; Scheduled; Production; Closed; Maintenance; On Hold; Cancelled.
-
-### Change Request
-
-Draft; Submitted; Technical Review; Waiting Business Approval; Approved; In Development; Internal Testing; Customer Testing; Ready for Production; Scheduled; Production; Closed; Rejected; Cancelled.
-
-### Version
-
-Draft; In Development; In Testing; Approved; Scheduled; Production; Superseded; Rolled Back; Retired.
-
-## Appendix B - Representative Transition Gates
-
-### Intake to technical review
-
-- Required intake fields complete
-- At least one specification or approved exception
+- Required business fields complete
 - Transactions identified
-- Technical owner assigned
+- Specification or approved exception present
+- EDI owner assigned
 
 ### Assessment to business approval
 
-- Assessment complete
-- Complexity and effort recorded
+- Every transaction assessed
 - Interface impact recorded
-- Risks and open questions recorded
+- Complexity and effort recorded
+- Risks and questions recorded
 - Recommendation selected
 
-### Approval to project creation
+### Approval to implementation creation
 
-- Decision is Approve
-- Assessment version is current
+- Transaction approved
+- Assessment version current
 - Scope snapshot stored
-- Project owner assignable
-- Idempotency check passes
+- Owner assignable
+- Idempotency check passed
 
 ### Customer testing to production readiness
 
-- Required customer scenarios completed
-- Required acknowledgement evidence stored
-- Blocking defects resolved
-- Customer signoff recorded or waived
+- Required scenarios complete
+- Customer evidence stored
+- Blocking defects resolved or waived
+- Mapping and validation versions aligned
 
-### Production approval to scheduled
+### Production approval to deployment
 
 - Deployment and rollback plans complete
-- Required signoffs current
-- Version immutable snapshot created
-- Production approver authorizes deployment
+- Required approvals current
+- Immutable version snapshot created
+- Production approver authorized
 
-## Appendix C - Representative Management Questions
+## Appendix B - Representative Management Questions
 
-- Which customers require the most custom work?
+- Which customers require the most revisions?
 - Which transaction sets take longest to implement?
-- How accurate are complexity and duration estimates?
-- Which ERP systems generate the most interface changes?
-- What proportion of work is new implementation versus maintenance?
+- How accurate are assessment estimates?
+- Which ERP systems cause the most interface changes?
+- Where does implementation work wait the longest?
 - Which change reasons cause the most rework?
-- Where does work spend the most time?
-- Which customers have repeated specification updates?
-- How often do production deployments require rollback?
-- Which requirements are frequently missing from internal interfaces?
-
+- Which customers repeatedly change specifications?
+- Which interface fields are most often missing?
+- What percentage of deployments succeed without rollback?
+- How much capacity is spent on new implementations versus revisions?

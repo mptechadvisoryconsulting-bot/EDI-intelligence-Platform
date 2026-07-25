@@ -103,7 +103,7 @@ export function NewProjectForm() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "Failed to create workspace");
+        setError(data.error ?? "Failed to create implementation");
         return;
       }
 
@@ -111,7 +111,7 @@ export function NewProjectForm() {
       router.push(`/projects/${project.id}`);
       router.refresh();
     } catch {
-      setError("Unable to create workspace");
+      setError("Unable to create implementation");
     } finally {
       setLoading(false);
     }
@@ -119,13 +119,13 @@ export function NewProjectForm() {
 
   return (
     <form onSubmit={handleSubmit} className="glass-panel rounded-2xl p-6">
-      <h2 className="text-lg font-semibold text-slate-100">New implementation workspace</h2>
+      <h2 className="text-lg font-semibold text-slate-100">New implementation</h2>
       <p className="mt-1 text-sm text-slate-400">
         Customer, trading partner, ERP platform, connection (VAN/SFTP/AS2), and industry transaction sets — not locked to any single vendor.
       </p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <Field label="Workspace name" name="name" required placeholder="Acme 850 PO Setup" />
+        <Field label="Implementation name" name="name" required placeholder="Acme 850 Purchase Order" />
         <Field label="Customer / vendor name" name="customer" required placeholder="Your customer or client company" />
 
         <div className="sm:col-span-2 [&_label]:text-slate-400 [&_input]:border-slate-700 [&_input]:bg-slate-900/60 [&_input]:text-slate-100">

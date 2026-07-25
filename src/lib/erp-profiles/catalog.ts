@@ -435,7 +435,7 @@ export function enrichHintsMap(
 export function describeErpSupport(erpSystem: string): string {
   const profile = resolveErpProfile(erpSystem);
   if (profile.id === "custom") {
-    return `Generic ERP mode for "${erpSystem}" — upload a source field list for best mapping accuracy. ${listErpProfiles().length}+ named ERP profiles available when creating a workspace.`;
+    return `Generic ERP mode for "${erpSystem}" — upload a source field list for best mapping accuracy. ${listErpProfiles().length}+ named ERP profiles available when creating an implementation.`;
   }
   return `Using ${profile.name} field aliases (${profile.vendor}) plus uploaded source data for mapping.`;
 }

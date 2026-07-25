@@ -43,7 +43,7 @@ export default async function DashboardPage() {
             <p className="text-xs font-medium uppercase tracking-wider text-indigo-400">AI platform</p>
             <h1 className="mt-1 text-2xl font-semibold ai-gradient-text">Dashboard</h1>
             <p className="mt-1 text-sm text-slate-500">
-              Upload once, analyze fast, export Sterling MRS by transaction set
+              Manage each customer transaction from specification through production and revisions
             </p>
           </div>
           <Link
@@ -51,12 +51,12 @@ export default async function DashboardPage() {
             className="btn-ai-primary inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-white"
           >
             <Plus className="h-4 w-4" />
-            New workspace
+            New implementation
           </Link>
         </div>
 
         <div className="mb-8 grid gap-4 sm:grid-cols-4">
-          <Stat label="Workspaces" value={stats.total} />
+          <Stat label="Implementations" value={stats.total} />
           <Stat label="In review" value={stats.inReview} />
           <Stat label="Open questions" value={stats.questions} />
           <Stat label="AI mappings" value={stats.mappings} />
@@ -70,7 +70,7 @@ export default async function DashboardPage() {
                 Step 1: Configure account ERP layout
               </p>
               <p className="mt-1 text-amber-200/80">
-                Upload Interface Column, Record Number, Start Column, Width once — every workspace inherits it for MRS export.
+                Upload Interface Column, Record Number, Start Column, Width once — every implementation inherits it for MRS export.
               </p>
             </div>
             <Link
@@ -97,12 +97,12 @@ export default async function DashboardPage() {
         )}
 
         <section>
-          <h2 className="mb-4 text-lg font-semibold text-slate-200">Recent workspaces</h2>
+          <h2 className="mb-4 text-lg font-semibold text-slate-200">Recent implementations</h2>
           {projects.length === 0 ? (
             <div className="glass-panel rounded-2xl px-6 py-12 text-center">
-              <p className="text-slate-400">No workspaces yet.</p>
+              <p className="text-slate-400">No implementations yet.</p>
               <Link href="/projects/new" className="mt-3 inline-block text-sm font-medium text-indigo-400 hover:text-indigo-300">
-                Create your first workspace →
+                Create your first implementation →
               </Link>
             </div>
           ) : (

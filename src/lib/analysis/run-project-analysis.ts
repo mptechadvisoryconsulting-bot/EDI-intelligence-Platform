@@ -25,7 +25,7 @@ export async function runProjectAnalysis(
   });
 
   if (!project) {
-    return { projectId, projectName: "", ok: false, error: "Project not found" };
+    return { projectId, projectName: "", ok: false, error: "Implementation not found" };
   }
 
   const parsedDocuments: ParsedDocument[] = project.documents
@@ -166,7 +166,7 @@ export async function reanalyzeAllUserProjects(userId: string) {
       skipped: projects.length - eligible.length,
       failed: 0,
       results: [] as ProjectAnalysisResult[],
-      error: `Too many workspaces to re-analyze at once (${eligible.length}). Run analysis per workspace or limit to ${MAX_BATCH}.`,
+      error: `Too many implementations to re-analyze at once (${eligible.length}). Run analysis per implementation or limit to ${MAX_BATCH}.`,
     };
   }
 

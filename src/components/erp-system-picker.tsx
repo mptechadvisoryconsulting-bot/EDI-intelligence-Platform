@@ -29,10 +29,6 @@ export function ErpSystemPicker({
       .catch(() => setOptions([]));
   }, []);
 
-  useEffect(() => {
-    setQuery(value);
-  }, [value]);
-
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return options.slice(0, 12);
@@ -63,13 +59,16 @@ export function ErpSystemPicker({
           id="erpSystem"
           name="erpSystem"
           required
-          value={query}
+          value={open ? query : value}
           onChange={(e) => {
             setQuery(e.target.value);
             onChange(e.target.value);
             setOpen(true);
           }}
-          onFocus={() => setOpen(true)}
+          onFocus={() => {
+            setQuery(value);
+            setOpen(true);
+          }}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           placeholder="Select ERP — SAP, NetSuite, Dynamics, JD Edwards..."
           className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"

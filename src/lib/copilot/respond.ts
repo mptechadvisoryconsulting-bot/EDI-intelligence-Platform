@@ -61,7 +61,7 @@ function respondSummary(context: CopilotContext): string {
 function respondTransactionPacks(context: CopilotContext): string {
   if (context.transactionPacks.length === 0) {
     return [
-      "No supported transaction family packs are active for this workspace.",
+      "No supported transaction family packs are active for this implementation.",
       "",
       "Supported packs: **846** Inventory Advice, **850** Purchase Order, **855** PO Acknowledgment, **856** Ship Notice/ASN, **810** Invoice.",
       "",
@@ -116,8 +116,8 @@ function respondErp(context: CopilotContext): string {
     "",
     "**Tips**",
     "• Upload your ERP export or schema CSV as **ERP schema / field list**",
-    "• Re-run analysis after changing the ERP name in workspace settings",
-    "• 20+ named profiles available when creating a new workspace",
+    "• Re-run analysis after changing the ERP name in implementation settings",
+    "• 20+ named profiles available when creating a new implementation",
   ].join("\n");
 }
 
@@ -170,7 +170,7 @@ function respondLowConfidence(context: CopilotContext): string {
 
 function respondReuse(context: CopilotContext, insights: ReuseInsight[]): string {
   return [
-    `Searching prior workspaces for **${context.project.tradingPartner}**, **${context.project.customer}**, and **${context.project.erpSystem}**:`,
+    `Searching prior implementations for **${context.project.tradingPartner}**, **${context.project.customer}**, and **${context.project.erpSystem}**:`,
     "",
     ...insights.map((i) => `• **${i.label}** — ${i.detail}`),
   ].join("\n");
@@ -246,7 +246,7 @@ export function generateCopilotReply(input: {
       "The compare panel checks segments against your mappings and partner rule pack.",
       "",
       `Active partner: ${resolvePartnerPack(context.project.tradingPartner).name}`,
-      "Try the **Sample EDI compare** panel in the workspace for pass/fail details.",
+      "Try the **Sample EDI compare** panel in the implementation for pass/fail details.",
     ].join("\n");
   }
 
@@ -271,14 +271,14 @@ export function generateCopilotReply(input: {
 
   if (matches(message, ["help", "what can you"])) {
     return [
-      "I can help with this implementation workspace:",
+      "I can help with this transaction implementation:",
       "",
       "• **What's blocking setup?** — readiness score and blockers",
       "• **What should I do next?** — recommended workflow steps",
-      "• **Summarize this project** — current status overview",
+      "• **Summarize this implementation** — current status overview",
       "• **Draft customer clarification** — email from open questions",
       "• **Explain low-confidence mappings** — review risky items",
-      "• **Have we seen this partner before?** — reuse from prior workspaces",
+      "• **Have we seen this partner before?** — reuse from prior implementations",
       "• **What transaction packs apply?** — 846, 850, 855, 856, 810 field and test guidance",
       "• **Which ERP profile is active?** — field alias support for your source system",
       "",
@@ -314,7 +314,7 @@ export async function generateCopilotReplyWithLLM(input: {
     "Be concise, actionable, and surface missing information early.",
     "Always mention confidence, blockers, and next steps when relevant.",
     "",
-    "Project context:",
+    "Implementation context:",
     JSON.stringify({ context: input.context, reuseInsights: input.reuseInsights }, null, 2),
   ].join("\n");
 

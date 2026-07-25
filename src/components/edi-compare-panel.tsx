@@ -33,7 +33,6 @@ export function EdiComparePanel({ projectId }: { projectId: string }) {
   const [hasSampleEdi, setHasSampleEdi] = useState(false);
 
   const load = useCallback(async () => {
-    setLoading(true);
     try {
       const res = await fetch(`/api/projects/${projectId}/edi-compare`);
       if (res.ok) {

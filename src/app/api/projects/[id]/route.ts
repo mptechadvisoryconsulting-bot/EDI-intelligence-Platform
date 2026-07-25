@@ -25,7 +25,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
   });
 
   if (!project) {
-    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    return NextResponse.json({ error: "Implementation not found" }, { status: 404 });
   }
 
   return NextResponse.json(project);
@@ -41,7 +41,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   });
 
   if (!existing) {
-    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    return NextResponse.json({ error: "Implementation not found" }, { status: 404 });
   }
 
   const project = await db.implementationProject.update({
@@ -80,7 +80,7 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
   });
 
   if (!existing) {
-    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    return NextResponse.json({ error: "Implementation not found" }, { status: 404 });
   }
 
   await db.implementationProject.delete({ where: { id } });

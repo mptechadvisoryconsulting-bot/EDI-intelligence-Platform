@@ -6,7 +6,9 @@ Follow the documentation in `/docs`. Do not deviate from the documented architec
 
 ## Product Identity
 
-This application manages the complete EDI implementation lifecycle. Mapping is one module within the platform.
+This application is the operational system used by Business, EDI, QA, and Management to implement and maintain EDI trading partners. It is not a mapper or a generic project management system.
+
+A Customer is the long-lived container. An Implementation is the operational object for one customer transaction and direction. Mapping, validation, testing, production, revisions, documents, and activity belong to that Implementation.
 
 ## Protected Capabilities
 
@@ -17,15 +19,18 @@ Do not replace or redesign the specification parser, ERP layout module, sample o
 1. Build one vertical slice at a time.
 2. Prefer additive migrations and compatibility adapters.
 3. Reuse existing components and services.
-4. Use Customer as the root entity for new lifecycle features.
-5. Do not create a project before technical assessment and business approval.
-6. Route status changes through a centralized workflow service.
-7. Enforce authorization server-side.
-8. Record audit events in the same transaction as material changes.
-9. Preserve version history; do not overwrite approved or production records.
-10. Add tests for permissions, transitions, migration, and failure paths.
-11. Read the installed Next.js 16 documentation under `node_modules/next/dist/docs/` before changing framework APIs.
-12. Never commit secrets or production credentials.
+4. Use Customer as the container and Implementation as the operational entity.
+5. Model one Implementation per customer transaction and direction.
+6. Do not create an Implementation before technical assessment and business approval.
+7. Do not use Project in new user-facing language.
+8. Treat Mapping as living, versioned data owned by an Implementation.
+9. Route status changes through a centralized workflow service.
+10. Enforce authorization server-side.
+11. Record timeline and audit events in the same transaction as material changes.
+12. Preserve version history; do not overwrite approved or production records.
+13. Add tests for permissions, transitions, migration, and failure paths.
+14. Read the installed Next.js 16 documentation under `node_modules/next/dist/docs/` before changing framework APIs.
+15. Never commit secrets or production credentials.
 
 ## Required Change Plan
 

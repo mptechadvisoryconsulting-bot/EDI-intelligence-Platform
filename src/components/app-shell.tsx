@@ -16,7 +16,7 @@ import type { SessionUser } from "@/lib/auth";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/projects", label: "Workspaces", icon: FolderKanban },
+  { href: "/projects", label: "Implementations", icon: FolderKanban },
   { href: "/account/erp-layout", label: "ERP layout", icon: Database },
   { href: "/knowledge", label: "Knowledge", icon: Search },
 ];

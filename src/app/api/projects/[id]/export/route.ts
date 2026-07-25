@@ -24,7 +24,7 @@ export async function GET(request: NextRequest, { params }: Params) {
   });
 
   if (!project) {
-    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    return NextResponse.json({ error: "Implementation not found" }, { status: 404 });
   }
 
   if (type === "mapping_matrix" || type === "mapping_matrix_xlsx") {
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     const codes = activeTransactionCodes(project.transactions);
     if (transaction && !codes.includes(transaction)) {
       return NextResponse.json(
-        { error: `Transaction ${transaction} is not in project scope (${codes.join(", ")})` },
+        { error: `Transaction ${transaction} is not in implementation scope (${codes.join(", ")})` },
         { status: 400 }
       );
     }
