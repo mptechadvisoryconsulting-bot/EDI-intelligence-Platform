@@ -431,7 +431,9 @@ Business sees:
 
 ### 10.3 Approval result
 
-Approval creates one implementation per approved transaction. It stores an immutable snapshot of:
+For a new transaction, approval creates exactly one implementation. For a revision request, approval creates a new draft version under the linked existing implementation rather than creating another implementation.
+
+Both approval paths store an immutable snapshot of:
 
 - Approved scope
 - Assessment version
@@ -442,7 +444,7 @@ Approval creates one implementation per approved transaction. It stores an immut
 - Approval comments
 - Approver identity and timestamp
 
-The command is idempotent and cannot create duplicate implementations.
+The commands are idempotent and cannot create duplicate implementations or duplicate revision versions.
 
 ## 11. Transaction Workspace
 
@@ -1032,20 +1034,37 @@ Direct arbitrary status updates are prohibited.
 
 ### 21.2 Permission matrix
 
-| Capability | Business | EDI | QA | Approver | Production | Admin |
-|---|---:|---:|---:|---:|---:|---:|
-| Create customer | Yes | View | View | View | View | Yes |
-| Submit request | Yes | View | View | View | View | Yes |
-| Complete assessment | View | Yes | View | View | View | Yes |
-| Approve business scope | No | No | No | Yes | No | Configurable |
-| Edit mapping | No | Yes | No | View | View | Configurable |
-| Execute tests | View | Yes | Yes | View | View | Configurable |
-| Approve test gate | No | No | Yes | View | View | Configurable |
-| Approve production | No | No | No | No | Yes | Configurable |
-| Deploy production | No | Yes | No | No | Configurable | Configurable |
-| View audit history | Scoped | Scoped | Scoped | Scoped | Scoped | Yes |
+Operational roles:
 
-Permissions are enforced server-side. Separation of duties is configurable and enabled for business and production approval in controlled environments.
+| Capability | Business | EDI | QA | Business Approver | Production Approver |
+|---|---:|---:|---:|---:|---:|
+| Create customer | Yes | View | View | View | View |
+| Submit request | Yes | View | View | View | View |
+| Complete assessment | View | Yes | View | View | View |
+| Approve business scope | No | No | No | Yes | No |
+| Edit mapping | No | Yes | No | View | View |
+| Execute tests | View | Yes | Yes | View | View |
+| Approve test gate | No | No | Yes | View | View |
+| Approve production | No | No | No | No | Yes |
+| Deploy production | No | Yes | No | No | Configurable |
+| View audit history | Scoped | Scoped | Scoped | Scoped | Scoped |
+
+Oversight roles:
+
+| Capability | Manager | Administrator | Auditor |
+|---|---:|---:|---:|
+| Create customer | View | Yes | View |
+| Submit request | View | Yes | View |
+| Complete assessment | View | Configurable | View |
+| Approve business scope | Configurable | Configurable | View |
+| Edit mapping | View | Configurable | View |
+| Execute tests | View | Configurable | View |
+| Approve test gate | Configurable | Configurable | View |
+| Approve production | Configurable | Configurable | View |
+| Deploy production | Configurable | Configurable | View |
+| View audit history | Company | Authorized | Authorized |
+
+Permissions are enforced server-side. "Scoped" means records within the user's assigned customers and implementations. Managers may view audit history for their company; Administrators and Auditors may view all companies explicitly granted to them, with Auditor access remaining read-only. Separation of duties is configurable and enabled for business and production approval in controlled environments.
 
 ## 22. Database Blueprint
 

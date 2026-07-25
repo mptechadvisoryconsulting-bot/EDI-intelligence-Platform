@@ -338,7 +338,7 @@ export function AccountErpLayoutPanel() {
                 ) : (
                   <RefreshCw className="h-4 w-4" />
                 )}
-                Re-analyze all workspaces
+                Re-analyze all implementations
               </button>
               <button
                 type="button"
@@ -464,7 +464,7 @@ export function AccountErpLayoutPanel() {
                 Upload a sample flat file from your ERP interface. The system extracts values at each layout field&apos;s
                 Rec Number, Start Column, and Width to confirm positions are correct. This sample is{" "}
                 <strong className="text-slate-300">not</strong> used for EDI field mapping — only for verifying your
-                account layout positions across all workspaces.
+                account layout positions across all implementations.
               </p>
             </div>
             {layout?.hasSampleOutput && (
