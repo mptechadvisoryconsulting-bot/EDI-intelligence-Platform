@@ -143,8 +143,8 @@ export function buildSpecReviewReport(input: {
       detail: inCustomerSpec
         ? "Supported — map ERP interface layout and export handoff."
         : inProjectScope
-          ? "In project scope — confirm customer spec includes this transaction."
-          : "Detected in project config.",
+          ? "In implementation scope — confirm customer spec includes this transaction."
+          : "Detected in implementation configuration.",
       inProjectScope,
       inCustomerSpec,
       platformSupported,
@@ -156,7 +156,7 @@ export function buildSpecReviewReport(input: {
       code: "—",
       name: "No transactions configured",
       status: "partial",
-      detail: "Set transaction codes on the workspace or upload a spec with EDI transaction sets.",
+      detail: "Set transaction codes on the implementation or upload a spec with EDI transaction sets.",
       inProjectScope: false,
       inCustomerSpec: false,
       platformSupported: false,

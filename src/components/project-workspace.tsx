@@ -31,7 +31,7 @@ import { TestScenariosPanel } from "@/components/test-scenarios-panel";
 import { TransactionPackBadges } from "@/components/transaction-pack-badges";
 import { WorkflowStepper, type WorkflowStep } from "@/components/workflow-stepper";
 import { parsePositionalFromTransformation } from "@/lib/exports/positional-resolve";
-import { cn, confidenceColor, formatDate, statusColor } from "@/lib/utils";
+import { cn, confidenceColor, statusColor } from "@/lib/utils";
 import { resolveErpProfile } from "@/lib/erp-profiles";
 import { parseTransactionCodes } from "@/lib/transaction-packs";
 
@@ -279,7 +279,7 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
   }
 
   async function removeDocument(documentId: string, name: string) {
-    if (!confirm(`Remove "${name}" from this workspace?`)) return;
+    if (!confirm(`Remove "${name}" from this implementation?`)) return;
     const res = await fetch(`/api/projects/${project.id}/documents/${documentId}`, {
       method: "DELETE",
     });
@@ -333,7 +333,7 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
       <header className="mb-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-indigo-400">Implementation workspace</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-indigo-400">Transaction implementation</p>
             <h1 className="mt-1 text-2xl font-semibold ai-gradient-text">{project.name}</h1>
             <p className="mt-2 text-sm text-slate-400">
               {project.customer} · {project.tradingPartner} · {project.erpSystem}

@@ -38,7 +38,7 @@ export async function findReuseInsights(input: {
   if (similarProjects.length === 0) {
     return [
       {
-        label: "No prior workspaces",
+        label: "No prior implementations",
         detail: "This is the first similar implementation in your account. Approved mappings here will become reusable knowledge.",
       },
     ];

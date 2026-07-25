@@ -141,10 +141,10 @@ export async function cloneMappingsFromProject(input: {
     }),
   ]);
 
-  if (!target) return { ok: false as const, error: "Target workspace not found" };
-  if (!source) return { ok: false as const, error: "Source workspace not found" };
+  if (!target) return { ok: false as const, error: "Target implementation not found" };
+  if (!source) return { ok: false as const, error: "Source implementation not found" };
   if (source.mappingRecommendations.length === 0) {
-    return { ok: false as const, error: "Source workspace has no mappings to clone" };
+    return { ok: false as const, error: "Source implementation has no mappings to clone" };
   }
 
   if (input.replaceExisting) {

@@ -68,7 +68,7 @@ export function PartnerClonePanel({
       <section className="glass-panel mb-8 rounded-2xl p-6">
         <div className="flex items-center gap-2 text-sm text-slate-400">
           <Loader2 className="h-4 w-4 animate-spin" />
-          Loading prior workspaces...
+          Loading prior implementations...
         </div>
       </section>
     );
@@ -85,19 +85,19 @@ export function PartnerClonePanel({
         <h2 className="text-lg font-semibold text-slate-100">Clone from prior partner layout</h2>
       </div>
       <p className="mt-1 text-sm text-slate-400">
-        Reuse interface positions from another workspace when layout structure is the same — confirm customer-specific meanings for{" "}
+        Reuse interface positions from another implementation when layout structure is the same — confirm customer-specific meanings for{" "}
         <strong className="text-slate-300">{currentPartner}</strong>.
       </p>
 
       <div className="mt-4 flex flex-wrap items-end gap-3">
         <label className="min-w-[240px] flex-1 text-sm">
-          <span className="text-slate-400">Source workspace</span>
+          <span className="text-slate-400">Source implementation</span>
           <select
             value={sourceId}
             onChange={(e) => setSourceId(e.target.value)}
             className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-slate-100"
           >
-            <option value="">Select workspace...</option>
+            <option value="">Select implementation...</option>
             {candidates.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name} · {c.tradingPartner} · {c.mappingCount} mappings ({c.approvedCount} approved)

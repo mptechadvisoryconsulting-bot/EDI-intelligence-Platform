@@ -19,7 +19,6 @@ export function ErpSystemPicker({
   onChange: (name: string) => void;
 }) {
   const [options, setOptions] = useState<ErpOption[]>([]);
-  const [query, setQuery] = useState(value);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -29,12 +28,8 @@ export function ErpSystemPicker({
       .catch(() => setOptions([]));
   }, []);
 
-  useEffect(() => {
-    setQuery(value);
-  }, [value]);
-
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = value.trim().toLowerCase();
     if (!q) return options.slice(0, 12);
     return options
       .filter(
@@ -44,11 +39,10 @@ export function ErpSystemPicker({
           o.category.toLowerCase().includes(q)
       )
       .slice(0, 12);
-  }, [options, query]);
+  }, [options, value]);
 
   function select(option: ErpOption) {
     onChange(option.name);
-    setQuery(option.name);
     setOpen(false);
   }
 
@@ -63,9 +57,8 @@ export function ErpSystemPicker({
           id="erpSystem"
           name="erpSystem"
           required
-          value={query}
+          value={value}
           onChange={(e) => {
-            setQuery(e.target.value);
             onChange(e.target.value);
             setOpen(true);
           }}

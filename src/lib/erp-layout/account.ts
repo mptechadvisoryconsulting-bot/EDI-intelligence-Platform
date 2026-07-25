@@ -2,7 +2,7 @@ import type { ErpLayoutField } from "./types";
 import { db } from "@/lib/db";
 import { deserializeLayoutProfile, detectLayoutStyles } from "./parser";
 import { verifyLayoutAgainstSample, type SampleVerificationReport } from "./sample-verify";
-import { validateLayoutFields, type LayoutValidation } from "./validate-layout";
+import { validateLayoutFields } from "./validate-layout";
 
 export async function getAccountErpLayout(userId: string) {
   const row = await db.erpLayoutProfile.findUnique({ where: { userId } });

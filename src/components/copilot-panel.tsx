@@ -52,6 +52,7 @@ export function CopilotPanel({
   const [readiness, setReadiness] = useState<{ score: number; label: string } | null>(null);
   const [nextActions, setNextActions] = useState<string[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const temporaryMessageId = useRef(0);
 
   useEffect(() => {
     fetch(`/api/projects/${projectId}/copilot`)
@@ -67,7 +68,7 @@ export function CopilotPanel({
               content: [
                 `I'm your **Implementation Copilot** for **${projectName}**.`,
                 "",
-                "I track this workspace — documents, mappings, gaps, and approvals — to help you move faster through setup.",
+                "I track this implementation — documents, mappings, gaps, approvals, and readiness — from specification through production.",
                 "",
                 "Ask what's blocking build, what to do next, or request a customer clarification draft.",
               ].join("\n"),
@@ -89,9 +90,10 @@ export function CopilotPanel({
 
     setInput("");
     setLoading(true);
+    temporaryMessageId.current += 1;
 
     const optimisticUser: CopilotMessage = {
-      id: `temp-${Date.now()}`,
+      id: `temp-${temporaryMessageId.current}`,
       role: "user",
       content: trimmed,
       createdAt: new Date().toISOString(),
@@ -112,10 +114,11 @@ export function CopilotPanel({
       setReadiness({ score: data.readinessScore, label: data.readinessLabel });
       setNextActions(data.nextActions ?? []);
     } catch {
+      temporaryMessageId.current += 1;
       setMessages((prev) => [
         ...prev,
         {
-          id: `err-${Date.now()}`,
+          id: `err-${temporaryMessageId.current}`,
           role: "assistant",
           content: "Sorry, I couldn't process that request. Please try again.",
           createdAt: new Date().toISOString(),

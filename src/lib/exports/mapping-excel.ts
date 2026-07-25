@@ -23,7 +23,7 @@ export type ProjectExportMeta = {
 function projectInfoRows(meta: ProjectExportMeta, mappings?: EnrichedMappingRow[]) {
   const coverage = mappings ? countPositionalCoverage(mappings) : null;
   return [
-    { Field: "Project", Value: meta.name },
+    { Field: "Implementation", Value: meta.name },
     { Field: "Customer", Value: meta.customer },
     { Field: "Trading partner", Value: meta.tradingPartner },
     { Field: "ERP system", Value: meta.erpSystem },
@@ -175,7 +175,7 @@ export function exportSterlingExcel(
   filterTransaction?: string
 ) {
   const sheets = [
-    { name: "Project Info", rows: projectInfoRows(meta, mappings) },
+    { name: "Implementation", rows: projectInfoRows(meta, mappings) },
     ...transactionSheets(meta, mappings, sterlingMrsRow, "MRS", filterTransaction),
   ];
   return buildWorkbook(sheets);
@@ -187,7 +187,7 @@ export function exportCleoExcel(
   filterTransaction?: string
 ) {
   const sheets = [
-    { name: "Project Info", rows: projectInfoRows(meta, mappings) },
+    { name: "Implementation", rows: projectInfoRows(meta, mappings) },
     ...transactionSheets(meta, mappings, (meta, tx, m) => cleoMrsRow(tx, m), "Cleo", filterTransaction),
   ];
   return buildWorkbook(sheets);
@@ -199,7 +199,7 @@ export function exportOpenTextExcel(
   filterTransaction?: string
 ) {
   const sheets = [
-    { name: "Project Info", rows: projectInfoRows(meta, mappings) },
+    { name: "Implementation", rows: projectInfoRows(meta, mappings) },
     ...transactionSheets(meta, mappings, openTextMrsRow, "OpenText", filterTransaction),
   ];
   return buildWorkbook(sheets);
@@ -211,7 +211,7 @@ export function exportBoomiExcel(
   filterTransaction?: string
 ) {
   const sheets = [
-    { name: "Project Info", rows: projectInfoRows(meta, mappings) },
+    { name: "Implementation", rows: projectInfoRows(meta, mappings) },
     ...transactionSheets(meta, mappings, (meta, tx, m) => boomiMrsRow(tx, m), "Boomi", filterTransaction),
   ];
   return buildWorkbook(sheets);
@@ -224,7 +224,7 @@ export function exportMappingMatrixExcel(
 ) {
   const grouped = groupMappingsByTransaction(mappings, meta.transactions);
   const sheets: Array<{ name: string; rows: Record<string, unknown>[] }> = [
-    { name: "Project Info", rows: projectInfoRows(meta, mappings) },
+    { name: "Implementation", rows: projectInfoRows(meta, mappings) },
   ];
 
   for (const [txCode, rows] of grouped) {

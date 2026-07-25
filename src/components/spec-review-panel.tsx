@@ -165,7 +165,7 @@ export function SpecReviewPanel({
           {data.partnerCatalog.ediVersions && data.partnerCatalog.ediVersions.length > 1
             ? ` (also ${data.partnerCatalog.ediVersions.slice(1).join(", ")})`
             : ""}{" "}
-          — set in workspace settings if not already configured.
+          — set in implementation settings if not already configured.
         </p>
       )}
 
@@ -222,7 +222,7 @@ export function SpecReviewPanel({
       {data.memorySuggestions.length > 0 && (
         <div className="mt-6">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-sm font-semibold text-slate-300">Mapping memory (prior workspaces)</h3>
+            <h3 className="text-sm font-semibold text-slate-300">Mapping memory (prior implementations)</h3>
             <button
               type="button"
               onClick={applyMemory}

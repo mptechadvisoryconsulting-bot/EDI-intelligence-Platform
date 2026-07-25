@@ -17,7 +17,7 @@ export async function applyMappingMemory(input: {
     include: { mappingRecommendations: true },
   });
 
-  if (!project) return { ok: false as const, error: "Project not found" };
+  if (!project) return { ok: false as const, error: "Implementation not found" };
 
   let applied = 0;
   let skipped = 0;

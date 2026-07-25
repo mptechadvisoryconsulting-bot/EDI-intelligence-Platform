@@ -22,7 +22,7 @@ export async function POST(request: NextRequest, { params }: Params) {
 
   const project = await getOwnedProject(id, session.id);
   if (!project) {
-    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    return NextResponse.json({ error: "Implementation not found" }, { status: 404 });
   }
 
   const formData = await request.formData();
@@ -91,7 +91,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
 
   const project = await getOwnedProject(id, session.id);
   if (!project) {
-    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    return NextResponse.json({ error: "Implementation not found" }, { status: 404 });
   }
 
   const documents = await db.document.findMany({

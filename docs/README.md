@@ -1,6 +1,8 @@
 # EDI Lifecycle Documentation
 
-`PRD.md` is the product baseline. `Codex-Development-Guide.md` contains mandatory implementation constraints for AI-assisted development.
+`PRD.md` is the operations and software blueprint. It begins with how the EDI department works, then defines the screens, workflows, data model, APIs, architecture, security, roadmap, and acceptance criteria that support that operation.
+
+`Codex-Development-Guide.md` contains mandatory implementation constraints for AI-assisted development.
 
 Planned supporting specifications:
 
@@ -14,4 +16,4 @@ Planned supporting specifications:
 - Reporting catalog
 - Roadmap and release plan
 
-No supporting document may silently contradict the PRD. Conflicts require an explicit product decision and version update.
+No supporting document may silently contradict the blueprint. Conflicts require an explicit product decision and version update.

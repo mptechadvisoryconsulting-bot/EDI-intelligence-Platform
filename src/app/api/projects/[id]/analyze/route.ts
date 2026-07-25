@@ -13,7 +13,7 @@ export async function POST(_request: NextRequest, { params }: Params) {
   const result = await runProjectAnalysis(id, session.id);
 
   if (!result.ok) {
-    const status = result.error === "Project not found" ? 404 : 400;
+    const status = result.error === "Implementation not found" ? 404 : 400;
     return NextResponse.json({ error: result.error }, { status });
   }
 

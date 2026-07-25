@@ -48,12 +48,6 @@ export function MappingWorkspacePanel({
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (!data) return;
-        const specByKey = new Map(
-          (data.requirements ?? []).map(
-            (r: { key: string; description?: string; required: boolean }) => [r.key, r]
-          )
-        );
-
         const merged = new Map<string, WorkspaceRow>();
 
         for (const r of data.requirements ?? []) {

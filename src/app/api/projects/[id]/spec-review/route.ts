@@ -19,7 +19,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
   });
 
   if (!project) {
-    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    return NextResponse.json({ error: "Implementation not found" }, { status: 404 });
   }
 
   const report = buildSpecReviewReport({

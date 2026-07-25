@@ -1,6 +1,6 @@
 # EDI Intelligence Platform
 
-AI-assisted EDI implementation workspace: upload customer specs, run analysis, export Sterling MRS mappings with Oracle positional columns (Interface Column, Record Number, Start Column, Width).
+AI-assisted EDI implementation platform: manage each customer transaction from specification and technical assessment through mapping, testing, production, and revisions.
 
 ## Stack
 
@@ -24,8 +24,10 @@ Demo login uses `SEED_USERNAME` / `SEED_PASSWORD` from `.env.local` (see `.env.e
 
 1. **Account → ERP layout** — upload positional layout once (Oracle, SAP IDoc, JDE, etc.)
 2. **Sample ERP output** — upload a flat sample file to verify Rec/Start/Width (not used for EDI mapping)
-3. **Workspace** — upload customer specs → **Run analysis**
-4. **Export** — Sterling MRS Excel/CSV by transaction set (850, 856, …)
+3. **Request and assessment** — upload customer specs → run feasibility and technical assessment
+4. **Business approval** — approve each transaction before creating its implementation
+5. **Implementation** — map, validate, test, and prepare the approved transaction for production
+6. **Export** — Sterling MRS Excel/CSV by transaction set (850, 856, …)
 
 ## Deploy to Vercel
 

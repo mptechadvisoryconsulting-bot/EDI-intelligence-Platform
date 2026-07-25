@@ -14,11 +14,11 @@ export async function POST(request: NextRequest, { params }: Params) {
   const replaceExisting = Boolean(body.replaceExisting);
 
   if (!sourceProjectId) {
-    return NextResponse.json({ error: "sourceProjectId is required" }, { status: 400 });
+    return NextResponse.json({ error: "A source implementation is required" }, { status: 400 });
   }
 
   if (sourceProjectId === id) {
-    return NextResponse.json({ error: "Cannot clone from the same workspace" }, { status: 400 });
+    return NextResponse.json({ error: "Cannot clone from the same implementation" }, { status: 400 });
   }
 
   const result = await cloneMappingsFromProject({

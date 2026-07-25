@@ -101,14 +101,14 @@ export function WorkspaceSettingsPanel({
         className="inline-flex items-center gap-1.5 rounded-lg border border-slate-600/50 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-slate-800/50"
       >
         <Settings2 className="h-3.5 w-3.5" />
-        {open ? "Close setup" : "Edit workspace setup"}
+        {open ? "Close setup" : "Edit implementation setup"}
       </button>
 
       {open && (
         <form onSubmit={save} className="glass-panel mt-3 rounded-2xl p-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="text-sm">
-              <span className="text-slate-400">Workspace name</span>
+              <span className="text-slate-400">Implementation name</span>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
