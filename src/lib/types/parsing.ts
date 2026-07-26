@@ -13,6 +13,14 @@ export type ParsedTargetField = {
   description?: string;
   required?: boolean;
   qualifier?: string;
+  loopPath?: string;
+  parent?: string;
+  usage?: "required" | "optional" | "conditional";
+  condition?: string;
+  dataType?: string;
+  expectedFormat?: string;
+  repeats?: string;
+  reviewStatus?: "pending" | "confirmed" | "needs_review";
 };
 
 export type ParsedSourceField = {

@@ -132,7 +132,7 @@ export function SpecReviewPanel({
     <section className="glass-panel mb-8 rounded-2xl p-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-lg font-semibold text-slate-100">1 · Spec review &amp; feasibility</h2>
+          <h2 className="text-lg font-semibold text-slate-100">Specification analysis &amp; feasibility</h2>
           <p className="mt-1 text-sm text-slate-400">
             What the customer asked for vs what we can produce now — before ERP interface mapping
           </p>
@@ -188,35 +188,6 @@ export function SpecReviewPanel({
         <p className="mt-4 text-xs text-slate-500">
           Transaction sets in uploaded specs: {data.detectedTransactionSets.join(", ")}
         </p>
-      )}
-
-      {data.requirements.length > 0 && (
-        <div className="mt-6 overflow-x-auto">
-          <h3 className="text-sm font-semibold text-slate-300">Segment requirements from specs</h3>
-          <table className="mt-2 w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-slate-700/50 text-xs uppercase text-slate-500">
-                <th className="pb-2 pr-4">Target</th>
-                <th className="pb-2 pr-4">Required</th>
-                <th className="pb-2 pr-4">Status</th>
-                <th className="pb-2">Source doc</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.requirements.slice(0, 30).map((r) => (
-                <tr key={r.key} className="border-b border-slate-800/50">
-                  <td className="py-2 pr-4 font-mono text-xs text-cyan-400/90">
-                    {r.segment}.{r.element}
-                    {r.qualifier && <span className="text-slate-500"> ({r.qualifier})</span>}
-                  </td>
-                  <td className="py-2 pr-4 text-slate-400">{r.required ? "Yes" : "—"}</td>
-                  <td className="py-2 pr-4 text-xs text-slate-400">{r.status.replace(/_/g, " ")}</td>
-                  <td className="py-2 text-xs text-slate-500">{r.sourceDocument ?? "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       )}
 
       {data.memorySuggestions.length > 0 && (

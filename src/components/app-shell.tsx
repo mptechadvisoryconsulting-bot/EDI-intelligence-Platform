@@ -8,6 +8,7 @@ import {
   FolderKanban,
   LayoutDashboard,
   LogOut,
+  RadioTower,
   Search,
   Sparkles,
 } from "lucide-react";
@@ -17,6 +18,7 @@ import type { SessionUser } from "@/lib/auth";
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/projects", label: "Implementations", icon: FolderKanban },
+  { href: "/live-trading-partners", label: "Live Trading Partners", icon: RadioTower },
   { href: "/account/erp-layout", label: "ERP layout", icon: Database },
   { href: "/knowledge", label: "Knowledge", icon: Search },
 ];

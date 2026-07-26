@@ -31,7 +31,9 @@ export async function GET(_request: NextRequest, { params }: Params) {
     documents: project.documents,
   });
 
-  const specKeys = report.requirements.map((r) => r.key);
+  const specKeys = report.requirements.map(
+    (r) => `${r.segment}.${r.element}${r.qualifier ? `:${r.qualifier}` : ""}`
+  );
   const memorySuggestions = await getMappingMemorySuggestions({
     ownerId: session.id,
     projectId: id,

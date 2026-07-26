@@ -22,11 +22,13 @@ import { FileDropZone } from "@/components/file-drop-zone";
 import { MappingWorkspacePanel } from "@/components/mapping-workspace-panel";
 import { PartnerClonePanel } from "@/components/partner-clone-panel";
 import { PartnerPackBadge } from "@/components/partner-pack-badge";
+import { ProductionLifecyclePanel } from "@/components/production-lifecycle-panel";
 import { SpecReviewPanel } from "@/components/spec-review-panel";
 import { WorkspaceSettingsPanel } from "@/components/workspace-settings-panel";
 import { formatConnectionLabel, formatEdiVersionLabel } from "@/lib/industry/connection-labels";
 import { CopilotPanel } from "@/components/copilot-panel";
 import { ApprovalPanel, ReadinessPanel } from "@/components/readiness-panel";
+import { RequirementsPanel } from "@/components/requirements-panel";
 import { TestScenariosPanel } from "@/components/test-scenarios-panel";
 import { TransactionPackBadges } from "@/components/transaction-pack-badges";
 import { WorkflowStepper, type WorkflowStep } from "@/components/workflow-stepper";
@@ -534,6 +536,11 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
 
       <SpecReviewPanel projectId={project.id} onMemoryApplied={refreshProject} />
 
+      <RequirementsPanel
+        projectId={project.id}
+        mappings={project.mappingRecommendations}
+      />
+
       <PartnerClonePanel
         projectId={project.id}
         currentPartner={project.tradingPartner}
@@ -875,6 +882,13 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
       />
 
       <EdiComparePanel projectId={project.id} />
+
+      <ProductionLifecyclePanel
+        projectId={project.id}
+        status={project.status}
+        reviewStatus={project.reviewStatus}
+        onChanged={refreshProject}
+      />
 
       <CopilotPanel projectId={project.id} projectName={project.name} />
     </div>

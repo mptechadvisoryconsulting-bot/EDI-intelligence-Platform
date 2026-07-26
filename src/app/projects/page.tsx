@@ -11,7 +11,7 @@ export default async function ProjectsPage() {
   if (!session) redirect("/login");
 
   const projects = await db.implementationProject.findMany({
-    where: { ownerId: session.id },
+    where: { ownerId: session.id, status: { not: "production" } },
     orderBy: { updatedAt: "desc" },
     include: {
       _count: {

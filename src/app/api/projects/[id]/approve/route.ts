@@ -41,7 +41,14 @@ export async function POST(request: NextRequest, { params }: Params) {
   }
 
   const reviewStatus = action === "approve" ? "approved" : action === "reject" ? "rejected" : "pending";
-  const projectStatus = action === "approve" ? "approved" : action === "reject" ? "blocked" : project.status;
+  const projectStatus =
+    action === "approve"
+      ? project.status === "revision"
+        ? "revision"
+        : "approved"
+      : action === "reject"
+        ? "blocked"
+        : project.status;
 
   const approval = await db.approvalRecord.create({
     data: {

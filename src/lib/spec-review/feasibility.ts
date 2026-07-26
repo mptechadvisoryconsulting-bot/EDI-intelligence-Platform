@@ -9,11 +9,20 @@ import { deserializeParsed } from "@/lib/uploads";
 
 export type SpecRequirementRow = {
   key: string;
+  sourceDocumentId: string;
   segment: string;
   element: string;
   qualifier?: string;
   description?: string;
   required: boolean;
+  loopPath: string;
+  parent: string;
+  usage: "required" | "optional" | "conditional";
+  condition?: string;
+  dataType?: string;
+  expectedFormat?: string;
+  repeats?: string;
+  reviewStatus: "pending" | "confirmed" | "needs_review";
   sourceDocument?: string;
   inPlatformPack: boolean;
   status: "supported" | "needs_mapping" | "clarification";
@@ -47,8 +56,14 @@ export type SpecReviewReport = {
   gapsForCustomer: string[];
 };
 
-function fieldKey(f: { segment: string; element: string; qualifier?: string | null }) {
-  return `${f.segment}.${f.element}${f.qualifier ? `:${f.qualifier}` : ""}`;
+export function specRequirementKey(f: {
+  loopPath?: string | null;
+  parent?: string | null;
+  segment: string;
+  element: string;
+  qualifier?: string | null;
+}) {
+  return `${f.loopPath ?? "Header"}|${f.parent ?? ""}|${f.segment}.${f.element}${f.qualifier ? `:${f.qualifier}` : ""}`;
 }
 
 function parseDocuments(documents: Document[]) {
@@ -63,16 +78,16 @@ function parseDocuments(documents: Document[]) {
 
 function aggregateTargetFields(
   parsedDocs: Array<{ doc: Document; content: ParsedDocument }>
-): Array<ParsedTargetField & { sourceDocument: string }> {
+): Array<ParsedTargetField & { sourceDocument: string; sourceDocumentId: string }> {
   const seen = new Set<string>();
-  const fields: Array<ParsedTargetField & { sourceDocument: string }> = [];
+  const fields: Array<ParsedTargetField & { sourceDocument: string; sourceDocumentId: string }> = [];
 
   for (const { doc, content } of parsedDocs) {
     for (const f of content.targetFields) {
-      const key = fieldKey(f);
+      const key = specRequirementKey(f);
       if (seen.has(key)) continue;
       seen.add(key);
-      fields.push({ ...f, sourceDocument: doc.name });
+      fields.push({ ...f, sourceDocument: doc.name, sourceDocumentId: doc.id });
     }
   }
   return fields;
@@ -170,12 +185,21 @@ export function buildSpecReviewReport(input: {
       )
     );
     return {
-      key: fieldKey(r),
+      key: specRequirementKey(r),
+      sourceDocumentId: r.sourceDocumentId,
       segment: r.segment,
       element: r.element,
       qualifier: r.qualifier,
       description: r.description,
       required: Boolean(r.required),
+      loopPath: r.loopPath ?? "Header",
+      parent: r.parent ?? r.loopPath ?? "Header",
+      usage: r.usage ?? (r.required ? "required" : "optional"),
+      condition: r.condition,
+      dataType: r.dataType,
+      expectedFormat: r.expectedFormat,
+      repeats: r.repeats,
+      reviewStatus: r.reviewStatus ?? "pending",
       sourceDocument: r.sourceDocument,
       inPlatformPack: inAnyPack,
       status: r.required && !inAnyPack ? "clarification" : inAnyPack ? "supported" : "needs_mapping",

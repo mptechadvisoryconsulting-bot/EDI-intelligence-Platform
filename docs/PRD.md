@@ -2,7 +2,7 @@
 
 ## Operations and Software Blueprint
 
-**Version:** 2.0
+**Version:** 2.1
 **Status:** Production product baseline
 **Date:** July 25, 2026  
 **Product owner:** MP Tech Advisory Consulting  
@@ -62,23 +62,25 @@ This operating story is the design authority for the product:
 1. A customer sends an implementation guide.
 2. Business creates or selects the customer and records the request.
 3. Business uploads the guide, samples, questionnaire, transaction list, and requested date.
-4. EDI receives a technical-assessment assignment.
-5. EDI reviews each requested transaction against the organization's interface.
-6. EDI identifies supported fields, missing fields, transformations, ERP changes, risks, complexity, and questions.
-7. EDI records a recommendation.
-8. Business reviews the assessment rather than the raw specification.
-9. Business approves, rejects, delays, or requests more information.
-10. Approval creates one Implementation for each approved transaction.
-11. The analyst opens the transaction workspace, such as Target - 850 Purchase Order.
-12. The analyst builds and reviews one living mapping for that implementation.
-13. Validation runs against the specification, interface, and mapping.
-14. Internal and customer testing are executed and recorded.
-15. Production is approved and deployed.
-16. The implementation receives a production version and go-live record.
-17. Six months later, the customer sends an updated guide.
-18. Business records a revision request against the same implementation.
-19. Assessment, approval, mapping changes, validation, testing, and deployment repeat.
-20. The transaction workspace permanently shows the complete history.
+4. The platform parses the guide into a contextual requirement hierarchy.
+5. EDI reviews and confirms loops, segments, elements, usage, conditions, formats, and repeat rules.
+6. EDI receives a technical-assessment assignment.
+7. EDI reviews each requested transaction against the organization's interface.
+8. EDI identifies supported fields, missing fields, transformations, ERP changes, risks, complexity, and questions.
+9. EDI records a recommendation.
+10. Business reviews the assessment rather than the raw specification.
+11. Business approves, rejects, delays, or requests more information.
+12. Approval creates one Implementation for each approved transaction.
+13. The analyst opens the transaction workspace, such as Target - 850 Purchase Order.
+14. The analyst maps each approved requirement to a normalized interface field.
+15. Validation runs against the specification, requirements, interface, and mapping.
+16. Internal and customer testing are executed and recorded.
+17. Production is approved and deployed.
+18. The implementation receives a production version, go-live record, and Live Trading Partner entry.
+19. Six months later, the customer sends an updated guide.
+20. Business records a revision request against the same live implementation.
+21. Assessment, approval, mapping changes, validation, testing, and deployment repeat.
+22. The transaction workspace permanently shows the complete history.
 
 Every screen, data relationship, workflow, and permission must support this story.
 
@@ -91,6 +93,12 @@ Customer Sends Specification
         |
         v
 Business Receives Request
+        |
+        v
+AI Parses Specification
+        |
+        v
+EDI Reviews Parsed Requirements
         |
         v
 EDI Technical Assessment
@@ -114,6 +122,9 @@ Validation and Testing
 Production
         |
         v
+Live Trading Partners
+        |
+        v
 Customer Revision Requests
         |
         v
@@ -126,9 +137,14 @@ Repeat on the Same Implementation
 - Each approved transaction becomes a separate implementation.
 - A multi-transaction customer request may create several implementations.
 - Mapping, validation, testing, production, and revisions belong to the implementation.
+- A customer specification is structured implementation data, not merely an attachment.
+- Requirement identity includes transaction, loop path, parent, segment, element, and qualifier.
+- Customer requirements remain independent from ERP, interface format, and translator.
+- Mapping begins from an analyst-reviewed requirement and connects it to a normalized interface field.
 - Every material decision records actor, timestamp, comments, and evidence.
 - Every implementation remains attached to its customer permanently.
 - Revision work updates the same implementation and creates a new version.
+- A deployed implementation appears in Live Trading Partners while retaining its complete workspace and history.
 
 ## 4. Business Responsibilities
 
@@ -193,6 +209,7 @@ Company
         +-- Implementation: 850 Purchase Order
         |     |
         |     +-- Customer Specification
+        |     +-- Requirements
         |     +-- Mapping
         |     +-- Validation
         |     +-- Testing
@@ -459,8 +476,8 @@ Target
 850 Purchase Order
 Current Version 2.4
 
-Overview | Customer Specification | Mapping | Validation
-Testing | Production | Revision History | Documents | Activity
+Overview | Customer Specification | Requirements | Mapping | Validation
+Testing | Documents | Go Live | Revision History | Activity
 ```
 
 ### 11.2 Workspace tabs
@@ -480,17 +497,24 @@ Testing | Production | Revision History | Documents | Activity
 
 - Current specification
 - Prior specification versions
-- Parsed requirements
-- Findings
+- Original document and source navigation
 - Change comparison
-- Source navigation
+
+**Requirements**
+
+- Hierarchical tree of loops, segments, and elements
+- Full contextual path and parent loop
+- Usage, cardinality, conditions, data type, format, and customer rule
+- Analyst confirmation, correction, and needs-review disposition
+- Coverage: total, mapped, missing, needs review, and percentage
+- Traceability to the source specification
 
 **Mapping**
 
 - One living implementation mapping
 - Segment navigation
-- Interface source
-- Customer requirement
+- Approved customer requirement
+- Normalized interface field and structured source reference
 - Transformation
 - Result
 - Review and completion
@@ -551,6 +575,8 @@ Testing | Production | Revision History | Documents | Activity
 
 - The analyst can reach every artifact for one transaction without leaving the workspace.
 - The current version is always visible.
+- Requirements with the same segment and element in different loops remain distinct.
+- Mapping coverage is calculated from contextual, analyst-reviewed requirements.
 - The active tab is deep-linkable.
 - Counts and readiness update after material actions.
 - Permissions control edit actions without hiding readable history.
@@ -560,7 +586,7 @@ Testing | Production | Revision History | Documents | Activity
 
 ### 12.1 Definition
 
-A mapping is a living implementation artifact that connects the customer's specification to the organization's interface layout.
+A mapping is a living implementation artifact that connects an analyst-reviewed customer requirement to the organization's normalized interface field.
 
 Mappings are structured data, not uploaded documents. From mapping data, the platform generates:
 
@@ -587,7 +613,7 @@ PO1
 PID
 CTT
 
-Interface Layout -> Customer Requirement -> Transformation -> Result
+Customer Specification -> EDI Requirement -> Interface Field -> Transformation -> Result
 ```
 
 The user does not manage separate mappings for each segment. Segments are sections within the same mapping.
@@ -601,7 +627,8 @@ The user does not manage separate mappings for each segment. Segments are sectio
 - Requirement status
 - Qualifier
 - Source interface field
-- Interface record and position
+- Source type: fixed width, CSV, XML, JSON, SQL, API, or another configured type
+- Structured source reference, such as `H:1-10`, `Column 12`, `order.header.poNumber`, or `/Order/Header/PONumber`
 - Transformation type
 - Transformation configuration
 - Constant or code translation
@@ -619,6 +646,7 @@ The user does not manage separate mappings for each segment. Segments are sectio
 - Approved production mapping versions are immutable.
 - Mapping edits occur in a draft implementation version.
 - Each rule is traceable to a specification requirement.
+- Requirements do not change when the organization changes ERP or interface format.
 - Reused rules retain their source lineage.
 - Required unresolved rules block readiness.
 - One export generates the complete transaction mapping for the selected translator.
@@ -705,11 +733,27 @@ Required:
 
 Production creates an immutable version and sets it as current after verification.
 
+### 15.3 Live Trading Partners
+
+Live Trading Partners is a top-level production registry grouped by customer and transaction. It is not a duplicate customer or a new project.
+
+Each live entry displays:
+
+- Customer and transaction
+- Live version and go-live date
+- Active or revision-in-progress status
+- Current mapping, documents, and test evidence
+- Production and revision history
+
+Deploying an implementation adds it to the registry. Opening a revision keeps the same live entry visible and links all revision work to the existing implementation.
+
 ## 16. Revisions
 
 ### 16.1 Principle
 
 Revisions belong to the implementation, not to a generic project.
+
+A new customer guide for a live transaction creates a Revision Request against the existing implementation. It never creates a second trading partner record.
 
 Example:
 
@@ -866,6 +910,7 @@ Primary navigation:
 - Customers
 - Requests
 - Implementations
+- Live Trading Partners
 - Assessments
 - Approvals
 - Reports
@@ -947,7 +992,11 @@ Side-by-side comparison:
 - Testing differences
 - Approval and deployment metadata
 
-### 19.9 Screen-wide acceptance rules
+### 19.9 Live Trading Partners
+
+Grouped by customer, with one entry per live transaction. Each entry shows live version, go-live date, revision state, documents, mapping, tests, and history. Users open a revision from this area against the existing implementation.
+
+### 19.10 Screen-wide acceptance rules
 
 Every screen must provide:
 
@@ -988,6 +1037,7 @@ Every screen must provide:
 - Production Approval
 - Scheduled
 - Production
+- Revision
 - Maintenance
 - On Hold
 - Retired
@@ -1085,6 +1135,8 @@ Permissions are enforced server-side. "Scoped" means records within the user's a
 - RequestedTransaction
 - Specification
 - SpecificationVersion
+- SpecificationRequirement
+- RequirementReview
 - TechnicalAssessment
 - TransactionAssessment
 - AssessmentFinding
@@ -1139,6 +1191,7 @@ Implementation
 
 ImplementationVersion
   1--1 SpecificationVersion
+  1--* SpecificationRequirement
   1--1 MappingVersion
   1--* ValidationRun
   1--* TestExecution
@@ -1149,6 +1202,9 @@ Mapping
 
 MappingVersion
   1--* MappingRule
+
+SpecificationRequirement
+  0--* MappingRule
 ```
 
 ### 22.3 Data rules
@@ -1158,6 +1214,8 @@ MappingVersion
 - One Implementation owns one logical Mapping.
 - MappingVersion and ImplementationVersion are aligned.
 - Production versions are immutable.
+- Requirement identity includes loop path and parent context; repeated segments are not collapsed.
+- InterfaceField normalizes source type and structured reference independently of mapping rules.
 - Documents use versioned metadata and secure object storage.
 - Timeline events are user-readable.
 - Audit events are append-only and system-oriented.
@@ -1176,12 +1234,14 @@ MappingVersion
 /api/requests/{requestId}/assessment
 /api/requests/{requestId}/approve
 /api/implementations/{implementationId}
+/api/implementations/{implementationId}/requirements
 /api/implementations/{implementationId}/mapping
 /api/implementations/{implementationId}/validation-runs
 /api/implementations/{implementationId}/tests
 /api/implementations/{implementationId}/production
 /api/implementations/{implementationId}/revisions
 /api/implementations/{implementationId}/timeline
+/api/live-trading-partners
 ```
 
 ### 23.2 API rules
@@ -1215,7 +1275,7 @@ Existing `/api/projects` routes and `ImplementationProject` storage may remain t
 
 - Presentation: role-specific pages and transaction workspace
 - Application: request, assessment, approval, implementation, mapping, testing, revision commands
-- Domain: implementation lifecycle, versioning, transition rules
+- Domain: contextual requirements, implementation lifecycle, versioning, transition rules
 - Data: Prisma repositories and additive migrations
 - Integration: storage, notifications, AI, translator exports
 - Observability: logs, errors, metrics, audit
@@ -1318,7 +1378,9 @@ Historical reports use stored snapshots so later edits do not rewrite past decis
 
 Near-term:
 
-- Parse specifications
+- Parse specifications into loop, segment, element, usage, condition, format, and repeat metadata
+- Preserve the full contextual path for repeated segments
+- Support analyst confirmation and correction before mapping
 - Compare specification versions
 - Identify interface coverage and gaps
 - Suggest assessment findings
@@ -1355,6 +1417,8 @@ The existing database stores an `ImplementationProject` with customer and transa
 9. Validate record counts and relationships.
 10. Remove legacy fields only in a later approved migration.
 
+The compatibility release stores analyst-reviewed requirements in versioned document parse content and production/revision events in existing approval history. This avoids a destructive schema migration while normalized entities are introduced additively.
+
 No existing production data is deleted.
 
 ## 31. Delivery Roadmap
@@ -1387,6 +1451,8 @@ No existing production data is deleted.
 
 - Workspace shell and tabs
 - Specification area
+- Hierarchical Requirements area
+- Analyst requirement review and coverage
 - One mapping model
 - Validation history
 - Testing evidence
@@ -1394,6 +1460,7 @@ No existing production data is deleted.
 
 ### Phase E - Revisions
 
+- Live Trading Partners production registry
 - Revision requests
 - Version management
 - Version comparison
@@ -1417,10 +1484,15 @@ Release 1 is complete when:
 - Business can approve each transaction.
 - Approval creates exactly one implementation per approved transaction.
 - The Transaction Workspace provides the required nine areas.
+- Specifications become structured, contextual requirements before mapping.
+- Analysts can confirm or correct requirements and see mapped, missing, and needs-review coverage.
+- Requirements remain independent from ERP and source interface type.
 - Each implementation has one living, versioned mapping.
 - Validation and testing belong to the implementation version.
 - Production creates an immutable current version.
+- Production entries appear in the top-level Live Trading Partners registry.
 - Revision requests update the same implementation.
+- Opening a revision never creates a duplicate live trading partner.
 - Every material action appears in timeline and audit history.
 - Existing parser, ERP layout, mapping, comparison, test, and export functions remain operational.
 - Migration, permission, workflow, and failure paths have automated tests.
