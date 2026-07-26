@@ -63,6 +63,15 @@ type Project = {
   status: string;
   reviewStatus: string;
   description: string | null;
+  interfaceDefinitionId?: string | null;
+  interfaceDefinition?: {
+    id: string;
+    transactionCode: string;
+    name: string;
+    version: string;
+    layoutType: string;
+    fieldCount: number;
+  } | null;
   updatedAt: string;
   documents: DocumentItem[];
   mappingRecommendations: Array<{
@@ -319,7 +328,7 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
     {
       id: "analyze",
       label: "Analyze",
-      hint: "Match ERP layout to transaction sets",
+      hint: "Compare customer requirements to the internal transaction interface",
       status: analyzing ? "loading" : hasMappings ? "done" : parsedCount > 0 ? "current" : "pending",
     },
     {
@@ -410,7 +419,7 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
           <div>
             <h2 className="text-lg font-semibold text-slate-100">1 · Upload customer specs</h2>
             <p className="mt-1 text-sm text-slate-500">
-              Drag files in — type is auto-detected. Account ERP layout supplies Interface Column, Record #, Start, Width for MRS.
+              Drag customer files in — type is auto-detected. The assigned Interface Library definition supplies the normalized internal source model.
             </p>
           </div>
         </div>
@@ -439,7 +448,7 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
             disabled={uploading}
             onFiles={uploadFiles}
             label="Drag and drop customer specs here"
-            hint="Guides, test specs, sample EDI, mapping sheets — ERP layout applied from your account"
+            hint="Guides, test specs, sample EDI, and mapping sheets — the transaction interface is assigned separately"
           />
         </div>
 
@@ -554,7 +563,7 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
       {project.mappingRecommendations.length > 0 && (
         <section className="glass-panel mb-8 rounded-2xl p-6">
           <h2 className="text-lg font-semibold text-slate-100">Mapping recommendations</h2>
-          <p className="mt-1 text-sm text-slate-500">Edit Interface / Rec / Start / Width before export. Values also come from account ERP layout when matched.</p>
+          <p className="mt-1 text-sm text-slate-500">Map each approved customer requirement to a field in the assigned internal transaction interface.</p>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
@@ -787,7 +796,7 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
           <div className="mt-4 rounded-lg border border-indigo-500/25 bg-indigo-500/10 px-4 py-3">
             <p className="text-xs font-medium uppercase tracking-wide text-indigo-300">IBM Sterling MRS / translator exports</p>
             <p className="mt-1 text-xs text-indigo-200/80">
-              Each file is split by transaction set (850, 856, etc.). MRS includes Interface Column, Record Number, Start Column, and Width from your account layout.
+              Each file is split by transaction set. Exports use the versioned interface definition assigned to this implementation.
             </p>
 
             <p className="mt-3 text-xs font-medium text-indigo-200">All transactions (one tab/sheet per set)</p>

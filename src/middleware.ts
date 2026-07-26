@@ -43,6 +43,7 @@ export const config = {
     "/dashboard/:path*",
     "/projects/:path*",
     "/live-trading-partners/:path*",
+    "/interface-library/:path*",
     "/knowledge/:path*",
     "/account",
     "/account/:path*",

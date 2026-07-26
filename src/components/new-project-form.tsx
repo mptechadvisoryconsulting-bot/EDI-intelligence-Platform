@@ -21,6 +21,9 @@ export function NewProjectForm() {
   const [translatorTarget, setTranslatorTarget] = useState("");
   const [translatorOptions, setTranslatorOptions] = useState<string[]>([]);
   const [accountErp, setAccountErp] = useState<{ erpSystem: string; fieldCount: number } | null>(null);
+  const [interfaceDefinitions, setInterfaceDefinitions] = useState<
+    Array<{ id: string; transactionCode: string; name: string; version: string; fieldCount: number; status: string }>
+  >([]);
   const [partnerHint, setPartnerHint] = useState("");
 
   useEffect(() => {
@@ -37,7 +40,20 @@ export function NewProjectForm() {
         }
       })
       .catch(() => {});
+
+    fetch("/api/interface-definitions")
+      .then((r) => r.json())
+      .then((data) => setInterfaceDefinitions(data.definitions ?? []))
+      .catch(() => {});
   }, []);
+
+  const selectedTransactionCodes = transactions
+    .split(/[,;/\s]+/)
+    .map((value) => value.trim().replace(/^0+/, "").padStart(3, "0"));
+  const interfaceDefinition = interfaceDefinitions.find(
+    (definition) =>
+      definition.status === "active" && selectedTransactionCodes.includes(definition.transactionCode)
+  );
 
   function applyAccountErp() {
     if (accountErp) setErpSystem(accountErp.erpSystem);
@@ -121,7 +137,7 @@ export function NewProjectForm() {
     <form onSubmit={handleSubmit} className="glass-panel rounded-2xl p-6">
       <h2 className="text-lg font-semibold text-slate-100">New implementation</h2>
       <p className="mt-1 text-sm text-slate-400">
-        Customer, trading partner, ERP platform, connection (VAN/SFTP/AS2), and industry transaction sets — not locked to any single vendor.
+        Customer operations reference a reusable internal transaction interface; the customer specification and ERP remain separate inputs.
       </p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -194,7 +210,7 @@ export function NewProjectForm() {
               onClick={applyAccountErp}
               className="mt-2 text-xs font-medium text-emerald-400 hover:underline"
             >
-              Use account layout ERP: {accountErp.erpSystem} ({accountErp.fieldCount} fields) — optional
+              Use legacy source system: {accountErp.erpSystem} ({accountErp.fieldCount} fields) — optional
             </button>
           )}
         </div>
@@ -203,6 +219,21 @@ export function NewProjectForm() {
 
         <div className="sm:col-span-2 [&_label]:text-slate-300 [&_input]:border-slate-700 [&_input]:bg-slate-900/60 [&_input]:text-slate-100">
           <TransactionCatalogPicker value={transactions} onChange={setTransactions} />
+        </div>
+
+        <div className="sm:col-span-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-4">
+          <p className="text-sm font-medium text-indigo-200">Internal transaction interface</p>
+          {interfaceDefinition ? (
+            <p className="mt-1 text-sm text-slate-300">
+              Uses <strong>{interfaceDefinition.name}</strong> v{interfaceDefinition.version} ·{" "}
+              {interfaceDefinition.fieldCount} normalized fields
+            </p>
+          ) : (
+            <p className="mt-1 text-sm text-amber-300">
+              No active Interface Library definition matches this transaction. The legacy account interface will be
+              used if available.
+            </p>
+          )}
         </div>
 
         <div className="sm:col-span-2">

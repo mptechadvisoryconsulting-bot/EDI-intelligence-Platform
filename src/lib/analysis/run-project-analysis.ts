@@ -1,7 +1,8 @@
 import { runImplementationAnalysis } from "@/lib/analysis/engine";
 import { db } from "@/lib/db";
 import { resolvePositionalFields } from "@/lib/exports/positional-resolve";
-import { getAccountErpLayout, layoutFieldsToSourceFields } from "@/lib/erp-layout";
+import { layoutFieldsToSourceFields } from "@/lib/erp-layout";
+import { getImplementationInterface } from "@/lib/interface-definitions";
 import { deserializeParsed, normalizeParsedDocument } from "@/lib/uploads";
 import type { ParsedDocument } from "@/lib/types/parsing";
 
@@ -53,7 +54,11 @@ export async function runProjectAnalysis(
     })
     .filter((x): x is { name: string; text: string } => x !== null);
 
-  const accountLayout = await getAccountErpLayout(userId);
+  const accountLayout = await getImplementationInterface({
+    userId,
+    transactions: project.transactions,
+    interfaceDefinitionId: project.interfaceDefinitionId,
+  });
   const accountSourceFields = accountLayout
     ? layoutFieldsToSourceFields(accountLayout.fields)
     : undefined;

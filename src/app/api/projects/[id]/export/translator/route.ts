@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { getAccountErpLayout } from "@/lib/erp-layout/account";
+import { getImplementationInterface } from "@/lib/interface-definitions";
 import { detectLayoutFormat } from "@/lib/erp-layout/parser";
 import { generateTranslatorExport, type TranslatorFormat } from "@/lib/exports/translator-formats";
 import { toExportMappingRow } from "@/lib/exports/mapping-rows";
@@ -54,7 +54,11 @@ export async function GET(request: NextRequest, { params }: Params) {
     );
   }
 
-  const accountLayout = await getAccountErpLayout(session.id);
+  const accountLayout = await getImplementationInterface({
+    userId: session.id,
+    transactions: project.transactions,
+    interfaceDefinitionId: project.interfaceDefinitionId,
+  });
   const layoutFields = accountLayout?.fields ?? [];
 
   const meta = {

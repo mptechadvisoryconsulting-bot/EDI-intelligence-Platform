@@ -21,6 +21,7 @@ export default async function ProjectDetailPage({ params }: Props) {
       assumptions: { orderBy: { createdAt: "desc" } },
       artifacts: { orderBy: { createdAt: "desc" } },
       testScenarios: { orderBy: { createdAt: "asc" } },
+      interfaceDefinition: true,
     },
   });
 

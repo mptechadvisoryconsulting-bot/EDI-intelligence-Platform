@@ -134,7 +134,7 @@ export function SpecReviewPanel({
         <div>
           <h2 className="text-lg font-semibold text-slate-100">Specification analysis &amp; feasibility</h2>
           <p className="mt-1 text-sm text-slate-400">
-            What the customer asked for vs what we can produce now — before ERP interface mapping
+            How the approved internal transaction interface can satisfy the customer&apos;s structured requirements
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -235,7 +235,7 @@ export function SpecReviewPanel({
       {data.canProduceNow && (
         <p className="mt-4 flex items-center gap-2 text-sm text-emerald-400">
           <CheckCircle2 className="h-4 w-4" />
-          Feasibility check passed — proceed to ERP layout mapping and handoff export.
+          Feasibility check passed — proceed from the internal interface definition to mapping and handoff export.
         </p>
       )}
     </section>

@@ -15,12 +15,23 @@ import {
 import { cn } from "@/lib/utils";
 import type { SessionUser } from "@/lib/auth";
 
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/projects", label: "Implementations", icon: FolderKanban },
-  { href: "/live-trading-partners", label: "Live Trading Partners", icon: RadioTower },
-  { href: "/account/erp-layout", label: "ERP layout", icon: Database },
-  { href: "/knowledge", label: "Knowledge", icon: Search },
+const navGroups = [
+  {
+    label: "Operations",
+    items: [
+      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/projects", label: "Implementations", icon: FolderKanban },
+      { href: "/live-trading-partners", label: "Live Trading Partners", icon: RadioTower },
+    ],
+  },
+  {
+    label: "Configuration",
+    items: [
+      { href: "/interface-library", label: "Interface Library", icon: Database },
+      { href: "/knowledge", label: "Knowledge", icon: Search },
+      { href: "/account/erp-layout", label: "Legacy ERP Layout", icon: Database },
+    ],
+  },
 ];
 
 export function AppShell({
@@ -56,24 +67,31 @@ export function AppShell({
         </div>
 
         <nav className="flex-1 space-y-1 px-3 py-4">
-          {navItems.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href || pathname.startsWith(href + "/");
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={cn(
-                  "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition",
-                  active
-                    ? "bg-indigo-500/15 text-indigo-200 ring-1 ring-indigo-500/30"
-                    : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </Link>
-            );
-          })}
+          {navGroups.map((group) => (
+            <div key={group.label} className="pb-3">
+              <p className="px-3 pb-1.5 pt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-600">
+                {group.label}
+              </p>
+              {group.items.map(({ href, label, icon: Icon }) => {
+                const active = pathname === href || pathname.startsWith(href + "/");
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={cn(
+                      "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition",
+                      active
+                        ? "bg-indigo-500/15 text-indigo-200 ring-1 ring-indigo-500/30"
+                        : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {label}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
         <div className="border-t border-slate-800/80 p-4">

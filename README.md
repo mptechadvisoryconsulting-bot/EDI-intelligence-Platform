@@ -2,6 +2,8 @@
 
 AI-assisted EDI implementation platform: manage each customer transaction from specification and technical assessment through mapping, testing, production, and revisions.
 
+The platform separates reusable company configuration from customer operations. The Interface Library defines each internal transaction once; customer requirements are parsed independently and mapped to the assigned interface version.
+
 ## Stack
 
 - Next.js 16 · React 19 · Prisma 7 · SQLite (local) / Turso (production)
@@ -22,8 +24,8 @@ Demo login uses `SEED_USERNAME` / `SEED_PASSWORD` from `.env.local` (see `.env.e
 
 ## Account workflow
 
-1. **Account → ERP layout** — upload positional layout once (Oracle, SAP IDoc, JDE, etc.)
-2. **Sample ERP output** — upload a flat sample file to verify Rec/Start/Width (not used for EDI mapping)
+1. **Interface Library** — define versioned internal 850, 856, 810, and other transaction interfaces once
+2. **Structure** — organize fields into Header, Detail, Summary, or format-specific record groups
 3. **Specification analysis** — upload a guide → parse its loop/segment/element hierarchy → review structured requirements
 4. **Assessment and approval** — assess interface impact and approve each transaction before implementation
 5. **Implementation** — map approved requirements, validate, test, and prepare the transaction for production

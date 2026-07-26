@@ -37,6 +37,14 @@ function normalize(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
+function normalizedStructure(value?: string) {
+  const text = value?.toLowerCase() ?? "";
+  if (/detail|item|line|po1/.test(text)) return "detail";
+  if (/summary|total|ctt|trailer/.test(text)) return "summary";
+  if (/header|beg|n1/.test(text)) return "header";
+  return "other";
+}
+
 function scoreFieldMatch(
   targetKey: string,
   source: ParsedSourceField,
@@ -78,7 +86,12 @@ function bestSourceMatch(
   let bestScore = 0;
 
   for (const source of sourceFields) {
-    const score = scoreFieldMatch(key, source, hintsMap);
+    let score = scoreFieldMatch(key, source, hintsMap);
+    const targetStructure = normalizedStructure(target.loopPath ?? target.parent ?? target.segment);
+    const sourceStructure = normalizedStructure(source.recordType ?? source.table);
+    if (targetStructure !== "other" && targetStructure === sourceStructure) {
+      score = Math.min(1, score + 0.08);
+    }
     if (score > bestScore) {
       bestScore = score;
       best = source;
@@ -235,8 +248,8 @@ export function runImplementationAnalysis(input: {
   if (uniqueSources.length === 0) {
     openQuestions.unshift({
       question: input.accountSourceFields?.length
-        ? `Account ERP layout loaded but no matches yet — verify field names align with ${input.erpSystem} interface columns.`
-        : `Upload an ERP schema or configure your account ERP layout for ${input.erpSystem} to improve mapping confidence.`,
+        ? `Internal transaction interface loaded but no matches yet — verify normalized field names align with ${input.erpSystem} source columns.`
+        : `Create or assign a Transaction Interface Definition for ${input.erpSystem} to improve mapping confidence.`,
       category: "source_data",
       priority: "high",
     });
@@ -279,6 +292,32 @@ export function runImplementationAnalysis(input: {
     mappings,
   });
 
+  const internalStructures = [...new Set(
+    uniqueSources.map((field) => field.recordType ?? field.table ?? "Ungrouped")
+  )];
+  const customerStructures = [...new Set(
+    input.parsedDocuments.flatMap((document) =>
+      document.targetFields.map((field) => field.loopPath ?? field.parent ?? "Header")
+    )
+  )];
+  const structureLines = [
+    "STRUCTURE COMPARISON (performed before field matching)",
+    "",
+    `Internal transaction model: ${internalStructures.join(" → ") || "No structure classified"}`,
+    `Customer requirement model: ${customerStructures.join(" → ") || "No structure parsed"}`,
+    "",
+    "Structural alignment:",
+    ...customerStructures.map((customerStructure) => {
+      const normalized = normalizedStructure(customerStructure);
+      const match = internalStructures.find(
+        (internalStructure) => normalizedStructure(internalStructure) === normalized
+      );
+      return `• ${customerStructure} → ${match ?? "Needs analyst structure review"}`;
+    }),
+    "",
+    "Field-level matching is scored only after this structural context is established.",
+  ];
+
   const ediTexts =
     input.ediTexts ??
     input.parsedDocuments
@@ -298,6 +337,11 @@ export function runImplementationAnalysis(input: {
   });
 
   const artifacts = [
+    {
+      type: "interface_structure_comparison",
+      title: "Internal vs Customer Structure",
+      content: structureLines.join("\n"),
+    },
     {
       type: "mapping_matrix",
       title: "Mapping Matrix",
