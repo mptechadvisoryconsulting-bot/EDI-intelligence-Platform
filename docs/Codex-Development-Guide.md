@@ -8,7 +8,7 @@ Follow the documentation in `/docs`. Do not deviate from the documented architec
 
 This application is the operational system used by Business, EDI, QA, and Management to implement and maintain EDI trading partners. It is not a mapper or a generic project management system.
 
-A Customer is the long-lived container. An Implementation is the operational object for one customer transaction and direction. Mapping, validation, testing, production, revisions, documents, and activity belong to that Implementation.
+A Customer is the long-lived container. An Implementation is the operational object for one customer transaction and direction. Requirements, mapping, validation, testing, production, revisions, documents, and activity belong to that Implementation.
 
 ## Protected Capabilities
 
@@ -31,6 +31,12 @@ Do not replace or redesign the specification parser, ERP layout module, sample o
 13. Add tests for permissions, transitions, migration, and failure paths.
 14. Read the installed Next.js 16 documentation under `node_modules/next/dist/docs/` before changing framework APIs.
 15. Never commit secrets or production credentials.
+16. Treat a customer specification as structured requirements, not merely an attachment.
+17. Identify requirements by transaction, loop path, parent, segment, element, and qualifier.
+18. Keep customer requirements independent from ERP, source interface format, and translator.
+19. Begin mapping from an analyst-reviewed requirement and a normalized interface field.
+20. Keep deployed and revision-in-progress implementations in the Live Trading Partners registry.
+21. Create revisions against the existing implementation; never duplicate a live trading partner.
 
 ## Required Change Plan
 

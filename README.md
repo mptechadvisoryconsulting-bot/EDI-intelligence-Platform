@@ -24,10 +24,12 @@ Demo login uses `SEED_USERNAME` / `SEED_PASSWORD` from `.env.local` (see `.env.e
 
 1. **Account → ERP layout** — upload positional layout once (Oracle, SAP IDoc, JDE, etc.)
 2. **Sample ERP output** — upload a flat sample file to verify Rec/Start/Width (not used for EDI mapping)
-3. **Request and assessment** — upload customer specs → run feasibility and technical assessment
-4. **Business approval** — approve each transaction before creating its implementation
-5. **Implementation** — map, validate, test, and prepare the approved transaction for production
-6. **Export** — Sterling MRS Excel/CSV by transaction set (850, 856, …)
+3. **Specification analysis** — upload a guide → parse its loop/segment/element hierarchy → review structured requirements
+4. **Assessment and approval** — assess interface impact and approve each transaction before implementation
+5. **Implementation** — map approved requirements, validate, test, and prepare the transaction for production
+6. **Go live** — deploy an approved implementation into the Live Trading Partners registry
+7. **Revisions** — open future customer changes against the same live implementation and retain every version
+8. **Export** — Sterling MRS Excel/CSV by transaction set (850, 856, …)
 
 ## Deploy to Vercel
 
