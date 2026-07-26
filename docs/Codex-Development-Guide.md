@@ -2,13 +2,13 @@
 
 ## Governing Instruction
 
-Follow the documentation in `/docs`. Do not deviate from the documented architecture or workflow without recording an Architecture Decision Record.
+Follow the documentation in `/docs`. `/docs/Architectural-Refactor-Specification.md` is the authority for all new domain work. Do not deviate from the documented architecture or workflow without recording an Architecture Decision Record.
 
 ## Product Identity
 
-This application is the operational system used by Business, EDI, QA, and Management to implement and maintain EDI trading partners. It is not a mapper or a generic project management system.
+This application is an EDI Engineering Platform used by Business, EDI, QA, and Management to implement and maintain Trading Partner Transactions. It is not a mapper or a generic project management system.
 
-A Customer is the long-lived container. An Implementation is the operational object for one customer transaction and direction. Requirements, mapping, validation, testing, production, revisions, documents, and activity belong to that Implementation.
+A Trading Partner is the long-lived external-party container. A Trading Partner Transaction is the permanent aggregate for one partner, transaction, direction, and business stream. Requirements, assessment, mapping, validation, testing, production, revisions, documents, and activity belong to that aggregate.
 
 ## Protected Capabilities
 
@@ -41,6 +41,11 @@ Do not replace or redesign the specification parser, ERP layout module, sample o
 23. Model one versioned Transaction Interface Definition per internal transaction standard and allow many implementations to reference it.
 24. Compare internal record structure to customer loop structure before field-level matching.
 25. Preserve the legacy account ERP layout only as a compatibility fallback; do not make new features depend on it.
+26. Treat `ImplementationProject` and `/api/projects` as migration-only legacy adapters.
+27. Do not create new user-facing Project concepts or Project-owned domain artifacts.
+28. New customer guides for an existing transaction create Transaction Revisions.
+29. New APIs use Trading Partner Transaction identifiers and domain commands.
+30. Follow the implementation order and acceptance gates in the Architectural Refactor Specification.
 
 ## Required Change Plan
 

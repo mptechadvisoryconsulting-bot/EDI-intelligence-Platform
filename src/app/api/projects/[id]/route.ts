@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { syncTransactionLifecycleForLegacyProject } from "@/lib/trading-partner-transactions";
 import { parseTransactionCodes } from "@/lib/transaction-packs";
 
 type Params = { params: Promise<{ id: string }> };
@@ -89,6 +90,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       interfaceDefinitionId,
     },
   });
+  await syncTransactionLifecycleForLegacyProject(id, project.status, project.reviewStatus);
 
   return NextResponse.json(project);
 }

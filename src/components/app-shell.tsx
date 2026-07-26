@@ -5,10 +5,13 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   BrainCircuit,
   Database,
-  FolderKanban,
+  Building2,
+  ClipboardCheck,
   LayoutDashboard,
   LogOut,
   RadioTower,
+  BarChart3,
+  Settings,
   Search,
   Sparkles,
 } from "lucide-react";
@@ -20,8 +23,10 @@ const navGroups = [
     label: "Operations",
     items: [
       { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/projects", label: "Implementations", icon: FolderKanban },
-      { href: "/live-trading-partners", label: "Live Trading Partners", icon: RadioTower },
+      { href: "/trading-partners", label: "Trading Partners", icon: Building2 },
+      { href: "/engineering-queue", label: "Engineering Queue", icon: ClipboardCheck },
+      { href: "/production", label: "Production", icon: RadioTower },
+      { href: "/reports", label: "Reports", icon: BarChart3 },
     ],
   },
   {
@@ -30,6 +35,7 @@ const navGroups = [
       { href: "/interface-library", label: "Interface Library", icon: Database },
       { href: "/knowledge", label: "Knowledge", icon: Search },
       { href: "/account/erp-layout", label: "Legacy ERP Layout", icon: Database },
+      { href: "/administration", label: "Administration", icon: Settings },
     ],
   },
 ];
@@ -60,8 +66,8 @@ export function AppShell({
               <Sparkles className="absolute -right-0.5 -top-0.5 h-3 w-3 text-cyan-300 ai-pulse" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-100">EDI Intelligence</p>
-              <p className="text-[10px] uppercase tracking-wider text-indigo-400/80">AI implementation</p>
+              <p className="text-sm font-semibold text-slate-100">EDI Engineering</p>
+              <p className="text-[10px] uppercase tracking-wider text-indigo-400/80">Lifecycle platform</p>
             </div>
           </div>
         </div>

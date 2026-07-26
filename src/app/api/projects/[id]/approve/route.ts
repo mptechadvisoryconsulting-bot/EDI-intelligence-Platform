@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { syncTransactionLifecycleForLegacyProject } from "@/lib/trading-partner-transactions";
 import { buildReadinessReport } from "@/lib/readiness";
 
 type Params = { params: Promise<{ id: string }> };
@@ -64,6 +65,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     where: { id },
     data: { reviewStatus, status: projectStatus },
   });
+  await syncTransactionLifecycleForLegacyProject(id, projectStatus, reviewStatus);
 
   return NextResponse.json({
     ok: true,

@@ -21,6 +21,7 @@ model User {
   mappingReviews   MappingRecommendation[] @relation("ReviewedBy")
   erpLayout        ErpLayoutProfile?
   interfaceDefinitions TransactionInterfaceDefinition[]
+  tradingPartners  TradingPartner[]
 }
 
 model ErpLayoutProfile {
@@ -90,9 +91,82 @@ model TransactionInterfaceDefinition {
   userId String
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   implementations ImplementationProject[]
+  tradingPartnerTransactions TradingPartnerTransaction[]
 
   @@unique([userId, transactionCode, version])
   @@index([userId, transactionCode, status])
+}
+
+model TradingPartner {
+  id             String   @id @default(cuid())
+  name           String
+  normalizedName String
+  status         String   @default("active")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  ownerId String
+  owner   User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  transactions TradingPartnerTransaction[]
+
+  @@unique([ownerId, normalizedName])
+  @@index([ownerId, status])
+}
+
+model TradingPartnerTransaction {
+  id                 String   @id @default(cuid())
+  transactionCode    String
+  transactionName    String
+  direction          String   @default("inbound")
+  businessStream     String   @default("default")
+  lifecycleState     String   @default("specification_received")
+  currentVersion     String   @default("1.0")
+  productionVersion  String?
+  legacyProjectId    String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  tradingPartnerId String
+  tradingPartner   TradingPartner @relation(fields: [tradingPartnerId], references: [id], onDelete: Cascade)
+  interfaceDefinitionId String?
+  interfaceDefinition TransactionInterfaceDefinition? @relation(fields: [interfaceDefinitionId], references: [id], onDelete: SetNull)
+  revisions TransactionRevision[]
+  legacyLinks LegacyImplementationLink[]
+
+  @@unique([tradingPartnerId, transactionCode, direction, businessStream])
+  @@index([legacyProjectId])
+  @@index([tradingPartnerId, lifecycleState])
+}
+
+model LegacyImplementationLink {
+  id              String   @id @default(cuid())
+  legacyProjectId String
+  relationship    String   @default("source")
+  createdAt       DateTime @default(now())
+
+  transactionId String
+  transaction   TradingPartnerTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@unique([transactionId, legacyProjectId])
+  @@index([legacyProjectId])
+}
+
+model TransactionRevision {
+  id                String   @id @default(cuid())
+  version           String
+  reason            String
+  lifecycleState    String
+  isCurrent         Boolean  @default(true)
+  goLiveAt          DateTime?
+  legacyProjectId   String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  transactionId String
+  transaction   TradingPartnerTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@unique([transactionId, version])
+  @@index([legacyProjectId])
 }
 
 model Document {
