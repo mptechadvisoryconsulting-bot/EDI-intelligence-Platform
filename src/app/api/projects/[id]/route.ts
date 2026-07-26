@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { parseTransactionCodes } from "@/lib/transaction-packs";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -21,6 +22,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
         include: { user: { select: { username: true, name: true } } },
         orderBy: { createdAt: "desc" },
       },
+      interfaceDefinition: true,
     },
   });
 
@@ -44,6 +46,25 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Implementation not found" }, { status: 404 });
   }
 
+  let interfaceDefinitionId: string | null | undefined;
+  if (body.interfaceDefinitionId !== undefined) {
+    interfaceDefinitionId = body.interfaceDefinitionId ? String(body.interfaceDefinitionId) : null;
+    if (interfaceDefinitionId) {
+      const definition = await db.transactionInterfaceDefinition.findFirst({
+        where: { id: interfaceDefinitionId, userId: session.id, status: "active" },
+      });
+      const implementationCodes = parseTransactionCodes(
+        body.transactions !== undefined ? String(body.transactions) : existing.transactions
+      );
+      if (!definition || !implementationCodes.includes(definition.transactionCode)) {
+        return NextResponse.json(
+          { error: "Select an active interface definition for this implementation transaction" },
+          { status: 400 }
+        );
+      }
+    }
+  }
+
   const project = await db.implementationProject.update({
     where: { id },
     data: {
@@ -65,6 +86,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
             : null
           : undefined,
       ediVersion: body.ediVersion !== undefined ? (body.ediVersion ? String(body.ediVersion) : null) : undefined,
+      interfaceDefinitionId,
     },
   });
 

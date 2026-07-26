@@ -1,6 +1,6 @@
 # EDI Lifecycle Documentation
 
-`PRD.md` is the version 2.1 operations and software blueprint. It begins with how the EDI department works, then defines structured specification requirements, Live Trading Partners, screens, workflows, data model, APIs, architecture, security, roadmap, and acceptance criteria.
+`PRD.md` is the version 2.2 operations and software blueprint. It begins with how the EDI department works, then defines the reusable Transaction Interface Library, structured customer requirements, Live Trading Partners, screens, workflows, data model, APIs, architecture, security, roadmap, and acceptance criteria.
 
 `Codex-Development-Guide.md` contains mandatory implementation constraints for AI-assisted development.
 

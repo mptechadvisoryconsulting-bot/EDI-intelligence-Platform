@@ -20,6 +20,13 @@ type ProjectSetup = {
   ediVersion?: string | null;
   transactions: string;
   description: string | null;
+  interfaceDefinitionId?: string | null;
+  interfaceDefinition?: {
+    id: string;
+    transactionCode: string;
+    name: string;
+    version: string;
+  } | null;
 };
 
 export function WorkspaceSettingsPanel({
@@ -44,11 +51,19 @@ export function WorkspaceSettingsPanel({
   const [transactions, setTransactions] = useState(project.transactions);
   const [description, setDescription] = useState(project.description ?? "");
   const [translatorOptions, setTranslatorOptions] = useState<string[]>([]);
+  const [interfaceDefinitionId, setInterfaceDefinitionId] = useState(project.interfaceDefinitionId ?? "");
+  const [interfaceDefinitions, setInterfaceDefinitions] = useState<
+    Array<{ id: string; transactionCode: string; name: string; version: string; status: string }>
+  >([]);
 
   useEffect(() => {
     fetch("/api/industry/catalog")
       .then((r) => r.json())
       .then((d) => setTranslatorOptions(d.translatorPlatforms ?? []))
+      .catch(() => {});
+    fetch("/api/interface-definitions")
+      .then((r) => r.json())
+      .then((d) => setInterfaceDefinitions(d.definitions ?? []))
       .catch(() => {});
   }, []);
 
@@ -79,6 +94,7 @@ export function WorkspaceSettingsPanel({
           ediVersion: ediVersion || null,
           transactions,
           description: description || null,
+          interfaceDefinitionId: interfaceDefinitionId || null,
         }),
       });
       if (!res.ok) {
@@ -185,6 +201,26 @@ export function WorkspaceSettingsPanel({
             <div className="sm:col-span-2 [&_label]:text-slate-300 [&_input]:border-slate-700 [&_input]:bg-slate-900/60 [&_input]:text-slate-100">
               <TransactionCatalogPicker value={transactions} onChange={setTransactions} />
             </div>
+            <label className="sm:col-span-2 text-sm">
+              <span className="text-slate-400">Internal transaction interface</span>
+              <select
+                value={interfaceDefinitionId}
+                onChange={(event) => setInterfaceDefinitionId(event.target.value)}
+                className="mt-1 w-full rounded-lg border border-indigo-500/30 bg-slate-900/60 px-3 py-2 text-slate-100"
+              >
+                <option value="">Automatic match / legacy fallback</option>
+                {interfaceDefinitions
+                  .filter((definition) => definition.status === "active")
+                  .map((definition) => (
+                    <option key={definition.id} value={definition.id}>
+                      {definition.transactionCode} · {definition.name} v{definition.version}
+                    </option>
+                  ))}
+              </select>
+              <span className="mt-1 block text-xs text-slate-500">
+                Customer requirements are compared against this reusable internal model.
+              </span>
+            </label>
             <label className="sm:col-span-2 text-sm">
               <span className="text-slate-400">Notes</span>
               <textarea

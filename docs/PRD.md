@@ -2,7 +2,7 @@
 
 ## Operations and Software Blueprint
 
-**Version:** 2.1
+**Version:** 2.2
 **Status:** Production product baseline
 **Date:** July 25, 2026  
 **Product owner:** MP Tech Advisory Consulting  
@@ -141,6 +141,8 @@ Repeat on the Same Implementation
 - Requirement identity includes transaction, loop path, parent, segment, element, and qualifier.
 - Customer requirements remain independent from ERP, interface format, and translator.
 - Mapping begins from an analyst-reviewed requirement and connects it to a normalized interface field.
+- Configuration owns reusable Transaction Interface Definitions; Operations owns customer implementations.
+- Structural comparison of the internal transaction model and customer requirement model occurs before field matching.
 - Every material decision records actor, timestamp, comments, and evidence.
 - Every implementation remains attached to its customer permanently.
 - Revision work updates the same implementation and creates a new version.
@@ -246,6 +248,30 @@ An implementation is uniquely identified by:
 - Transaction set
 - Direction
 - Implementation stream or business context when parallel implementations are required
+
+### 6.4 Transaction Interface Library
+
+The Interface Library is company configuration, not customer work. Each transaction standard is built once and versioned:
+
+```text
+850 Purchase Order
+  Header (H)
+    Customer Number
+    PO Number
+    Order Date
+  Detail (D, repeating)
+    Line Number
+    Item Number
+    UPC
+    Quantity
+  Summary (S)
+    Total Lines
+    Total Quantity
+```
+
+Each definition records transaction code, version, layout type, record structure, fields, source references, data types, validation, and repeating records. Supported layout types include fixed width, CSV, XML, JSON, and API.
+
+Every implementation references one versioned definition. A new customer does not upload a new internal layout. The platform compares the customer requirement hierarchy to the assigned internal transaction structure, then maps approved requirements to normalized interface fields.
 
 ## 7. Specification Intake
 
@@ -515,6 +541,7 @@ Testing | Documents | Go Live | Revision History | Activity
 - Segment navigation
 - Approved customer requirement
 - Normalized interface field and structured source reference
+- Internal-versus-customer structure comparison before field suggestions
 - Transformation
 - Result
 - Review and completion
@@ -911,6 +938,7 @@ Primary navigation:
 - Requests
 - Implementations
 - Live Trading Partners
+- Interface Library
 - Assessments
 - Approvals
 - Reports
@@ -1131,6 +1159,7 @@ Permissions are enforced server-side. "Scoped" means records within the user's a
 - InterfaceProfile
 - InterfaceVersion
 - InterfaceField
+- TransactionInterfaceDefinition
 - ImplementationRequest
 - RequestedTransaction
 - Specification
@@ -1216,6 +1245,8 @@ SpecificationRequirement
 - Production versions are immutable.
 - Requirement identity includes loop path and parent context; repeated segments are not collapsed.
 - InterfaceField normalizes source type and structured reference independently of mapping rules.
+- TransactionInterfaceDefinition is reusable configuration and may be referenced by many customer implementations.
+- Implementations retain the exact interface definition version used for assessment, mapping, and production.
 - Documents use versioned metadata and secure object storage.
 - Timeline events are user-readable.
 - Audit events are append-only and system-oriented.
@@ -1228,6 +1259,8 @@ SpecificationRequirement
 /api/customers
 /api/customers/{customerId}
 /api/customers/{customerId}/implementations
+/api/interface-definitions
+/api/interface-definitions/{interfaceDefinitionId}
 /api/requests
 /api/requests/{requestId}
 /api/requests/{requestId}/submit
@@ -1274,7 +1307,7 @@ Existing `/api/projects` routes and `ImplementationProject` storage may remain t
 ### 24.2 Target layers
 
 - Presentation: role-specific pages and transaction workspace
-- Application: request, assessment, approval, implementation, mapping, testing, revision commands
+- Application: interface-library configuration plus request, assessment, approval, implementation, mapping, testing, and revision commands
 - Domain: contextual requirements, implementation lifecycle, versioning, transition rules
 - Data: Prisma repositories and additive migrations
 - Integration: storage, notifications, AI, translator exports
@@ -1381,6 +1414,7 @@ Near-term:
 - Parse specifications into loop, segment, element, usage, condition, format, and repeat metadata
 - Preserve the full contextual path for repeated segments
 - Support analyst confirmation and correction before mapping
+- Compare internal and customer structures before scoring field-level matches
 - Compare specification versions
 - Identify interface coverage and gaps
 - Suggest assessment findings
@@ -1434,6 +1468,7 @@ No existing production data is deleted.
 
 - Customer model
 - Implementation model
+- Versioned Transaction Interface Library
 - Roles and permissions
 - Timeline and audit
 - Workflow service
@@ -1487,6 +1522,9 @@ Release 1 is complete when:
 - Specifications become structured, contextual requirements before mapping.
 - Analysts can confirm or correct requirements and see mapped, missing, and needs-review coverage.
 - Requirements remain independent from ERP and source interface type.
+- Configuration and customer Operations are separated in navigation and ownership.
+- Each implementation resolves a transaction-specific internal interface definition.
+- The analysis compares record and loop structures before field-level suggestions.
 - Each implementation has one living, versioned mapping.
 - Validation and testing belong to the implementation version.
 - Production creates an immutable current version.

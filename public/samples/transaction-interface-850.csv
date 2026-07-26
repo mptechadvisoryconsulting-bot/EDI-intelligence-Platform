@@ -1,0 +1,12 @@
+Record Type,Interface Column,Field Name,Rec Number,Start Column,Width,Data Type,Validation,Repeating,Description
+Header,CUSTOMER_NUMBER,Customer Number,1,1,10,String,Required,No,Internal customer identifier
+Header,PO_NUMBER,PO Number,1,11,22,String,Required,No,Purchase order number
+Header,ORDER_DATE,Order Date,1,33,8,Date,YYYYMMDD,No,Purchase order date
+Header,BUYER,Buyer,1,41,30,String,Optional,No,Buyer name
+Detail,LINE_NUMBER,Line Number,2,1,6,Integer,Required,Yes,Purchase order line
+Detail,ITEM_NUMBER,Item Number,2,7,20,String,Required,Yes,Internal item identifier
+Detail,UPC,UPC,2,27,14,String,Numeric,Yes,Universal product code
+Detail,DESCRIPTION,Description,2,41,80,String,Max 80 characters,Yes,Item description
+Detail,QUANTITY,Quantity,2,121,12,Decimal,Greater than zero,Yes,Order quantity
+Summary,TOTAL_LINES,Total Lines,3,1,8,Integer,Required,No,Number of detail records
+Summary,TOTAL_QUANTITY,Total Quantity,3,9,14,Decimal,Required,No,Sum of ordered quantity

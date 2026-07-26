@@ -45,9 +45,12 @@ function buildField(input: {
   startPosition?: number;
   charLimit?: number;
   interfaceStyle?: InterfaceStyle;
+  recordType?: string;
   dataType?: string;
   table?: string;
   description?: string;
+  validationRule?: string;
+  repeating?: boolean;
   xpath?: string;
   jsonPath?: string;
   soapPath?: string;
@@ -62,12 +65,15 @@ function buildField(input: {
     fieldName: input.fieldName.trim(),
     interfaceColumn: input.interfaceColumn.trim(),
     interfaceStyle: style,
+    recordType: input.recordType,
     recNumber: input.recNumber,
     startPosition: input.startPosition,
     charLimit: input.charLimit,
     dataType: input.dataType,
     table: input.table,
     description: input.description,
+    validationRule: input.validationRule,
+    repeating: input.repeating,
     xpath: input.xpath,
     jsonPath: input.jsonPath,
     soapPath: input.soapPath,
@@ -103,12 +109,17 @@ export function parseErpLayoutCsv(text: string, defaultStyle: InterfaceStyle = "
     /attribute/,
     /ddic/,
   ]);
+  const recordTypeIdx = findCol(headers, [
+    /record.?type/,
+    /record.?group/,
+    /^group$/,
+    /^section$/,
+  ]);
   const recIdx = findCol(headers, [
     /rec.?number/,
     /^rec$/,
     /record.?num/,
     /record.?number/,
-    /record.?type/,
     /segment.?number/,
     /segnum/,
     /line.?number/,
@@ -143,6 +154,8 @@ export function parseErpLayoutCsv(text: string, defaultStyle: InterfaceStyle = "
   const typeIdx = findCol(headers, [/data.?type/, /^type$/]);
   const tableIdx = findCol(headers, [/^table$/, /entity/, /segment.?name/, /segnam/, /structure/]);
   const descIdx = findCol(headers, [/description/, /^desc$/, /notes/]);
+  const validationIdx = findCol(headers, [/validation/, /business.?rule/, /^rule$/]);
+  const repeatIdx = findCol(headers, [/repeat/, /repeating/, /cardinality/]);
 
   const fields: ErpLayoutField[] = [];
 
@@ -162,9 +175,15 @@ export function parseErpLayoutCsv(text: string, defaultStyle: InterfaceStyle = "
         startPosition: startIdx >= 0 ? parseNum(cols[startIdx]) : undefined,
         charLimit: widthIdx >= 0 ? parseNum(cols[widthIdx]) : undefined,
         interfaceStyle: styleIdx >= 0 ? parseStyle(cols[styleIdx]) ?? defaultStyle : defaultStyle,
+        recordType: recordTypeIdx >= 0 ? cols[recordTypeIdx] : undefined,
         dataType: typeIdx >= 0 ? cols[typeIdx] : undefined,
         table: tableIdx >= 0 ? cols[tableIdx] : undefined,
         description: descIdx >= 0 ? cols[descIdx] : undefined,
+        validationRule: validationIdx >= 0 ? cols[validationIdx] : undefined,
+        repeating:
+          repeatIdx >= 0
+            ? /^(?:yes|true|y|1|repeat|repeating|\*)$/i.test(cols[repeatIdx] ?? "")
+            : undefined,
         xpath: xpathIdx >= 0 ? cols[xpathIdx] : undefined,
         jsonPath: jsonIdx >= 0 ? cols[jsonIdx] : undefined,
         soapPath: soapIdx >= 0 ? cols[soapIdx] : undefined,
@@ -188,8 +207,11 @@ export function parseRestLayoutJson(text: string): ErpLayoutField[] {
         interfaceStyle: "rest",
         jsonPath: row.jsonPath,
         dataType: row.dataType,
-        table: row.table,
+        recordType: row.recordType,
         description: row.description,
+        validationRule: row.validationRule,
+        repeating: row.repeating,
+        table: row.table,
         sortOrder: index,
       })
     );
@@ -215,6 +237,7 @@ export function parseXmlLayout(text: string): ErpLayoutField[] {
         fieldName: fieldName ?? interfaceColumn!,
         interfaceColumn: interfaceColumn ?? fieldName!,
         interfaceStyle: parseStyle(attr("style") ?? attr("format")) ?? "xml",
+        recordType: attr("recordType") ?? attr("group") ?? attr("section"),
         recNumber: parseNum(attr("recNumber") ?? attr("rec")),
         startPosition: parseNum(attr("startColumn") ?? attr("start")),
         charLimit: parseNum(attr("width") ?? attr("charLimit")),
@@ -225,6 +248,8 @@ export function parseXmlLayout(text: string): ErpLayoutField[] {
         dataType: attr("type") ?? attr("dataType"),
         table: attr("table"),
         description: attr("description"),
+        validationRule: attr("validation") ?? attr("rule"),
+        repeating: /^(?:yes|true|1)$/i.test(attr("repeating") ?? ""),
         sortOrder: index++,
       })
     );

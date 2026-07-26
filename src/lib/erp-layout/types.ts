@@ -4,6 +4,8 @@ export type ErpLayoutField = {
   fieldName: string;
   interfaceColumn: string;
   interfaceStyle: InterfaceStyle;
+  /** Logical transaction record group, such as Header, Detail, or Summary. */
+  recordType?: string;
   recNumber?: number;
   /** Oracle start column / positional start */
   startPosition?: number;
@@ -12,6 +14,8 @@ export type ErpLayoutField = {
   dataType?: string;
   table?: string;
   description?: string;
+  validationRule?: string;
+  repeating?: boolean;
   xpath?: string;
   jsonPath?: string;
   soapPath?: string;

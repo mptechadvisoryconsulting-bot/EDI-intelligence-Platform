@@ -37,6 +37,10 @@ Do not replace or redesign the specification parser, ERP layout module, sample o
 19. Begin mapping from an analyst-reviewed requirement and a normalized interface field.
 20. Keep deployed and revision-in-progress implementations in the Live Trading Partners registry.
 21. Create revisions against the existing implementation; never duplicate a live trading partner.
+22. Keep the reusable Interface Library in Configuration and customer lifecycle work in Operations.
+23. Model one versioned Transaction Interface Definition per internal transaction standard and allow many implementations to reference it.
+24. Compare internal record structure to customer loop structure before field-level matching.
+25. Preserve the legacy account ERP layout only as a compatibility fallback; do not make new features depend on it.
 
 ## Required Change Plan
 

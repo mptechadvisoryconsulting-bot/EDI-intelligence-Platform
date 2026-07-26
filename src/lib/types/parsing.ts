@@ -27,6 +27,9 @@ export type ParsedSourceField = {
   name: string;
   type?: string;
   table?: string;
+  recordType?: string;
+  validationRule?: string;
+  repeating?: boolean;
   interfaceColumn?: string;
   interfaceStyle?: "positional" | "xml" | "soap" | "rest";
   recNumber?: number;

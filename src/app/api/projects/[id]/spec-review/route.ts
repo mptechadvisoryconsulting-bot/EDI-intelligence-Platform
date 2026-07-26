@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isSessionResponse, requireSessionOr401 } from "@/lib/api-session";
 import { db } from "@/lib/db";
-import { getAccountErpLayout } from "@/lib/erp-layout";
+import { getImplementationInterface } from "@/lib/interface-definitions";
 import { findTradingPartner } from "@/lib/industry/trading-partners";
 import { buildSpecReviewReport, getMappingMemorySuggestions } from "@/lib/spec-review";
 
@@ -42,7 +42,11 @@ export async function GET(_request: NextRequest, { params }: Params) {
     specKeys,
   });
 
-  const accountLayout = await getAccountErpLayout(session.id);
+  const accountLayout = await getImplementationInterface({
+    userId: session.id,
+    transactions: project.transactions,
+    interfaceDefinitionId: project.interfaceDefinitionId,
+  });
   const partnerCatalog = findTradingPartner(project.tradingPartner);
 
   return NextResponse.json({
@@ -62,6 +66,10 @@ export async function GET(_request: NextRequest, { params }: Params) {
     accountLayout: accountLayout
       ? {
           erpSystem: accountLayout.erpSystem,
+          transactionCode: accountLayout.transactionCode,
+          name: accountLayout.name,
+          version: accountLayout.version,
+          source: accountLayout.source,
           fieldCount: accountLayout.fieldCount,
           hasSampleOutput: accountLayout.hasSampleOutput,
         }

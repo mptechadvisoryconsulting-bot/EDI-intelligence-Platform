@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { findDefaultInterfaceDefinition } from "@/lib/interface-definitions";
 
 export async function GET() {
   const session = await requireSession();
@@ -25,6 +26,8 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const session = await requireSession();
   const body = await request.json();
+  const transactions = String(body.transactions ?? "");
+  const standard = await findDefaultInterfaceDefinition(session.id, transactions);
 
   const project = await db.implementationProject.create({
     data: {
@@ -37,7 +40,8 @@ export async function POST(request: NextRequest) {
       connectionType: body.connectionType ? String(body.connectionType) : null,
       connectionProvider: body.connectionProvider ? String(body.connectionProvider) : null,
       ediVersion: body.ediVersion ? String(body.ediVersion) : null,
-      transactions: String(body.transactions ?? ""),
+      transactions,
+      interfaceDefinitionId: standard?.id ?? null,
       description: body.description ? String(body.description) : null,
       ownerId: session.id,
     },

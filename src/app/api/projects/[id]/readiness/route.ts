@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isSessionResponse, requireSessionOr401 } from "@/lib/api-session";
 import { db } from "@/lib/db";
-import { getAccountErpLayout } from "@/lib/erp-layout";
+import { getImplementationInterface } from "@/lib/interface-definitions";
 import { buildReadinessReport } from "@/lib/readiness";
 
 type Params = { params: Promise<{ id: string }> };
@@ -26,7 +26,11 @@ export async function GET(_request: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Implementation not found" }, { status: 404 });
   }
 
-  const layout = await getAccountErpLayout(session.id);
+  const layout = await getImplementationInterface({
+    userId: session.id,
+    transactions: project.transactions,
+    interfaceDefinitionId: project.interfaceDefinitionId,
+  });
   const account = layout
     ? {
         hasLayout: true,

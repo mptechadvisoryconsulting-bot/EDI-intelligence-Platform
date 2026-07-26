@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Plus, Sparkles } from "lucide-react";
+import { Layers3, Plus } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { ProjectCard } from "@/components/project-card";
 import { getSession } from "@/lib/auth";
@@ -27,6 +27,9 @@ export default async function DashboardPage() {
   });
 
   const accountLayout = await getAccountErpLayout(session.id);
+  const interfaceStandards = await db.transactionInterfaceDefinition.count({
+    where: { userId: session.id, status: "active" },
+  });
 
   const stats = {
     total: projects.length,
@@ -62,36 +65,35 @@ export default async function DashboardPage() {
           <Stat label="AI mappings" value={stats.mappings} />
         </div>
 
-        {!accountLayout ? (
+        {interfaceStandards === 0 ? (
           <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-5 py-4">
             <div className="text-sm text-amber-100">
               <p className="font-medium flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-amber-400" />
-                Step 1: Configure account ERP layout
+                <Layers3 className="h-4 w-4 text-amber-400" />
+                Step 1: Build your Interface Library
               </p>
               <p className="mt-1 text-amber-200/80">
-                Upload Interface Column, Record Number, Start Column, Width once — every implementation inherits it for MRS export.
+                Define your internal 850, 856, 810, and other transaction interfaces once, then reuse them for every customer.
+                {accountLayout ? " Your legacy ERP layout remains available as a fallback." : ""}
               </p>
             </div>
             <Link
-              href="/account/erp-layout"
+              href="/interface-library"
               className="rounded-xl bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500"
             >
-              Set up ERP layout
+              Build Interface Library
             </Link>
           </div>
         ) : (
           <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-5 py-4 text-sm">
             <p className="text-emerald-100">
-              <span className="font-medium">Account ERP ready:</span> {accountLayout.erpSystem}
-              {accountLayout.erpVersion ? ` ${accountLayout.erpVersion}` : ""} · {accountLayout.fieldCount}{" "}
-              fields with positional data for MRS export
+              <span className="font-medium">Interface Library ready:</span> {interfaceStandards} active transaction standard(s)
             </p>
             <Link
-              href="/account/erp-layout"
+              href="/interface-library"
               className="font-medium text-emerald-400 hover:text-emerald-300"
             >
-              Manage layout →
+              Manage library →
             </Link>
           </div>
         )}

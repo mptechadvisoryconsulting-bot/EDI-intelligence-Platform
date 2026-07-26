@@ -71,11 +71,11 @@ export function buildReadinessReport(
     account != null
       ? [
           {
-            label: "Account ERP layout configured",
+            label: "Transaction interface configured",
             passed: account.hasLayout,
             detail: account.hasLayout
               ? `${account.fieldCount} field(s) on account`
-              : "Upload layout at Account → ERP layout",
+              : "Create the transaction standard in Configuration → Interface Library",
           },
           {
             label: "Layout Rec/Start/Width complete",
@@ -84,7 +84,7 @@ export function buildReadinessReport(
               ? `${account.missingPositionCount} field(s) missing position`
               : account.hasLayout
                 ? "All positional fields complete"
-                : "No account layout",
+                : "No transaction interface",
           },
           {
             label: "Sample output verified",
@@ -204,17 +204,17 @@ export function buildReadinessReport(
   }
 
   if (account && !account.hasLayout) {
-    blockers.push("Account ERP layout not configured — MRS Rec/Start/Width may be incomplete.");
-    nextActions.push("Upload account ERP layout (Interface Column, Rec, Start, Width).");
-    approvalBlockers.push("Configure account ERP layout before approval.");
+    blockers.push("Transaction interface not configured — mapping has no approved internal source model.");
+    nextActions.push("Create or assign a Transaction Interface Definition in the Interface Library.");
+    approvalBlockers.push("Assign a transaction interface before approval.");
   } else if (account && account.hasLayout && !account.layoutValid) {
-    blockers.push(`${account.missingPositionCount} account layout field(s) missing Rec/Start/Width.`);
-    nextActions.push("Fix account ERP layout position columns.");
+    blockers.push(`${account.missingPositionCount} interface field(s) missing Rec/Start/Width.`);
+    nextActions.push("Fix the assigned interface definition positions.");
   }
 
   if (account?.hasSampleOutput && account.sampleIssueCount > 0) {
     blockers.push(`${account.sampleIssueCount} sample output position mismatch(es).`);
-    nextActions.push("Review sample verification on Account → ERP layout.");
+    nextActions.push("Review sample verification for the assigned interface definition.");
   }
 
   let score = 100;
