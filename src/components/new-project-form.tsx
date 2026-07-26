@@ -111,7 +111,7 @@ export function NewProjectForm() {
     };
 
     try {
-      const res = await fetch("/api/projects", {
+      const res = await fetch("/api/trading-partner-transactions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -119,15 +119,15 @@ export function NewProjectForm() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "Failed to create implementation");
+        setError(data.error ?? "Failed to create transaction workspace");
         return;
       }
 
-      const project = await res.json();
-      router.push(`/projects/${project.id}`);
+      const transaction = await res.json();
+      router.push(`/trading-partner-transactions/${transaction.id}`);
       router.refresh();
     } catch {
-      setError("Unable to create implementation");
+      setError("Unable to create transaction workspace");
     } finally {
       setLoading(false);
     }
@@ -135,13 +135,13 @@ export function NewProjectForm() {
 
   return (
     <form onSubmit={handleSubmit} className="glass-panel rounded-2xl p-6">
-      <h2 className="text-lg font-semibold text-slate-100">New implementation</h2>
+      <h2 className="text-lg font-semibold text-slate-100">New trading partner transaction</h2>
       <p className="mt-1 text-sm text-slate-400">
         Customer operations reference a reusable internal transaction interface; the customer specification and ERP remain separate inputs.
       </p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <Field label="Implementation name" name="name" required placeholder="Acme 850 Purchase Order" />
+        <Field label="Workspace name" name="name" required placeholder="Acme 850 Purchase Order" />
         <Field label="Customer / vendor name" name="customer" required placeholder="Your customer or client company" />
 
         <div className="sm:col-span-2 [&_label]:text-slate-400 [&_input]:border-slate-700 [&_input]:bg-slate-900/60 [&_input]:text-slate-100">
@@ -258,7 +258,7 @@ export function NewProjectForm() {
         className="mt-6 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
       >
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-        Create implementation
+        Create transaction workspace
       </button>
     </form>
   );

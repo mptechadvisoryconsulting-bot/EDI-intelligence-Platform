@@ -10,6 +10,11 @@ if (process.env.VERCEL === "1" && hasRemoteDatabase) {
     stdio: "inherit",
     env: process.env,
   });
+  console.log("Backfilling and reconciling permanent Trading Partner Transactions...");
+  execFileSync(process.execPath, ["node_modules/tsx/dist/cli.mjs", "scripts/backfill-trading-partner-transactions.ts"], {
+    stdio: "inherit",
+    env: process.env,
+  });
 }
 
 execFileSync(process.execPath, ["node_modules/next/dist/bin/next", "build"], {

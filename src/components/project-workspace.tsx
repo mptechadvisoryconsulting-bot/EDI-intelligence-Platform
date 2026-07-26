@@ -142,7 +142,13 @@ const SAMPLE_FILES = [
   { href: "/samples/sample-walmart-850.edi", label: "Walmart-style 850 EDI" },
 ];
 
-export function ProjectWorkspace({ project: initial }: { project: Project }) {
+export function ProjectWorkspace({
+  project: initial,
+  workspace,
+}: {
+  project: Project;
+  workspace?: { transactionCode: string; transactionName: string; version: string };
+}) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [project, setProject] = useState(initial);
@@ -344,8 +350,13 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
       <header className="mb-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-indigo-400">Transaction implementation</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-indigo-400">Permanent engineering workspace</p>
             <h1 className="mt-1 text-2xl font-semibold ai-gradient-text">{project.name}</h1>
+            {workspace && (
+              <p className="mt-1 text-sm font-medium text-indigo-300">
+                {workspace.transactionCode} {workspace.transactionName} · Version {workspace.version}
+              </p>
+            )}
             <p className="mt-2 text-sm text-slate-400">
               {project.customer} · {project.tradingPartner} · {project.erpSystem}
               {project.erpVersion ? ` ${project.erpVersion}` : ""} → {project.translatorTarget}
@@ -404,7 +415,29 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
         )}
       </header>
 
-      <div className="mb-8 glass-panel rounded-2xl p-5">
+      <nav className="mb-8 flex gap-1 overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950/70 p-2" aria-label="Transaction workspace">
+        {[
+          ["overview", "Overview"],
+          ["implementation-guide", "Implementation Guide"],
+          ["requirements", "Requirements"],
+          ["technical-assessment", "Technical Assessment"],
+          ["internal-interface", "Internal Interface"],
+          ["mapping", "Mapping"],
+          ["validation", "Validation"],
+          ["testing", "Testing"],
+          ["go-live", "Go Live"],
+          ["production", "Production"],
+          ["revision-history", "Revision History"],
+          ["documents", "Documents"],
+          ["activity", "Activity"],
+        ].map(([href, label]) => (
+          <a key={href} href={`#${href}`} className="shrink-0 rounded-lg px-3 py-2 text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-white">
+            {label}
+          </a>
+        ))}
+      </nav>
+
+      <div id="overview" className="mb-8 glass-panel scroll-mt-6 rounded-2xl p-5">
         <p className="mb-3 text-xs font-medium uppercase tracking-wider text-slate-500">Setup workflow</p>
         <WorkflowStepper steps={workflowSteps} />
         {parsedCount === 0 && (
@@ -414,7 +447,7 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
         )}
       </div>
 
-      <section className="glass-panel mb-8 rounded-2xl p-6">
+      <section id="implementation-guide" className="glass-panel mb-8 scroll-mt-6 rounded-2xl p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h2 className="text-lg font-semibold text-slate-100">1 · Upload customer specs</h2>
@@ -543,12 +576,12 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
         <MetricCard icon={CheckCircle2} label="Artifacts" value={project.artifacts.length} />
       </div>
 
-      <SpecReviewPanel projectId={project.id} onMemoryApplied={refreshProject} />
+      <div id="technical-assessment" className="scroll-mt-6"><SpecReviewPanel projectId={project.id} onMemoryApplied={refreshProject} /></div>
 
-      <RequirementsPanel
+      <div id="requirements" className="scroll-mt-6"><RequirementsPanel
         projectId={project.id}
         mappings={project.mappingRecommendations}
-      />
+      /></div>
 
       <PartnerClonePanel
         projectId={project.id}
@@ -557,7 +590,7 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
       />
 
       {(project.mappingRecommendations.length > 0 || project.documents.some((d) => d.status.startsWith("parsed"))) && (
-        <MappingWorkspacePanel projectId={project.id} mappings={project.mappingRecommendations} />
+        <div id="mapping" className="scroll-mt-6"><MappingWorkspacePanel projectId={project.id} mappings={project.mappingRecommendations} /></div>
       )}
 
       {project.mappingRecommendations.length > 0 && (
@@ -884,20 +917,20 @@ export function ProjectWorkspace({ project: initial }: { project: Project }) {
         onApproved={refreshProject}
       />
 
-      <TestScenariosPanel
+      <div id="testing" className="scroll-mt-6"><TestScenariosPanel
         projectId={project.id}
         scenarios={project.testScenarios ?? []}
         uncoveredCount={countUncoveredMappings(project.mappingRecommendations, project.testScenarios ?? [])}
-      />
+      /></div>
 
-      <EdiComparePanel projectId={project.id} />
+      <div id="validation" className="scroll-mt-6"><EdiComparePanel projectId={project.id} /></div>
 
-      <ProductionLifecyclePanel
+      <div id="production" className="scroll-mt-6"><ProductionLifecyclePanel
         projectId={project.id}
         status={project.status}
         reviewStatus={project.reviewStatus}
         onChanged={refreshProject}
-      />
+      /></div>
 
       <CopilotPanel projectId={project.id} projectName={project.name} />
     </div>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { findDefaultInterfaceDefinition } from "@/lib/interface-definitions";
+import { createTradingPartnerTransactions } from "@/lib/trading-partner-transactions";
 
 export async function GET() {
   const session = await requireSession();
@@ -26,26 +26,18 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const session = await requireSession();
   const body = await request.json();
-  const transactions = String(body.transactions ?? "");
-  const standard = await findDefaultInterfaceDefinition(session.id, transactions);
-
-  const project = await db.implementationProject.create({
-    data: {
-      name: String(body.name ?? "New Implementation"),
-      customer: String(body.customer ?? ""),
-      tradingPartner: String(body.tradingPartner ?? ""),
-      erpSystem: String(body.erpSystem ?? ""),
-      erpVersion: body.erpVersion ? String(body.erpVersion) : null,
-      translatorTarget: String(body.translatorTarget ?? ""),
-      connectionType: body.connectionType ? String(body.connectionType) : null,
-      connectionProvider: body.connectionProvider ? String(body.connectionProvider) : null,
-      ediVersion: body.ediVersion ? String(body.ediVersion) : null,
-      transactions,
-      interfaceDefinitionId: standard?.id ?? null,
-      description: body.description ? String(body.description) : null,
-      ownerId: session.id,
-    },
+  const transactions = await createTradingPartnerTransactions(session.id, body);
+  const project = await db.implementationProject.findUnique({
+    where: { id: transactions[0].legacyProjectId },
   });
-
-  return NextResponse.json(project, { status: 201 });
+  return NextResponse.json(
+    { ...project, transactionWorkspaceId: transactions[0].id },
+    {
+      status: 201,
+      headers: {
+        Deprecation: "true",
+        Link: `</api/trading-partner-transactions>; rel="successor-version"`,
+      },
+    }
+  );
 }

@@ -2,11 +2,13 @@
 
 ## Operations and Software Blueprint
 
-**Version:** 2.2
+**Version:** 2.3
 **Status:** Production product baseline
 **Date:** July 25, 2026  
 **Product owner:** MP Tech Advisory Consulting  
 **System of record:** This document and the supporting files in `/docs`
+
+**Architecture authority:** `/docs/Architectural-Refactor-Specification.md` governs the migration from the legacy Project/Implementation model to permanent Trading Partner Transactions. Where transitional language in this PRD conflicts with that specification, the refactor specification controls.
 
 ---
 
@@ -18,9 +20,9 @@ The EDI Implementation Platform is designed to manage the complete lifecycle of 
 
 ### 1.2 Product identity
 
-The platform models how an EDI department works. It does not organize the work around generic software modules, files, or projects. It organizes the work around customer transaction implementations.
+The platform models how an EDI department works. It does not organize the work around generic software modules, files, or projects. It organizes the work around permanent Trading Partner Transactions.
 
-A customer is the long-lived business container. An **Implementation** is the operational object.
+A Trading Partner is the long-lived external-party container. A **Trading Partner Transaction** is the primary operational aggregate for one partner, transaction, direction, and business stream.
 
 Examples:
 
@@ -29,7 +31,7 @@ Examples:
 - Target - 810 Invoice
 - Walmart - 850 Purchase Order
 
-Each implementation has its own specification, assessment, mapping, validation, testing, production deployment, revisions, documents, activity, approvals, and history.
+Each Trading Partner Transaction has its own specification, assessment, mapping, validation, testing, production deployment, revisions, documents, activity, approvals, and history.
 
 ### 1.3 Product promise
 

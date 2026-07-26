@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isSessionResponse, requireSessionOr401 } from "@/lib/api-session";
 import { db } from "@/lib/db";
+import { syncTransactionLifecycleForLegacyProject } from "@/lib/trading-partner-transactions";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -90,6 +91,22 @@ export async function POST(request: NextRequest, { params }: Params) {
       where: { id },
       data: { status: "production" },
     });
+    await db.tradingPartnerTransaction.updateMany({
+      where: { legacyLinks: { some: { legacyProjectId: id } } },
+      data: { lifecycleState: "production", currentVersion: version, productionVersion: version },
+    });
+    await db.transactionRevision.updateMany({
+      where: {
+        transaction: { legacyLinks: { some: { legacyProjectId: id } } },
+        version,
+      },
+      data: {
+        lifecycleState: "production",
+        isCurrent: true,
+        goLiveAt: deployment.createdAt,
+      },
+    });
+    await syncTransactionLifecycleForLegacyProject(id, "production", implementation.reviewStatus);
 
     return NextResponse.json({ ok: true, status: "production", version, event: deployment });
   }
@@ -121,6 +138,41 @@ export async function POST(request: NextRequest, { params }: Params) {
       where: { id },
       data: { status: "revision", reviewStatus: "pending" },
     });
+    const transactionWorkspaces = await db.tradingPartnerTransaction.findMany({
+      where: { legacyLinks: { some: { legacyProjectId: id } } },
+      include: { revisions: true },
+    });
+    for (const workspace of transactionWorkspaces) {
+      const nextMinor =
+        Math.max(
+          0,
+          ...workspace.revisions
+            .map((item) => Number(item.version.split(".")[1]))
+            .filter(Number.isFinite)
+        ) + 1;
+      const version = `1.${nextMinor}`;
+      await db.transactionRevision.updateMany({
+        where: { transactionId: workspace.id },
+        data: { isCurrent: false },
+      });
+      await db.transactionRevision.upsert({
+        where: { transactionId_version: { transactionId: workspace.id, version } },
+        update: { reason: notes, lifecycleState: "revision", isCurrent: true },
+        create: {
+          transactionId: workspace.id,
+          version,
+          reason: notes,
+          lifecycleState: "revision",
+          isCurrent: true,
+          legacyProjectId: id,
+        },
+      });
+      await db.tradingPartnerTransaction.update({
+        where: { id: workspace.id },
+        data: { lifecycleState: "revision", currentVersion: version },
+      });
+    }
+    await syncTransactionLifecycleForLegacyProject(id, "revision", "pending");
 
     return NextResponse.json({ ok: true, status: "revision", event: revision });
   }
