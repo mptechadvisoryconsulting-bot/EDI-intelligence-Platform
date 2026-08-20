@@ -61,8 +61,11 @@ export function OracleLayoutReportImport() {
       </div>
 
       <div className="mt-4 max-w-sm">
-        <label className="mb-1.5 block text-sm font-medium text-slate-300">Oracle / ERP version (optional)</label>
+        <label htmlFor="oracle-erp-version" className="mb-1.5 block text-sm font-medium text-slate-300">
+          Oracle / ERP version (optional)
+        </label>
         <input
+          id="oracle-erp-version"
           value={erpVersion}
           onChange={(event) => setErpVersion(event.target.value)}
           placeholder="12.2 / EBS release"
