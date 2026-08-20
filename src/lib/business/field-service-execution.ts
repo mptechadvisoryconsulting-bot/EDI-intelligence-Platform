@@ -1,11 +1,13 @@
+import { createHash } from "node:crypto";
 import { db } from "@/lib/db";
 import {
   assertRoleCapability,
+  normalizeIdempotencyKey,
   requireNonEmpty,
   validateMoneyMinor,
   validateQuantity,
 } from "@/lib/business/canonical-validation";
-import { assertCanViewWorkOrder, normalizeFieldServiceRole } from "@/lib/business/field-service-access";
+import { assertCanViewWorkOrder } from "@/lib/business/field-service-access";
 
 export type ChecklistItem = {
   id: string;
@@ -83,6 +85,21 @@ export function completionReadiness(checklist: ChecklistItem[], signatureContent
   return { ready: blockers.length === 0, blockers };
 }
 
+export function executionRecordId(
+  accountId: string,
+  workOrderId: string,
+  recordType: "part" | "time",
+  idempotencyKey: string,
+) {
+  const key = normalizeIdempotencyKey(idempotencyKey);
+  return `woexec_${createHash("sha256").update(`${accountId}\0${workOrderId}\0${recordType}\0${key}`).digest("hex").slice(0, 32)}`;
+}
+
+function assertExpectedVersion(actual: Date, expected: Date) {
+  if (!(expected instanceof Date) || Number.isNaN(expected.valueOf())) throw new Error("Valid expectedUpdatedAt is required");
+  if (actual.getTime() !== expected.getTime()) throw new Error("Work order changed concurrently");
+}
+
 async function requireEditableWorkOrder(input: {
   accountId: string;
   workOrderId: string;
@@ -98,6 +115,7 @@ async function requireEditableWorkOrder(input: {
       assignedUserId: true,
       checklistContent: true,
       signatureContent: true,
+      updatedAt: true,
     },
   });
   if (!workOrder) throw new Error("Work order not found");
@@ -125,11 +143,13 @@ export async function saveWorkOrderChecklist(input: {
   actorUserId: string;
   membershipRole: string;
   checklist: unknown;
+  expectedUpdatedAt: Date;
 }) {
-  await requireEditableWorkOrder(input);
+  const workOrder = await requireEditableWorkOrder(input);
+  assertExpectedVersion(workOrder.updatedAt, input.expectedUpdatedAt);
   const checklist = normalizeWorkOrderChecklist(input.checklist);
   const updated = await db.workOrder.updateMany({
-    where: { id: input.workOrderId, accountId: input.accountId },
+    where: { id: input.workOrderId, accountId: input.accountId, updatedAt: input.expectedUpdatedAt },
     data: { checklistContent: JSON.stringify(checklist) },
   });
   if (updated.count !== 1) throw new Error("Work order changed concurrently");
@@ -142,6 +162,7 @@ export async function addWorkOrderPart(input: {
   workOrderId: string;
   actorUserId: string;
   membershipRole: string;
+  idempotencyKey: string;
   description: string;
   quantity: number;
   unitPriceMinor: number;
@@ -152,15 +173,37 @@ export async function addWorkOrderPart(input: {
   const quantity = validateQuantity(input.quantity);
   const unitPriceMinor = validateMoneyMinor(input.unitPriceMinor, "Part unit price");
   const catalogItemId = input.catalogItemId?.trim() || null;
+  const id = executionRecordId(input.accountId, input.workOrderId, "part", input.idempotencyKey);
+
   if (catalogItemId) {
     const catalogItem = await db.catalogItem.findFirst({ where: { id: catalogItemId, accountId: input.accountId }, select: { id: true } });
     if (!catalogItem) throw new Error("Catalog item not found in this account");
   }
-  const part = await db.workOrderPart.create({
-    data: { accountId: input.accountId, workOrderId: input.workOrderId, description, quantity, unitPriceMinor, catalogItemId },
-  });
-  await audit(input.accountId, input.workOrderId, input.actorUserId, "part_added", { partId: part.id, quantity });
-  return part;
+
+  const existing = await db.workOrderPart.findFirst({ where: { id, accountId: input.accountId, workOrderId: input.workOrderId } });
+  if (existing) {
+    if (
+      existing.description !== description ||
+      existing.quantity !== quantity ||
+      existing.unitPriceMinor !== unitPriceMinor ||
+      existing.catalogItemId !== catalogItemId
+    ) {
+      throw new Error("Idempotency key was already used with different part data");
+    }
+    return existing;
+  }
+
+  try {
+    const part = await db.workOrderPart.create({
+      data: { id, accountId: input.accountId, workOrderId: input.workOrderId, description, quantity, unitPriceMinor, catalogItemId },
+    });
+    await audit(input.accountId, input.workOrderId, input.actorUserId, "part_added", { partId: part.id, quantity });
+    return part;
+  } catch (error) {
+    const raced = await db.workOrderPart.findFirst({ where: { id, accountId: input.accountId, workOrderId: input.workOrderId } });
+    if (raced) return raced;
+    throw error;
+  }
 }
 
 export async function addWorkTimeEntry(input: {
@@ -168,6 +211,7 @@ export async function addWorkTimeEntry(input: {
   workOrderId: string;
   actorUserId: string;
   membershipRole: string;
+  idempotencyKey: string;
   startedAt: Date;
   endedAt?: Date | null;
   notes?: string | null;
@@ -181,19 +225,41 @@ export async function addWorkTimeEntry(input: {
   const minutes = endedAt ? Math.max(1, Math.round((endedAt.getTime() - input.startedAt.getTime()) / 60000)) : null;
   if (minutes && minutes > 24 * 60) throw new Error("A single time entry cannot exceed 24 hours");
   const notes = input.notes?.trim() ? input.notes.trim().slice(0, 1000) : null;
-  const entry = await db.workTimeEntry.create({
-    data: {
-      accountId: input.accountId,
-      workOrderId: input.workOrderId,
-      userId: input.actorUserId,
-      startedAt: input.startedAt,
-      endedAt,
-      minutes,
-      notes,
-    },
-  });
-  await audit(input.accountId, input.workOrderId, input.actorUserId, "time_entry_added", { timeEntryId: entry.id, minutes });
-  return entry;
+  const id = executionRecordId(input.accountId, input.workOrderId, "time", input.idempotencyKey);
+
+  const existing = await db.workTimeEntry.findFirst({ where: { id, accountId: input.accountId, workOrderId: input.workOrderId } });
+  if (existing) {
+    if (
+      existing.userId !== input.actorUserId ||
+      existing.startedAt.getTime() !== input.startedAt.getTime() ||
+      (existing.endedAt?.getTime() ?? null) !== (endedAt?.getTime() ?? null) ||
+      existing.notes !== notes
+    ) {
+      throw new Error("Idempotency key was already used with different time-entry data");
+    }
+    return existing;
+  }
+
+  try {
+    const entry = await db.workTimeEntry.create({
+      data: {
+        id,
+        accountId: input.accountId,
+        workOrderId: input.workOrderId,
+        userId: input.actorUserId,
+        startedAt: input.startedAt,
+        endedAt,
+        minutes,
+        notes,
+      },
+    });
+    await audit(input.accountId, input.workOrderId, input.actorUserId, "time_entry_added", { timeEntryId: entry.id, minutes });
+    return entry;
+  } catch (error) {
+    const raced = await db.workTimeEntry.findFirst({ where: { id, accountId: input.accountId, workOrderId: input.workOrderId } });
+    if (raced) return raced;
+    throw error;
+  }
 }
 
 export async function captureWorkOrderSignoff(input: {
@@ -202,15 +268,17 @@ export async function captureWorkOrderSignoff(input: {
   actorUserId: string;
   membershipRole: string;
   signoff: unknown;
+  expectedUpdatedAt: Date;
 }) {
   const workOrder = await requireEditableWorkOrder(input);
+  assertExpectedVersion(workOrder.updatedAt, input.expectedUpdatedAt);
   if (!["in_progress", "completion_review"].includes(workOrder.status)) {
     throw new Error("Customer sign-off can only be captured during active completion work");
   }
   const signoff = normalizeSignoffInput(input.signoff, input.actorUserId);
   const serialized = JSON.stringify(signoff);
   const updated = await db.workOrder.updateMany({
-    where: { id: input.workOrderId, accountId: input.accountId, signatureContent: workOrder.signatureContent },
+    where: { id: input.workOrderId, accountId: input.accountId, updatedAt: input.expectedUpdatedAt },
     data: { signatureContent: serialized },
   });
   if (updated.count !== 1) throw new Error("Work order sign-off changed concurrently");
@@ -227,8 +295,4 @@ export async function assertWorkOrderCompletionReady(accountId: string, workOrde
   const readiness = completionReadiness(parseStoredChecklist(workOrder.checklistContent), workOrder.signatureContent);
   if (!readiness.ready) throw new Error(`Work order is not ready for completion: ${readiness.blockers.join("; ")}`);
   return readiness;
-}
-
-export function canTechnicianWriteExecution(role: string) {
-  return normalizeFieldServiceRole(role) === "field_technician";
 }
