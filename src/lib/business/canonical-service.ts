@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { assertAccountAccess } from "@/lib/account-context";
+import { buildCatalogPriceAuditMetadata } from "@/lib/business/catalog-pricing";
 import {
   assertRoleCapability,
   lineAmountMinor,
@@ -106,6 +107,14 @@ export async function upsertCatalogItemBySku(input: {
           },
         });
 
+    const pricingAudit = buildCatalogPriceAuditMetadata({
+      sku,
+      oldUnitPriceMinor: existing?.unitPriceMinor ?? null,
+      newUnitPriceMinor: item.unitPriceMinor,
+      oldActive: existing?.active ?? null,
+      newActive: item.active,
+    });
+
     await tx.accountAuditEvent.create({
       data: {
         accountId: input.accountId,
@@ -113,7 +122,7 @@ export async function upsertCatalogItemBySku(input: {
         entityId: item.id,
         action: existing ? "updated" : "created",
         actorUserId: input.actorUserId,
-        metadata: JSON.stringify({ sku }),
+        metadata: JSON.stringify(pricingAudit),
       },
     });
 
