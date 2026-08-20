@@ -54,6 +54,19 @@ export function deriveWorkOrderInvoiceLines(input: {
   return lines;
 }
 
+function isUniqueViolation(error: unknown): boolean {
+  return Boolean(
+    error &&
+      typeof error === "object" &&
+      "code" in error &&
+      (error as { code?: unknown }).code === "P2002",
+  );
+}
+
+export function derivedWorkOrderAuditEventId(invoiceId: string): string {
+  return `invoice-derivation:${invoiceId}`;
+}
+
 async function requireInvoiceWrite(accountId: string, actorUserId: string) {
   const membership = await assertAccountAccess(accountId, actorUserId);
   assertRoleCapability(membership.role, "invoice_write");
@@ -79,21 +92,42 @@ async function ensureDerivedAuditEvent(input: {
   });
   if (existing) return;
 
-  await db.accountAuditEvent.create({
-    data: {
-      accountId: input.accountId,
-      entityType: "invoice",
-      entityId: input.invoiceId,
-      action: "derived_from_completed_work_order",
-      actorUserId: input.actorUserId,
-      metadata: JSON.stringify({
-        workOrderId: input.workOrderId,
-        partLineCount: input.partLineCount,
-        completedLaborMinutes: input.completedLaborMinutes,
-        laborRateMinorPerHour: input.laborRateMinorPerHour ?? null,
-      }),
-    },
-  });
+  const eventId = derivedWorkOrderAuditEventId(input.invoiceId);
+  try {
+    await db.accountAuditEvent.create({
+      data: {
+        id: eventId,
+        accountId: input.accountId,
+        entityType: "invoice",
+        entityId: input.invoiceId,
+        action: "derived_from_completed_work_order",
+        actorUserId: input.actorUserId,
+        metadata: JSON.stringify({
+          workOrderId: input.workOrderId,
+          partLineCount: input.partLineCount,
+          completedLaborMinutes: input.completedLaborMinutes,
+          laborRateMinorPerHour: input.laborRateMinorPerHour ?? null,
+        }),
+      },
+    });
+  } catch (error) {
+    if (!isUniqueViolation(error)) throw error;
+
+    // Concurrent retries intentionally target the same deterministic primary key.
+    // Treat the unique race as success only when the winning row is the exact
+    // derivation event expected for this tenant and invoice.
+    const raced = await db.accountAuditEvent.findFirst({
+      where: {
+        id: eventId,
+        accountId: input.accountId,
+        entityType: "invoice",
+        entityId: input.invoiceId,
+        action: "derived_from_completed_work_order",
+      },
+      select: { id: true },
+    });
+    if (!raced) throw error;
+  }
 }
 
 export async function prepareInvoiceFromCompletedWorkOrder(input: {
@@ -145,7 +179,7 @@ export async function prepareInvoiceFromCompletedWorkOrder(input: {
       include: { lines: true },
     });
     // Repairs an audit write that may have failed after invoice persistence on an
-    // earlier attempt, while avoiding a duplicate on normal retries.
+    // earlier attempt, while avoiding a duplicate on normal and concurrent retries.
     await ensureDerivedAuditEvent({ ...auditInput, invoiceId: invoice.id });
     return invoice;
   }
