@@ -293,21 +293,26 @@ model Account {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  memberships      AccountMembership[]
-  storefront       StorefrontConfig?
-  customers        Customer[]
-  catalogItems     CatalogItem[]
-  orders           BusinessOrder[]
-  fulfillments     Fulfillment[]
-  workOrders       WorkOrder[]
+  memberships       AccountMembership[]
+  storefront        StorefrontConfig?
+  customers         Customer[]
+  catalogItems      CatalogItem[]
+  orders            BusinessOrder[]
+  orderLines        BusinessOrderLine[]
+  fulfillments      Fulfillment[]
+  fulfillmentLines  FulfillmentLine[]
   serviceAgreements ServiceAgreement[]
-  invoices         Invoice[]
-  auditEvents      AccountAuditEvent[]
+  workOrders        WorkOrder[]
+  workOrderParts    WorkOrderPart[]
+  workTimeEntries   WorkTimeEntry[]
+  invoices          Invoice[]
+  invoiceLines      InvoiceLine[]
+  auditEvents       AccountAuditEvent[]
 }
 
 model AccountMembership {
   id        String   @id @default(cuid())
-  role      String   @default("owner")
+  role      String
   status    String   @default("active")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -351,48 +356,50 @@ model StorefrontVersion {
 }
 
 model Customer {
-  id              String   @id @default(cuid())
-  displayName     String
-  email           String?
-  phone           String?
-  companyName     String?
-  billingAddress  String?
-  serviceAddress  String?
-  externalRef     String?
-  status          String   @default("active")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(cuid())
+  displayName    String
+  email          String?
+  phone          String?
+  companyName    String?
+  billingAddress String?
+  serviceAddress String?
+  externalRef    String?
+  status         String   @default("active")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  accountId String
-  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  orders    BusinessOrder[]
-  workOrders WorkOrder[]
-  invoices  Invoice[]
+  accountId         String
+  account           Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  orders            BusinessOrder[]
+  workOrders        WorkOrder[]
+  invoices          Invoice[]
   serviceAgreements ServiceAgreement[]
 
+  @@unique([accountId, id])
   @@index([accountId, displayName])
   @@index([accountId, email])
 }
 
 model CatalogItem {
-  id          String   @id @default(cuid())
-  kind        String   @default("product")
-  name        String
-  description String?
-  sku         String?
-  unitPrice   Float    @default(0)
-  unitLabel   String?
-  active      Boolean  @default(true)
-  metadata    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(cuid())
+  kind           String   @default("product")
+  name           String
+  description    String?
+  sku            String?
+  unitPriceMinor Int      @default(0)
+  unitLabel      String?
+  active         Boolean  @default(true)
+  metadata       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  accountId String
-  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  orderLines BusinessOrderLine[]
+  accountId        String
+  account          Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  orderLines       BusinessOrderLine[]
   fulfillmentLines FulfillmentLine[]
-  workOrderParts WorkOrderPart[]
+  workOrderParts   WorkOrderPart[]
 
+  @@unique([accountId, id])
   @@unique([accountId, sku])
   @@index([accountId, kind, active])
 }
@@ -413,36 +420,40 @@ model BusinessOrder {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  accountId String
-  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  customerId String
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
-  lines      BusinessOrderLine[]
+  accountId    String
+  account      Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  customerId   String
+  customer     Customer @relation(fields: [accountId, customerId], references: [accountId, id], onDelete: Restrict)
+  lines        BusinessOrderLine[]
   fulfillments Fulfillment[]
-  workOrders WorkOrder[]
-  invoices   Invoice[]
+  workOrders   WorkOrder[]
+  invoices     Invoice[]
 
+  @@unique([accountId, id])
   @@unique([accountId, orderNumber])
   @@unique([accountId, idempotencyKey])
   @@index([accountId, status, requestedAt])
-  @@index([customerId, requestedAt])
+  @@index([accountId, customerId, requestedAt])
 }
 
 model BusinessOrderLine {
-  id          String  @id @default(cuid())
-  description String
-  quantity    Float   @default(1)
-  unitPrice   Float   @default(0)
-  createdAt   DateTime @default(now())
+  id             String   @id @default(cuid())
+  description    String
+  quantity       Float    @default(1)
+  unitPriceMinor Int      @default(0)
+  createdAt      DateTime @default(now())
 
-  orderId String
-  order   BusinessOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  catalogItemId String?
-  catalogItem   CatalogItem? @relation(fields: [catalogItemId], references: [id], onDelete: SetNull)
+  accountId        String
+  account          Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  orderId          String
+  order            BusinessOrder @relation(fields: [accountId, orderId], references: [accountId, id], onDelete: Cascade)
+  catalogItemId    String?
+  catalogItem      CatalogItem? @relation(fields: [accountId, catalogItemId], references: [accountId, id], onDelete: Restrict)
   fulfillmentLines FulfillmentLine[]
-  invoiceLines InvoiceLine[]
+  invoiceLines     InvoiceLine[]
 
-  @@index([orderId])
+  @@unique([accountId, id])
+  @@index([accountId, orderId])
 }
 
 model Fulfillment {
@@ -459,79 +470,85 @@ model Fulfillment {
   accountId String
   account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
   orderId   String
-  order     BusinessOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order     BusinessOrder @relation(fields: [accountId, orderId], references: [accountId, id], onDelete: Cascade)
   lines     FulfillmentLine[]
 
+  @@unique([accountId, id])
   @@unique([accountId, idempotencyKey])
   @@index([accountId, status])
-  @@index([orderId, status])
+  @@index([accountId, orderId, status])
 }
 
 model FulfillmentLine {
   id       String @id @default(cuid())
   quantity Float  @default(0)
 
-  fulfillmentId String
-  fulfillment   Fulfillment @relation(fields: [fulfillmentId], references: [id], onDelete: Cascade)
-  orderLineId   String
-  orderLine     BusinessOrderLine @relation(fields: [orderLineId], references: [id], onDelete: Restrict)
-  catalogItemId String?
-  catalogItem   CatalogItem? @relation(fields: [catalogItemId], references: [id], onDelete: SetNull)
+  accountId      String
+  account        Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  fulfillmentId  String
+  fulfillment    Fulfillment @relation(fields: [accountId, fulfillmentId], references: [accountId, id], onDelete: Cascade)
+  orderLineId    String
+  orderLine      BusinessOrderLine @relation(fields: [accountId, orderLineId], references: [accountId, id], onDelete: Restrict)
+  catalogItemId  String?
+  catalogItem    CatalogItem? @relation(fields: [accountId, catalogItemId], references: [accountId, id], onDelete: Restrict)
 
-  @@unique([fulfillmentId, orderLineId])
+  @@unique([accountId, id])
+  @@unique([accountId, fulfillmentId, orderLineId])
 }
 
 model ServiceAgreement {
-  id             String   @id @default(cuid())
-  name           String
-  status         String   @default("active")
-  recurrenceRule String
-  nextRunAt      DateTime?
+  id              String   @id @default(cuid())
+  name            String
+  status          String   @default("active")
+  recurrenceRule  String
+  nextRunAt       DateTime?
   lastGeneratedAt DateTime?
-  version        Int      @default(1)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  version         Int      @default(1)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  accountId String
-  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  accountId  String
+  account    Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
   customerId String
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  customer   Customer @relation(fields: [accountId, customerId], references: [accountId, id], onDelete: Restrict)
   workOrders WorkOrder[]
 
+  @@unique([accountId, id])
   @@index([accountId, status, nextRunAt])
 }
 
 model WorkOrder {
-  id             String   @id @default(cuid())
-  workOrderNumber String
-  idempotencyKey String
-  serviceType    String
-  status         String   @default("requested")
-  serviceAddress String?
-  scheduledStart DateTime?
-  scheduledEnd   DateTime?
-  arrivalWindow  String?
-  assignedUserId String?
-  customerNotes  String?
-  internalNotes  String?
-  checklistContent String?
-  signatureContent String?
-  completedAt    DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                   String   @id @default(cuid())
+  workOrderNumber      String
+  idempotencyKey       String
+  serviceType          String
+  status               String   @default("requested")
+  serviceAddress       String?
+  scheduledStart       DateTime?
+  scheduledEnd         DateTime?
+  arrivalWindow        String?
+  assignedUserId       String?
+  customerNotes        String?
+  internalNotes        String?
+  checklistContent     String?
+  signatureContent     String?
+  completedAt          DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
-  accountId String
-  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  customerId String
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
-  orderId String?
-  order   BusinessOrder? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  accountId          String
+  account            Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  customerId         String
+  customer           Customer @relation(fields: [accountId, customerId], references: [accountId, id], onDelete: Restrict)
+  orderId            String?
+  order              BusinessOrder? @relation(fields: [accountId, orderId], references: [accountId, id], onDelete: Restrict)
   serviceAgreementId String?
-  serviceAgreement   ServiceAgreement? @relation(fields: [serviceAgreementId], references: [id], onDelete: SetNull)
-  parts      WorkOrderPart[]
-  timeEntries WorkTimeEntry[]
-  invoices   Invoice[]
+  serviceAgreement   ServiceAgreement? @relation(fields: [accountId, serviceAgreementId], references: [accountId, id], onDelete: Restrict)
+  parts              WorkOrderPart[]
+  timeEntries        WorkTimeEntry[]
+  invoices           Invoice[]
 
+  @@unique([accountId, id])
   @@unique([accountId, workOrderNumber])
   @@unique([accountId, idempotencyKey])
   @@index([accountId, status, scheduledStart])
@@ -539,34 +556,40 @@ model WorkOrder {
 }
 
 model WorkOrderPart {
-  id          String   @id @default(cuid())
-  description String
-  quantity    Float    @default(1)
-  unitPrice   Float    @default(0)
-  createdAt   DateTime @default(now())
+  id             String   @id @default(cuid())
+  description    String
+  quantity       Float    @default(1)
+  unitPriceMinor Int      @default(0)
+  createdAt      DateTime @default(now())
 
-  workOrderId String
-  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  accountId     String
+  account       Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  workOrderId   String
+  workOrder     WorkOrder @relation(fields: [accountId, workOrderId], references: [accountId, id], onDelete: Cascade)
   catalogItemId String?
-  catalogItem   CatalogItem? @relation(fields: [catalogItemId], references: [id], onDelete: SetNull)
+  catalogItem   CatalogItem? @relation(fields: [accountId, catalogItemId], references: [accountId, id], onDelete: Restrict)
 
-  @@index([workOrderId])
+  @@unique([accountId, id])
+  @@index([accountId, workOrderId])
 }
 
 model WorkTimeEntry {
-  id          String   @id @default(cuid())
-  userId      String
-  startedAt   DateTime
-  endedAt     DateTime?
-  minutes     Int?
-  notes       String?
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String
+  startedAt DateTime
+  endedAt   DateTime?
+  minutes   Int?
+  notes     String?
+  createdAt DateTime @default(now())
 
+  accountId   String
+  account     Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
   workOrderId String
-  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  workOrder   WorkOrder @relation(fields: [accountId, workOrderId], references: [accountId, id], onDelete: Cascade)
 
-  @@index([workOrderId, startedAt])
-  @@index([userId, startedAt])
+  @@unique([accountId, id])
+  @@index([accountId, workOrderId, startedAt])
+  @@index([accountId, userId, startedAt])
 }
 
 model Invoice {
@@ -578,42 +601,46 @@ model Invoice {
   dueAt                    DateTime?
   finalizedAt              DateTime?
   finalizedSnapshotContent String?
-  subtotal                 Float    @default(0)
-  taxTotal                 Float    @default(0)
-  total                    Float    @default(0)
+  subtotalMinor            Int      @default(0)
+  taxTotalMinor            Int      @default(0)
+  totalMinor               Int      @default(0)
   paymentStatus            String   @default("awaiting_payment")
   notes                    String?
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
 
-  accountId String
-  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  customerId String
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
-  orderId String?
-  order   BusinessOrder? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  accountId   String
+  account     Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  customerId  String
+  customer    Customer @relation(fields: [accountId, customerId], references: [accountId, id], onDelete: Restrict)
+  orderId     String?
+  order       BusinessOrder? @relation(fields: [accountId, orderId], references: [accountId, id], onDelete: Restrict)
   workOrderId String?
-  workOrder   WorkOrder? @relation(fields: [workOrderId], references: [id], onDelete: SetNull)
-  lines      InvoiceLine[]
+  workOrder   WorkOrder? @relation(fields: [accountId, workOrderId], references: [accountId, id], onDelete: Restrict)
+  lines       InvoiceLine[]
 
+  @@unique([accountId, id])
   @@unique([accountId, invoiceNumber])
   @@index([accountId, status, issuedAt])
   @@index([accountId, paymentStatus, dueAt])
 }
 
 model InvoiceLine {
-  id          String @id @default(cuid())
-  description String
-  quantity    Float  @default(1)
-  unitPrice   Float  @default(0)
-  amount      Float  @default(0)
+  id             String @id @default(cuid())
+  description    String
+  quantity       Float  @default(1)
+  unitPriceMinor Int    @default(0)
+  amountMinor    Int    @default(0)
 
-  invoiceId String
-  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  accountId   String
+  account     Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  invoiceId   String
+  invoice     Invoice @relation(fields: [accountId, invoiceId], references: [accountId, id], onDelete: Cascade)
   orderLineId String?
-  orderLine   BusinessOrderLine? @relation(fields: [orderLineId], references: [id], onDelete: SetNull)
+  orderLine   BusinessOrderLine? @relation(fields: [accountId, orderLineId], references: [accountId, id], onDelete: Restrict)
 
-  @@index([invoiceId])
+  @@unique([accountId, id])
+  @@index([accountId, invoiceId])
 }
 
 model AccountAuditEvent {
