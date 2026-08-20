@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { deriveWorkOrderInvoiceLines } from "@/lib/business/work-order-invoice";
+import {
+  deriveWorkOrderInvoiceLines,
+  derivedWorkOrderAuditEventId,
+} from "@/lib/business/work-order-invoice";
 
 test("derives part lines and aggregates completed labor minutes", () => {
   const lines = deriveWorkOrderInvoiceLines({
@@ -18,6 +21,12 @@ test("derives part lines and aggregates completed labor minutes", () => {
   assert.equal(lines[2]?.description, "Labor (75 minutes)");
   assert.equal(lines[2]?.quantity, 1.25);
   assert.equal(lines[2]?.unitPriceMinor, 12000);
+});
+
+test("uses one deterministic audit identity per derived invoice", () => {
+  assert.equal(derivedWorkOrderAuditEventId("inv_123"), "invoice-derivation:inv_123");
+  assert.equal(derivedWorkOrderAuditEventId("inv_123"), derivedWorkOrderAuditEventId("inv_123"));
+  assert.notEqual(derivedWorkOrderAuditEventId("inv_123"), derivedWorkOrderAuditEventId("inv_456"));
 });
 
 test("requires an explicit labor rate when completed labor exists", () => {
