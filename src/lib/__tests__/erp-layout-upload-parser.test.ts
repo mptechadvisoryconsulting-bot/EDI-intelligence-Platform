@@ -6,6 +6,7 @@ import {
 } from "../erp-layout/upload-parser";
 
 const ORACLE_LAYOUT_REPORT = `
+Oracle E-Commerce Gateway
 Transaction Layout Definition Report
 Transaction: POI Description: IN: Purchase Order (850/ORDERS)
 Level: Order Header Interface Table: OE_HEADERS_INTERFACE
@@ -18,10 +19,22 @@ CUSTOMER_PO_NUMBER                                        1000    50    50 VARCH
 ORDERED_DATE                                              1000    60    15 DATE           168     PO  PO1
 `;
 
+const GENERIC_LAYOUT_REPORT = `
+Transaction Layout Definition Report
+-Record Layout-
+Interface Column Ext Table Rec Num Pos Width Data Type Start Col Seq Code Qual
+CUSTOMER_PO_NUMBER 1000 50 50 VARCHAR2 118 PO PO1
+`;
+
 describe("Oracle Transaction Layout Definition Report parser", () => {
   it("recognizes Oracle report markers", () => {
     assert.equal(isOracleTransactionLayoutReport(ORACLE_LAYOUT_REPORT), true);
     assert.equal(isOracleTransactionLayoutReport("Interface Column,Field Name,Width"), false);
+  });
+
+  it("requires an Oracle-specific identifier", () => {
+    assert.equal(isOracleTransactionLayoutReport(GENERIC_LAYOUT_REPORT), false);
+    assert.deepEqual(parseOracleTransactionLayoutReport(GENERIC_LAYOUT_REPORT), []);
   });
 
   it("extracts positional fields from Oracle TXT/PDF text", () => {
