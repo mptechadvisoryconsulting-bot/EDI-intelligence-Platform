@@ -17,31 +17,43 @@ function dateValue(value: unknown) {
   return Number.isNaN(date.valueOf()) ? null : date;
 }
 
+function stringValue(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
 export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const account = await requireAccountContext();
     const { id } = await context.params;
     const body = (await request.json()) as Record<string, unknown>;
-    const action = typeof body.action === "string" ? body.action.trim() : "";
+    const action = stringValue(body.action);
 
     if (action === "save_checklist") {
+      const expectedUpdatedAt = dateValue(body.expectedUpdatedAt);
+      if (!expectedUpdatedAt) {
+        return NextResponse.json({ error: "Valid expectedUpdatedAt is required" }, { status: 400 });
+      }
       const checklist = await saveWorkOrderChecklist({
         accountId: account.accountId,
         workOrderId: id,
         actorUserId: account.user.id,
         membershipRole: account.membershipRole,
         checklist: body.checklist,
+        expectedUpdatedAt,
       });
       return NextResponse.json({ ok: true, checklist });
     }
 
     if (action === "add_part") {
+      const idempotencyKey = stringValue(body.idempotencyKey);
+      if (!idempotencyKey) return NextResponse.json({ error: "idempotencyKey is required" }, { status: 400 });
       const part = await addWorkOrderPart({
         accountId: account.accountId,
         workOrderId: id,
         actorUserId: account.user.id,
         membershipRole: account.membershipRole,
-        description: typeof body.description === "string" ? body.description : "",
+        idempotencyKey,
+        description: stringValue(body.description),
         quantity: numberValue(body.quantity),
         unitPriceMinor: numberValue(body.unitPriceMinor),
         catalogItemId: typeof body.catalogItemId === "string" ? body.catalogItemId : null,
@@ -50,6 +62,8 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     }
 
     if (action === "add_time") {
+      const idempotencyKey = stringValue(body.idempotencyKey);
+      if (!idempotencyKey) return NextResponse.json({ error: "idempotencyKey is required" }, { status: 400 });
       const startedAt = dateValue(body.startedAt);
       const endedAt = body.endedAt == null ? null : dateValue(body.endedAt);
       if (!startedAt || (body.endedAt != null && !endedAt)) {
@@ -60,6 +74,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
         workOrderId: id,
         actorUserId: account.user.id,
         membershipRole: account.membershipRole,
+        idempotencyKey,
         startedAt,
         endedAt,
         notes: typeof body.notes === "string" ? body.notes : null,
@@ -68,12 +83,17 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     }
 
     if (action === "capture_signoff") {
+      const expectedUpdatedAt = dateValue(body.expectedUpdatedAt);
+      if (!expectedUpdatedAt) {
+        return NextResponse.json({ error: "Valid expectedUpdatedAt is required" }, { status: 400 });
+      }
       const signoff = await captureWorkOrderSignoff({
         accountId: account.accountId,
         workOrderId: id,
         actorUserId: account.user.id,
         membershipRole: account.membershipRole,
         signoff: body.signoff,
+        expectedUpdatedAt,
       });
       return NextResponse.json({ ok: true, signoff });
     }
@@ -82,7 +102,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to update work order execution";
     if (message === "Forbidden") return NextResponse.json({ error: message }, { status: 403 });
-    if (message.includes("concurrently") || message.includes("locked")) {
+    if (message.includes("concurrently") || message.includes("locked") || message.includes("Idempotency key was already used")) {
       return NextResponse.json({ error: message }, { status: 409 });
     }
     if (message.includes("Unauthorized")) {
