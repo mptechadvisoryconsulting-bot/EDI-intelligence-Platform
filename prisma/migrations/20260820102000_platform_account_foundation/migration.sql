@@ -10,7 +10,7 @@ CREATE TABLE "Account" (
 
 CREATE TABLE "AccountMembership" (
     "id" TEXT NOT NULL PRIMARY KEY,
-    "role" TEXT NOT NULL DEFAULT 'owner',
+    "role" TEXT NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'active',
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE "CatalogItem" (
     "name" TEXT NOT NULL,
     "description" TEXT,
     "sku" TEXT,
-    "unitPrice" REAL NOT NULL DEFAULT 0,
+    "unitPriceMinor" INTEGER NOT NULL DEFAULT 0,
     "unitLabel" TEXT,
     "active" BOOLEAN NOT NULL DEFAULT true,
     "metadata" TEXT,
@@ -93,19 +93,21 @@ CREATE TABLE "BusinessOrder" (
     "accountId" TEXT NOT NULL,
     "customerId" TEXT NOT NULL,
     CONSTRAINT "BusinessOrder_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "BusinessOrder_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "Customer" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "BusinessOrder_accountId_customerId_fkey" FOREIGN KEY ("accountId", "customerId") REFERENCES "Customer" ("accountId", "id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE "BusinessOrderLine" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "description" TEXT NOT NULL,
     "quantity" REAL NOT NULL DEFAULT 1,
-    "unitPrice" REAL NOT NULL DEFAULT 0,
+    "unitPriceMinor" INTEGER NOT NULL DEFAULT 0,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "accountId" TEXT NOT NULL,
     "orderId" TEXT NOT NULL,
     "catalogItemId" TEXT,
-    CONSTRAINT "BusinessOrderLine_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "BusinessOrder" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "BusinessOrderLine_catalogItemId_fkey" FOREIGN KEY ("catalogItemId") REFERENCES "CatalogItem" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    CONSTRAINT "BusinessOrderLine_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "BusinessOrderLine_accountId_orderId_fkey" FOREIGN KEY ("accountId", "orderId") REFERENCES "BusinessOrder" ("accountId", "id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "BusinessOrderLine_accountId_catalogItemId_fkey" FOREIGN KEY ("accountId", "catalogItemId") REFERENCES "CatalogItem" ("accountId", "id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE "Fulfillment" (
@@ -121,18 +123,20 @@ CREATE TABLE "Fulfillment" (
     "accountId" TEXT NOT NULL,
     "orderId" TEXT NOT NULL,
     CONSTRAINT "Fulfillment_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "Fulfillment_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "BusinessOrder" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT "Fulfillment_accountId_orderId_fkey" FOREIGN KEY ("accountId", "orderId") REFERENCES "BusinessOrder" ("accountId", "id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE "FulfillmentLine" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "quantity" REAL NOT NULL DEFAULT 0,
+    "accountId" TEXT NOT NULL,
     "fulfillmentId" TEXT NOT NULL,
     "orderLineId" TEXT NOT NULL,
     "catalogItemId" TEXT,
-    CONSTRAINT "FulfillmentLine_fulfillmentId_fkey" FOREIGN KEY ("fulfillmentId") REFERENCES "Fulfillment" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "FulfillmentLine_orderLineId_fkey" FOREIGN KEY ("orderLineId") REFERENCES "BusinessOrderLine" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "FulfillmentLine_catalogItemId_fkey" FOREIGN KEY ("catalogItemId") REFERENCES "CatalogItem" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    CONSTRAINT "FulfillmentLine_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "FulfillmentLine_accountId_fulfillmentId_fkey" FOREIGN KEY ("accountId", "fulfillmentId") REFERENCES "Fulfillment" ("accountId", "id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "FulfillmentLine_accountId_orderLineId_fkey" FOREIGN KEY ("accountId", "orderLineId") REFERENCES "BusinessOrderLine" ("accountId", "id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "FulfillmentLine_accountId_catalogItemId_fkey" FOREIGN KEY ("accountId", "catalogItemId") REFERENCES "CatalogItem" ("accountId", "id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE "ServiceAgreement" (
@@ -148,7 +152,7 @@ CREATE TABLE "ServiceAgreement" (
     "accountId" TEXT NOT NULL,
     "customerId" TEXT NOT NULL,
     CONSTRAINT "ServiceAgreement_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "ServiceAgreement_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "Customer" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "ServiceAgreement_accountId_customerId_fkey" FOREIGN KEY ("accountId", "customerId") REFERENCES "Customer" ("accountId", "id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE "WorkOrder" (
@@ -174,21 +178,23 @@ CREATE TABLE "WorkOrder" (
     "orderId" TEXT,
     "serviceAgreementId" TEXT,
     CONSTRAINT "WorkOrder_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "WorkOrder_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "Customer" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "WorkOrder_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "BusinessOrder" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT "WorkOrder_serviceAgreementId_fkey" FOREIGN KEY ("serviceAgreementId") REFERENCES "ServiceAgreement" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    CONSTRAINT "WorkOrder_accountId_customerId_fkey" FOREIGN KEY ("accountId", "customerId") REFERENCES "Customer" ("accountId", "id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "WorkOrder_accountId_orderId_fkey" FOREIGN KEY ("accountId", "orderId") REFERENCES "BusinessOrder" ("accountId", "id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "WorkOrder_accountId_serviceAgreementId_fkey" FOREIGN KEY ("accountId", "serviceAgreementId") REFERENCES "ServiceAgreement" ("accountId", "id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE "WorkOrderPart" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "description" TEXT NOT NULL,
     "quantity" REAL NOT NULL DEFAULT 1,
-    "unitPrice" REAL NOT NULL DEFAULT 0,
+    "unitPriceMinor" INTEGER NOT NULL DEFAULT 0,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "accountId" TEXT NOT NULL,
     "workOrderId" TEXT NOT NULL,
     "catalogItemId" TEXT,
-    CONSTRAINT "WorkOrderPart_workOrderId_fkey" FOREIGN KEY ("workOrderId") REFERENCES "WorkOrder" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "WorkOrderPart_catalogItemId_fkey" FOREIGN KEY ("catalogItemId") REFERENCES "CatalogItem" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    CONSTRAINT "WorkOrderPart_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "WorkOrderPart_accountId_workOrderId_fkey" FOREIGN KEY ("accountId", "workOrderId") REFERENCES "WorkOrder" ("accountId", "id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "WorkOrderPart_accountId_catalogItemId_fkey" FOREIGN KEY ("accountId", "catalogItemId") REFERENCES "CatalogItem" ("accountId", "id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE "WorkTimeEntry" (
@@ -199,8 +205,10 @@ CREATE TABLE "WorkTimeEntry" (
     "minutes" INTEGER,
     "notes" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "accountId" TEXT NOT NULL,
     "workOrderId" TEXT NOT NULL,
-    CONSTRAINT "WorkTimeEntry_workOrderId_fkey" FOREIGN KEY ("workOrderId") REFERENCES "WorkOrder" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT "WorkTimeEntry_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "WorkTimeEntry_accountId_workOrderId_fkey" FOREIGN KEY ("accountId", "workOrderId") REFERENCES "WorkOrder" ("accountId", "id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE "Invoice" (
@@ -212,9 +220,9 @@ CREATE TABLE "Invoice" (
     "dueAt" DATETIME,
     "finalizedAt" DATETIME,
     "finalizedSnapshotContent" TEXT,
-    "subtotal" REAL NOT NULL DEFAULT 0,
-    "taxTotal" REAL NOT NULL DEFAULT 0,
-    "total" REAL NOT NULL DEFAULT 0,
+    "subtotalMinor" INTEGER NOT NULL DEFAULT 0,
+    "taxTotalMinor" INTEGER NOT NULL DEFAULT 0,
+    "totalMinor" INTEGER NOT NULL DEFAULT 0,
     "paymentStatus" TEXT NOT NULL DEFAULT 'awaiting_payment',
     "notes" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -224,21 +232,23 @@ CREATE TABLE "Invoice" (
     "orderId" TEXT,
     "workOrderId" TEXT,
     CONSTRAINT "Invoice_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "Invoice_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "Customer" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "Invoice_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "BusinessOrder" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT "Invoice_workOrderId_fkey" FOREIGN KEY ("workOrderId") REFERENCES "WorkOrder" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    CONSTRAINT "Invoice_accountId_customerId_fkey" FOREIGN KEY ("accountId", "customerId") REFERENCES "Customer" ("accountId", "id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Invoice_accountId_orderId_fkey" FOREIGN KEY ("accountId", "orderId") REFERENCES "BusinessOrder" ("accountId", "id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Invoice_accountId_workOrderId_fkey" FOREIGN KEY ("accountId", "workOrderId") REFERENCES "WorkOrder" ("accountId", "id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE "InvoiceLine" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "description" TEXT NOT NULL,
     "quantity" REAL NOT NULL DEFAULT 1,
-    "unitPrice" REAL NOT NULL DEFAULT 0,
-    "amount" REAL NOT NULL DEFAULT 0,
+    "unitPriceMinor" INTEGER NOT NULL DEFAULT 0,
+    "amountMinor" INTEGER NOT NULL DEFAULT 0,
+    "accountId" TEXT NOT NULL,
     "invoiceId" TEXT NOT NULL,
     "orderLineId" TEXT,
-    CONSTRAINT "InvoiceLine_invoiceId_fkey" FOREIGN KEY ("invoiceId") REFERENCES "Invoice" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "InvoiceLine_orderLineId_fkey" FOREIGN KEY ("orderLineId") REFERENCES "BusinessOrderLine" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    CONSTRAINT "InvoiceLine_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "InvoiceLine_accountId_invoiceId_fkey" FOREIGN KEY ("accountId", "invoiceId") REFERENCES "Invoice" ("accountId", "id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "InvoiceLine_accountId_orderLineId_fkey" FOREIGN KEY ("accountId", "orderLineId") REFERENCES "BusinessOrderLine" ("accountId", "id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE "AccountAuditEvent" (
@@ -260,30 +270,42 @@ CREATE INDEX "AccountMembership_userId_status_idx" ON "AccountMembership"("userI
 CREATE UNIQUE INDEX "StorefrontConfig_accountId_key" ON "StorefrontConfig"("accountId");
 CREATE UNIQUE INDEX "StorefrontVersion_storefrontId_versionNumber_key" ON "StorefrontVersion"("storefrontId", "versionNumber");
 CREATE INDEX "StorefrontVersion_storefrontId_state_idx" ON "StorefrontVersion"("storefrontId", "state");
+CREATE UNIQUE INDEX "Customer_accountId_id_key" ON "Customer"("accountId", "id");
 CREATE INDEX "Customer_accountId_displayName_idx" ON "Customer"("accountId", "displayName");
 CREATE INDEX "Customer_accountId_email_idx" ON "Customer"("accountId", "email");
+CREATE UNIQUE INDEX "CatalogItem_accountId_id_key" ON "CatalogItem"("accountId", "id");
 CREATE UNIQUE INDEX "CatalogItem_accountId_sku_key" ON "CatalogItem"("accountId", "sku");
 CREATE INDEX "CatalogItem_accountId_kind_active_idx" ON "CatalogItem"("accountId", "kind", "active");
+CREATE UNIQUE INDEX "BusinessOrder_accountId_id_key" ON "BusinessOrder"("accountId", "id");
 CREATE UNIQUE INDEX "BusinessOrder_accountId_orderNumber_key" ON "BusinessOrder"("accountId", "orderNumber");
 CREATE UNIQUE INDEX "BusinessOrder_accountId_idempotencyKey_key" ON "BusinessOrder"("accountId", "idempotencyKey");
 CREATE INDEX "BusinessOrder_accountId_status_requestedAt_idx" ON "BusinessOrder"("accountId", "status", "requestedAt");
-CREATE INDEX "BusinessOrder_customerId_requestedAt_idx" ON "BusinessOrder"("customerId", "requestedAt");
-CREATE INDEX "BusinessOrderLine_orderId_idx" ON "BusinessOrderLine"("orderId");
+CREATE INDEX "BusinessOrder_accountId_customerId_requestedAt_idx" ON "BusinessOrder"("accountId", "customerId", "requestedAt");
+CREATE UNIQUE INDEX "BusinessOrderLine_accountId_id_key" ON "BusinessOrderLine"("accountId", "id");
+CREATE INDEX "BusinessOrderLine_accountId_orderId_idx" ON "BusinessOrderLine"("accountId", "orderId");
+CREATE UNIQUE INDEX "Fulfillment_accountId_id_key" ON "Fulfillment"("accountId", "id");
 CREATE UNIQUE INDEX "Fulfillment_accountId_idempotencyKey_key" ON "Fulfillment"("accountId", "idempotencyKey");
 CREATE INDEX "Fulfillment_accountId_status_idx" ON "Fulfillment"("accountId", "status");
-CREATE INDEX "Fulfillment_orderId_status_idx" ON "Fulfillment"("orderId", "status");
-CREATE UNIQUE INDEX "FulfillmentLine_fulfillmentId_orderLineId_key" ON "FulfillmentLine"("fulfillmentId", "orderLineId");
+CREATE INDEX "Fulfillment_accountId_orderId_status_idx" ON "Fulfillment"("accountId", "orderId", "status");
+CREATE UNIQUE INDEX "FulfillmentLine_accountId_id_key" ON "FulfillmentLine"("accountId", "id");
+CREATE UNIQUE INDEX "FulfillmentLine_accountId_fulfillmentId_orderLineId_key" ON "FulfillmentLine"("accountId", "fulfillmentId", "orderLineId");
+CREATE UNIQUE INDEX "ServiceAgreement_accountId_id_key" ON "ServiceAgreement"("accountId", "id");
 CREATE INDEX "ServiceAgreement_accountId_status_nextRunAt_idx" ON "ServiceAgreement"("accountId", "status", "nextRunAt");
+CREATE UNIQUE INDEX "WorkOrder_accountId_id_key" ON "WorkOrder"("accountId", "id");
 CREATE UNIQUE INDEX "WorkOrder_accountId_workOrderNumber_key" ON "WorkOrder"("accountId", "workOrderNumber");
 CREATE UNIQUE INDEX "WorkOrder_accountId_idempotencyKey_key" ON "WorkOrder"("accountId", "idempotencyKey");
 CREATE INDEX "WorkOrder_accountId_status_scheduledStart_idx" ON "WorkOrder"("accountId", "status", "scheduledStart");
 CREATE INDEX "WorkOrder_accountId_assignedUserId_scheduledStart_idx" ON "WorkOrder"("accountId", "assignedUserId", "scheduledStart");
-CREATE INDEX "WorkOrderPart_workOrderId_idx" ON "WorkOrderPart"("workOrderId");
-CREATE INDEX "WorkTimeEntry_workOrderId_startedAt_idx" ON "WorkTimeEntry"("workOrderId", "startedAt");
-CREATE INDEX "WorkTimeEntry_userId_startedAt_idx" ON "WorkTimeEntry"("userId", "startedAt");
+CREATE UNIQUE INDEX "WorkOrderPart_accountId_id_key" ON "WorkOrderPart"("accountId", "id");
+CREATE INDEX "WorkOrderPart_accountId_workOrderId_idx" ON "WorkOrderPart"("accountId", "workOrderId");
+CREATE UNIQUE INDEX "WorkTimeEntry_accountId_id_key" ON "WorkTimeEntry"("accountId", "id");
+CREATE INDEX "WorkTimeEntry_accountId_workOrderId_startedAt_idx" ON "WorkTimeEntry"("accountId", "workOrderId", "startedAt");
+CREATE INDEX "WorkTimeEntry_accountId_userId_startedAt_idx" ON "WorkTimeEntry"("accountId", "userId", "startedAt");
+CREATE UNIQUE INDEX "Invoice_accountId_id_key" ON "Invoice"("accountId", "id");
 CREATE UNIQUE INDEX "Invoice_accountId_invoiceNumber_key" ON "Invoice"("accountId", "invoiceNumber");
 CREATE INDEX "Invoice_accountId_status_issuedAt_idx" ON "Invoice"("accountId", "status", "issuedAt");
 CREATE INDEX "Invoice_accountId_paymentStatus_dueAt_idx" ON "Invoice"("accountId", "paymentStatus", "dueAt");
-CREATE INDEX "InvoiceLine_invoiceId_idx" ON "InvoiceLine"("invoiceId");
+CREATE UNIQUE INDEX "InvoiceLine_accountId_id_key" ON "InvoiceLine"("accountId", "id");
+CREATE INDEX "InvoiceLine_accountId_invoiceId_idx" ON "InvoiceLine"("accountId", "invoiceId");
 CREATE INDEX "AccountAuditEvent_accountId_entityType_entityId_createdAt_idx" ON "AccountAuditEvent"("accountId", "entityType", "entityId", "createdAt");
 CREATE INDEX "AccountAuditEvent_accountId_createdAt_idx" ON "AccountAuditEvent"("accountId", "createdAt");
