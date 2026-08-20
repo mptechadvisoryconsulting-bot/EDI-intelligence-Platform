@@ -34,6 +34,7 @@ const navGroups = [
     items: [
       { href: "/interface-library", label: "Interface Library", icon: Database },
       { href: "/knowledge", label: "Knowledge", icon: Search },
+      { href: "/account/kpi", label: "KPI Setup", icon: BarChart3 },
       { href: "/account/erp-layout", label: "Legacy ERP Layout", icon: Database },
       { href: "/administration", label: "Administration", icon: Settings },
     ],
