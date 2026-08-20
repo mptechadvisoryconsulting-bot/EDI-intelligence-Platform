@@ -12,7 +12,8 @@ export type AccountContext = {
 
 /**
  * Produce a deterministic account slug for the legacy one-user-per-workspace model.
- * Including the user id prevents collisions without exposing credentials or secrets.
+ * The complete user id is included so two distinct users cannot collide merely because
+ * their usernames normalize alike and their ids happen to share a short suffix.
  */
 export function accountSlugForUser(user: Pick<SessionUser, "id" | "username">) {
   const base = user.username
@@ -20,7 +21,8 @@ export function accountSlugForUser(user: Pick<SessionUser, "id" | "username">) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "") || "business";
-  return `${base}-${user.id.slice(-8).toLowerCase()}`;
+  const stableUserId = user.id.trim().toLowerCase().replace(/[^a-z0-9_-]+/g, "-");
+  return `${base}-${stableUserId}`;
 }
 
 /**
@@ -84,14 +86,19 @@ export async function requireAccountContext(): Promise<AccountContext> {
   return getOrCreatePrimaryAccountForUser(user);
 }
 
-/** Reject cross-account access before loading or mutating tenant-owned records. */
+/** Reject cross-account or inactive-account access before tenant-owned operations. */
 export async function assertAccountAccess(accountId: string, userId: string) {
-  const membership = await db.accountMembership.findUnique({
-    where: { accountId_userId: { accountId, userId } },
+  const membership = await db.accountMembership.findFirst({
+    where: {
+      accountId,
+      userId,
+      status: "active",
+      account: { status: "active" },
+    },
     select: { status: true, role: true },
   });
 
-  if (!membership || membership.status !== "active") {
+  if (!membership) {
     throw new Error("Forbidden");
   }
 
