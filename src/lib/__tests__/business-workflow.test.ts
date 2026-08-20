@@ -39,10 +39,16 @@ describe("governed business workflows", () => {
 });
 
 describe("account tenant slug", () => {
-  it("is deterministic and includes user identity to prevent username collisions", () => {
+  it("is deterministic and uses complete user identity", () => {
     assert.equal(
       accountSlugForUser({ id: "clx1234567890abcd", username: "  My Business!  " }),
-      "my-business-7890abcd"
+      "my-business-clx1234567890abcd"
     );
+  });
+
+  it("does not collide when normalized usernames and trailing id characters match", () => {
+    const first = accountSlugForUser({ id: "user-alpha-12345678", username: "Acme" });
+    const second = accountSlugForUser({ id: "user-bravo-12345678", username: " acme " });
+    assert.notEqual(first, second);
   });
 });
