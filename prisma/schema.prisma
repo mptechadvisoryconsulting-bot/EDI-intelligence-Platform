@@ -16,12 +16,13 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  projects         ImplementationProject[]
-  approvals        ApprovalRecord[]
-  mappingReviews   MappingRecommendation[] @relation("ReviewedBy")
-  erpLayout        ErpLayoutProfile?
+  projects             ImplementationProject[]
+  approvals            ApprovalRecord[]
+  mappingReviews       MappingRecommendation[] @relation("ReviewedBy")
+  erpLayout            ErpLayoutProfile?
   interfaceDefinitions TransactionInterfaceDefinition[]
-  tradingPartners  TradingPartner[]
+  tradingPartners      TradingPartner[]
+  accountMemberships   AccountMembership[]
 }
 
 model ErpLayoutProfile {
@@ -41,22 +42,22 @@ model ErpLayoutProfile {
 }
 
 model ImplementationProject {
-  id               String   @id @default(cuid())
-  name             String
-  customer         String
-  tradingPartner   String
-  erpSystem        String
-  erpVersion       String?
-  translatorTarget String
+  id                 String   @id @default(cuid())
+  name               String
+  customer           String
+  tradingPartner     String
+  erpSystem          String
+  erpVersion         String?
+  translatorTarget   String
   connectionType     String?
   connectionProvider String?
   ediVersion         String?
-  transactions     String
-  status           String   @default("draft")
-  reviewStatus     String   @default("pending")
-  description      String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  transactions       String
+  status             String   @default("draft")
+  reviewStatus       String   @default("pending")
+  description        String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   ownerId String
   owner   User   @relation(fields: [ownerId], references: [id])
@@ -74,19 +75,19 @@ model ImplementationProject {
 }
 
 model TransactionInterfaceDefinition {
-  id               String   @id @default(cuid())
-  transactionCode  String
-  name             String
-  version          String
-  layoutType       String
-  status           String   @default("active")
-  description      String?
-  erpSystem        String?
-  originalFileName String?
-  fieldCount       Int      @default(0)
+  id                String   @id @default(cuid())
+  transactionCode   String
+  name              String
+  version           String
+  layoutType        String
+  status            String   @default("active")
+  description       String?
+  erpSystem         String?
+  originalFileName  String?
+  fieldCount        Int      @default(0)
   definitionContent String
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   userId String
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -114,17 +115,17 @@ model TradingPartner {
 }
 
 model TradingPartnerTransaction {
-  id                 String   @id @default(cuid())
-  transactionCode    String
-  transactionName    String
-  direction          String   @default("inbound")
-  businessStream     String   @default("default")
-  lifecycleState     String   @default("specification_received")
-  currentVersion     String   @default("1.0")
-  productionVersion  String?
-  legacyProjectId    String
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                String   @id @default(cuid())
+  transactionCode   String
+  transactionName   String
+  direction         String   @default("inbound")
+  businessStream    String   @default("default")
+  lifecycleState    String   @default("specification_received")
+  currentVersion    String   @default("1.0")
+  productionVersion String?
+  legacyProjectId   String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   tradingPartnerId String
   tradingPartner   TradingPartner @relation(fields: [tradingPartnerId], references: [id], onDelete: Cascade)
@@ -152,15 +153,15 @@ model LegacyImplementationLink {
 }
 
 model TransactionRevision {
-  id                String   @id @default(cuid())
-  version           String
-  reason            String
-  lifecycleState    String
-  isCurrent         Boolean  @default(true)
-  goLiveAt          DateTime?
-  legacyProjectId   String
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id              String   @id @default(cuid())
+  version         String
+  reason          String
+  lifecycleState  String
+  isCurrent       Boolean  @default(true)
+  goLiveAt        DateTime?
+  legacyProjectId String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   transactionId String
   transaction   TradingPartnerTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
@@ -281,4 +282,380 @@ model TestScenario {
 
   projectId String
   project   ImplementationProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  businessType String   @default("general")
+  status       String   @default("active")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  memberships       AccountMembership[]
+  storefront        StorefrontConfig?
+  customers         Customer[]
+  catalogItems      CatalogItem[]
+  orders            BusinessOrder[]
+  orderLines        BusinessOrderLine[]
+  fulfillments      Fulfillment[]
+  fulfillmentLines  FulfillmentLine[]
+  serviceAgreements ServiceAgreement[]
+  workOrders        WorkOrder[]
+  workOrderParts    WorkOrderPart[]
+  workTimeEntries   WorkTimeEntry[]
+  invoices          Invoice[]
+  invoiceLines      InvoiceLine[]
+  auditEvents       AccountAuditEvent[]
+}
+
+model AccountMembership {
+  id        String   @id @default(cuid())
+  role      String
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, userId])
+  @@index([userId, status])
+}
+
+model StorefrontConfig {
+  id                     String   @id @default(cuid())
+  status                 String   @default("draft")
+  themeContent           String
+  sectionContent         String
+  publishedVersionNumber Int?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  accountId String  @unique
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  versions  StorefrontVersion[]
+}
+
+model StorefrontVersion {
+  id              String   @id @default(cuid())
+  versionNumber   Int
+  state           String   @default("draft")
+  snapshotContent String
+  createdAt       DateTime @default(now())
+  publishedAt     DateTime?
+
+  storefrontId String
+  storefront   StorefrontConfig @relation(fields: [storefrontId], references: [id], onDelete: Cascade)
+
+  @@unique([storefrontId, versionNumber])
+  @@index([storefrontId, state])
+}
+
+model Customer {
+  id             String   @id @default(cuid())
+  displayName    String
+  email          String?
+  phone          String?
+  companyName    String?
+  billingAddress String?
+  serviceAddress String?
+  externalRef    String?
+  status         String   @default("active")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  accountId         String
+  account           Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  orders            BusinessOrder[]
+  workOrders        WorkOrder[]
+  invoices          Invoice[]
+  serviceAgreements ServiceAgreement[]
+
+  @@unique([accountId, id])
+  @@index([accountId, displayName])
+  @@index([accountId, email])
+}
+
+model CatalogItem {
+  id             String   @id @default(cuid())
+  kind           String   @default("product")
+  name           String
+  description    String?
+  sku            String?
+  unitPriceMinor Int      @default(0)
+  unitLabel      String?
+  active         Boolean  @default(true)
+  metadata       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  accountId        String
+  account          Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  orderLines       BusinessOrderLine[]
+  fulfillmentLines FulfillmentLine[]
+  workOrderParts   WorkOrderPart[]
+
+  @@unique([accountId, id])
+  @@unique([accountId, sku])
+  @@index([accountId, kind, active])
+}
+
+model BusinessOrder {
+  id             String   @id @default(cuid())
+  orderNumber    String
+  orderType      String   @default("product")
+  source         String   @default("manual")
+  sourceRef      String?
+  idempotencyKey String
+  status         String   @default("requested")
+  currency       String   @default("USD")
+  notes          String?
+  requestedAt    DateTime @default(now())
+  acceptedAt     DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  accountId    String
+  account      Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  customerId   String
+  customer     Customer @relation(fields: [accountId, customerId], references: [accountId, id], onDelete: Restrict)
+  lines        BusinessOrderLine[]
+  fulfillments Fulfillment[]
+  workOrders   WorkOrder[]
+  invoices     Invoice[]
+
+  @@unique([accountId, id])
+  @@unique([accountId, orderNumber])
+  @@unique([accountId, idempotencyKey])
+  @@index([accountId, status, requestedAt])
+  @@index([accountId, customerId, requestedAt])
+}
+
+model BusinessOrderLine {
+  id             String   @id @default(cuid())
+  description    String
+  quantity       Float    @default(1)
+  unitPriceMinor Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  accountId        String
+  account          Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  orderId          String
+  order            BusinessOrder @relation(fields: [accountId, orderId], references: [accountId, id], onDelete: Cascade)
+  catalogItemId    String?
+  catalogItem      CatalogItem? @relation(fields: [accountId, catalogItemId], references: [accountId, id], onDelete: Restrict)
+  fulfillmentLines FulfillmentLine[]
+  invoiceLines     InvoiceLine[]
+
+  @@unique([accountId, id])
+  @@index([accountId, orderId])
+}
+
+model Fulfillment {
+  id             String   @id @default(cuid())
+  idempotencyKey String
+  status         String   @default("pending")
+  trackingRef    String?
+  carrier        String?
+  notes          String?
+  completedAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  orderId   String
+  order     BusinessOrder @relation(fields: [accountId, orderId], references: [accountId, id], onDelete: Cascade)
+  lines     FulfillmentLine[]
+
+  @@unique([accountId, id])
+  @@unique([accountId, idempotencyKey])
+  @@index([accountId, status])
+  @@index([accountId, orderId, status])
+}
+
+model FulfillmentLine {
+  id       String @id @default(cuid())
+  quantity Float  @default(0)
+
+  accountId      String
+  account        Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  fulfillmentId  String
+  fulfillment    Fulfillment @relation(fields: [accountId, fulfillmentId], references: [accountId, id], onDelete: Cascade)
+  orderLineId    String
+  orderLine      BusinessOrderLine @relation(fields: [accountId, orderLineId], references: [accountId, id], onDelete: Restrict)
+  catalogItemId  String?
+  catalogItem    CatalogItem? @relation(fields: [accountId, catalogItemId], references: [accountId, id], onDelete: Restrict)
+
+  @@unique([accountId, id])
+  @@unique([accountId, fulfillmentId, orderLineId])
+}
+
+model ServiceAgreement {
+  id              String   @id @default(cuid())
+  name            String
+  status          String   @default("active")
+  recurrenceRule  String
+  nextRunAt       DateTime?
+  lastGeneratedAt DateTime?
+  version         Int      @default(1)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  accountId  String
+  account    Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  customerId String
+  customer   Customer @relation(fields: [accountId, customerId], references: [accountId, id], onDelete: Restrict)
+  workOrders WorkOrder[]
+
+  @@unique([accountId, id])
+  @@index([accountId, status, nextRunAt])
+}
+
+model WorkOrder {
+  id                   String   @id @default(cuid())
+  workOrderNumber      String
+  idempotencyKey       String
+  serviceType          String
+  status               String   @default("requested")
+  serviceAddress       String?
+  scheduledStart       DateTime?
+  scheduledEnd         DateTime?
+  arrivalWindow        String?
+  assignedUserId       String?
+  customerNotes        String?
+  internalNotes        String?
+  checklistContent     String?
+  signatureContent     String?
+  completedAt          DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  accountId          String
+  account            Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  customerId         String
+  customer           Customer @relation(fields: [accountId, customerId], references: [accountId, id], onDelete: Restrict)
+  orderId            String?
+  order              BusinessOrder? @relation(fields: [accountId, orderId], references: [accountId, id], onDelete: Restrict)
+  serviceAgreementId String?
+  serviceAgreement   ServiceAgreement? @relation(fields: [accountId, serviceAgreementId], references: [accountId, id], onDelete: Restrict)
+  parts              WorkOrderPart[]
+  timeEntries        WorkTimeEntry[]
+  invoices           Invoice[]
+
+  @@unique([accountId, id])
+  @@unique([accountId, workOrderNumber])
+  @@unique([accountId, idempotencyKey])
+  @@index([accountId, status, scheduledStart])
+  @@index([accountId, assignedUserId, scheduledStart])
+}
+
+model WorkOrderPart {
+  id             String   @id @default(cuid())
+  description    String
+  quantity       Float    @default(1)
+  unitPriceMinor Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  accountId     String
+  account       Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  workOrderId   String
+  workOrder     WorkOrder @relation(fields: [accountId, workOrderId], references: [accountId, id], onDelete: Cascade)
+  catalogItemId String?
+  catalogItem   CatalogItem? @relation(fields: [accountId, catalogItemId], references: [accountId, id], onDelete: Restrict)
+
+  @@unique([accountId, id])
+  @@index([accountId, workOrderId])
+}
+
+model WorkTimeEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  startedAt DateTime
+  endedAt   DateTime?
+  minutes   Int?
+  notes     String?
+  createdAt DateTime @default(now())
+
+  accountId   String
+  account     Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  workOrderId String
+  workOrder   WorkOrder @relation(fields: [accountId, workOrderId], references: [accountId, id], onDelete: Cascade)
+
+  @@unique([accountId, id])
+  @@index([accountId, workOrderId, startedAt])
+  @@index([accountId, userId, startedAt])
+}
+
+model Invoice {
+  id                       String   @id @default(cuid())
+  invoiceNumber            String
+  status                   String   @default("draft")
+  currency                 String   @default("USD")
+  issuedAt                 DateTime?
+  dueAt                    DateTime?
+  finalizedAt              DateTime?
+  finalizedSnapshotContent String?
+  subtotalMinor            Int      @default(0)
+  taxTotalMinor            Int      @default(0)
+  totalMinor               Int      @default(0)
+  paymentStatus            String   @default("awaiting_payment")
+  notes                    String?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  accountId   String
+  account     Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  customerId  String
+  customer    Customer @relation(fields: [accountId, customerId], references: [accountId, id], onDelete: Restrict)
+  orderId     String?
+  order       BusinessOrder? @relation(fields: [accountId, orderId], references: [accountId, id], onDelete: Restrict)
+  workOrderId String?
+  workOrder   WorkOrder? @relation(fields: [accountId, workOrderId], references: [accountId, id], onDelete: Restrict)
+  lines       InvoiceLine[]
+
+  @@unique([accountId, id])
+  @@unique([accountId, invoiceNumber])
+  @@index([accountId, status, issuedAt])
+  @@index([accountId, paymentStatus, dueAt])
+}
+
+model InvoiceLine {
+  id             String @id @default(cuid())
+  description    String
+  quantity       Float  @default(1)
+  unitPriceMinor Int    @default(0)
+  amountMinor    Int    @default(0)
+
+  accountId   String
+  account     Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  invoiceId   String
+  invoice     Invoice @relation(fields: [accountId, invoiceId], references: [accountId, id], onDelete: Cascade)
+  orderLineId String?
+  orderLine   BusinessOrderLine? @relation(fields: [accountId, orderLineId], references: [accountId, id], onDelete: Restrict)
+
+  @@unique([accountId, id])
+  @@index([accountId, invoiceId])
+}
+
+model AccountAuditEvent {
+  id          String   @id @default(cuid())
+  entityType  String
+  entityId    String
+  action      String
+  actorUserId String?
+  source      String   @default("app")
+  metadata    String?
+  createdAt   DateTime @default(now())
+
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, entityType, entityId, createdAt])
+  @@index([accountId, createdAt])
 }
