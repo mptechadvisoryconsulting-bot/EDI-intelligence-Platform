@@ -5,6 +5,12 @@ export type WorkflowKind =
   | "invoice"
   | "payment_status";
 
+/**
+ * These states govern the new account-scoped business domain only.
+ * Legacy ImplementationProject and TradingPartnerTransaction lifecycle fields use
+ * their existing EDI-specific lifecycle rules and are intentionally not members of
+ * WorkflowKind; callers must not route those legacy states through this table.
+ */
 const TRANSITIONS: Record<WorkflowKind, Record<string, readonly string[]>> = {
   product_order: {
     requested: ["confirmed", "cancelled"],
