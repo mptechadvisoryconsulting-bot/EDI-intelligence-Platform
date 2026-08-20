@@ -4,10 +4,10 @@ import { db } from "@/lib/db";
 import {
   getAccountErpLayout,
   layoutFieldsToSourceFields,
-  parseErpLayoutBuffer,
   saveAccountErpLayout,
   validateLayoutFields,
 } from "@/lib/erp-layout";
+import { parseUploadedErpLayout } from "@/lib/erp-layout/upload-parser";
 
 async function withAuth<T>(handler: (userId: string) => Promise<T>) {
   try {
@@ -45,13 +45,13 @@ export async function POST(request: NextRequest) {
 
       const fileName = file.name || "layout.csv";
       const buffer = Buffer.from(await file.arrayBuffer());
-      const fields = parseErpLayoutBuffer(buffer, fileName);
+      const fields = await parseUploadedErpLayout(buffer, fileName, file.type);
 
       if (fields.length === 0) {
         return NextResponse.json(
           {
             error:
-              "Could not parse any fields. Use CSV/Excel with columns: Interface Column, Field Name, Rec Number, Start Column, Width — or JSON/XML layout.",
+              "Could not parse any layout fields. Use CSV/Excel with Interface Column, Field Name, Rec Number, Start Column, Width; JSON/XML layout; or an Oracle Transaction Layout Definition Report in TXT/PDF format.",
           },
           { status: 400 }
         );
