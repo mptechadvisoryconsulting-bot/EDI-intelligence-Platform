@@ -5,6 +5,7 @@ import {
   assertCanViewWorkOrder,
   assertTechnicianStatusChangeAllowed,
 } from "@/lib/business/field-service-access";
+import { assertWorkOrderCompletionReady } from "@/lib/business/field-service-execution";
 import { transitionWorkOrderStatus } from "@/lib/business/workflow-service";
 
 export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
@@ -25,6 +26,9 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
 
     assertCanViewWorkOrder(account.membershipRole, account.user.id, workOrder.assignedUserId);
     assertTechnicianStatusChangeAllowed(account.membershipRole, workOrder.status, nextStatus);
+    if (nextStatus === "completed") {
+      await assertWorkOrderCompletionReady(account.accountId, workOrder.id);
+    }
 
     const updated = await transitionWorkOrderStatus({
       accountId: account.accountId,
@@ -39,7 +43,11 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     if (message === "Forbidden" || message.includes("cannot perform")) {
       return NextResponse.json({ error: message }, { status: 403 });
     }
-    if (message.startsWith("Invalid work_order transition") || message.includes("concurrently")) {
+    if (
+      message.startsWith("Invalid work_order transition") ||
+      message.includes("concurrently") ||
+      message.startsWith("Work order is not ready for completion")
+    ) {
       return NextResponse.json({ error: message }, { status: 409 });
     }
     if (message.includes("Unauthorized")) {
