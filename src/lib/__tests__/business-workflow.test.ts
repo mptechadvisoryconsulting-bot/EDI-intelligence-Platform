@@ -31,10 +31,12 @@ describe("governed business workflows", () => {
     assert.equal(canTransition("work_order", "completed", "requested"), false);
   });
 
-  it("prevents finalized invoices from returning to draft", () => {
+  it("keeps document status separate from payment status", () => {
     assert.equal(canTransition("invoice", "finalized", "draft"), false);
-    assert.equal(canTransition("invoice", "sent", "paid"), true);
-    assert.equal(canTransition("invoice", "paid", "void"), false);
+    assert.equal(canTransition("invoice", "finalized", "sent"), true);
+    assert.equal(canTransition("invoice", "sent", "paid"), false);
+    assert.equal(canTransition("payment_status", "awaiting_payment", "paid"), true);
+    assert.equal(canTransition("payment_status", "paid", "past_due"), false);
   });
 });
 
