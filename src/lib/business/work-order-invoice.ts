@@ -175,6 +175,16 @@ export async function prepareInvoiceFromCompletedWorkOrder(input: {
       lines,
       taxTotalMinor: input.taxTotalMinor,
     });
+
+    // The lower-level idempotent service can recover a unique invoice-number race.
+    // Never trust a recovered result until its canonical source and customer match.
+    if (
+      invoice.invoiceNumber !== invoiceNumber ||
+      invoice.workOrderId !== workOrder.id ||
+      invoice.customerId !== workOrder.customerId
+    ) {
+      throw new Error("Invoice number is already used by a different source");
+    }
   } catch (error) {
     // A concurrent request can win the unique workOrderId guard with a different
     // invoice number. Resolve by canonical source, never by the submitted number alone.
@@ -183,7 +193,7 @@ export async function prepareInvoiceFromCompletedWorkOrder(input: {
       include: { lines: true },
     });
     if (!raced) throw error;
-    if (raced.invoiceNumber !== invoiceNumber) {
+    if (raced.invoiceNumber !== invoiceNumber || raced.customerId !== workOrder.customerId) {
       throw new Error(`Work order is already linked to invoice ${raced.invoiceNumber}`);
     }
     invoice = raced;
