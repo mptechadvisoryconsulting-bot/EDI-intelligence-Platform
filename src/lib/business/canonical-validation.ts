@@ -3,6 +3,7 @@ export type CanonicalLineInput = {
   quantity: number;
   unitPriceMinor: number;
   catalogItemId?: string | null;
+  orderLineId?: string | null;
 };
 
 export function requireNonEmpty(value: string, field: string, maxLength = 200) {
@@ -43,6 +44,7 @@ export function validateCanonicalLines(lines: CanonicalLineInput[]) {
     quantity: validateQuantity(line.quantity),
     unitPriceMinor: validateMoneyMinor(line.unitPriceMinor, "Unit price"),
     catalogItemId: line.catalogItemId?.trim() || null,
+    orderLineId: line.orderLineId?.trim() || null,
   }));
 }
 
