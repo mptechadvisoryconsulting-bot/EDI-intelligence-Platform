@@ -1,4 +1,9 @@
-export type WorkflowKind = "product_order" | "service_order" | "work_order" | "invoice";
+export type WorkflowKind =
+  | "product_order"
+  | "service_order"
+  | "work_order"
+  | "invoice"
+  | "payment_status";
 
 const TRANSITIONS: Record<WorkflowKind, Record<string, readonly string[]>> = {
   product_order: {
@@ -45,7 +50,11 @@ const TRANSITIONS: Record<WorkflowKind, Record<string, readonly string[]>> = {
   invoice: {
     draft: ["finalized", "void"],
     finalized: ["sent", "void"],
-    sent: ["partially_paid", "paid", "past_due", "void"],
+    sent: ["void"],
+    void: [],
+  },
+  payment_status: {
+    awaiting_payment: ["partially_paid", "paid", "past_due", "void"],
     partially_paid: ["paid", "past_due", "void"],
     past_due: ["partially_paid", "paid", "void"],
     paid: [],
