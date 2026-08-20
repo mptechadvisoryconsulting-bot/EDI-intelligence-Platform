@@ -8,6 +8,8 @@ const ORACLE_REPORT_MARKERS = [
   "record layout",
 ];
 
+const ORACLE_SPECIFIC_MARKERS = ["oracle e-commerce gateway", "oracle ecommerce gateway"];
+
 function parseNumber(value: string | undefined): number | undefined {
   if (!value || !/^\d+$/.test(value)) return undefined;
   const parsed = Number.parseInt(value, 10);
@@ -16,7 +18,10 @@ function parseNumber(value: string | undefined): number | undefined {
 
 export function isOracleTransactionLayoutReport(text: string): boolean {
   const normalized = text.toLowerCase();
-  return ORACLE_REPORT_MARKERS.every((marker) => normalized.includes(marker));
+  return (
+    ORACLE_REPORT_MARKERS.every((marker) => normalized.includes(marker)) &&
+    ORACLE_SPECIFIC_MARKERS.some((marker) => normalized.includes(marker))
+  );
 }
 
 /**
@@ -27,8 +32,9 @@ export function isOracleTransactionLayoutReport(text: string): boolean {
  * or, when a sequence column is present:
  *   OPERATION_CODE_EXT1 1000  40  5   VARCHAR2  113  1  PO  PO1
  *
- * The parser deliberately requires the Oracle report markers above so ordinary
- * TXT/PDF documents are never mistaken for an ERP layout.
+ * The parser deliberately requires both the report-structure markers and an
+ * Oracle E-Commerce Gateway identifier so a generic TXT/PDF report cannot be
+ * mistaken for the account's authoritative ERP layout.
  */
 export function parseOracleTransactionLayoutReport(text: string): ErpLayoutField[] {
   if (!isOracleTransactionLayoutReport(text)) return [];
