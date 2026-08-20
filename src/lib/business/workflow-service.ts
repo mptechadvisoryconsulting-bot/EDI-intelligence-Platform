@@ -5,31 +5,6 @@ function auditMetadata(currentStatus: string, nextStatus: string) {
   return JSON.stringify({ currentStatus, nextStatus });
 }
 
-async function writeAudit(
-  tx: Parameters<Parameters<typeof db.$transaction>[0]>[0],
-  input: {
-    accountId: string;
-    entityType: string;
-    entityId: string;
-    action: string;
-    actorUserId?: string | null;
-    currentStatus: string;
-    nextStatus: string;
-  }
-) {
-  await tx.accountAuditEvent.create({
-    data: {
-      accountId: input.accountId,
-      entityType: input.entityType,
-      entityId: input.entityId,
-      action: input.action,
-      actorUserId: input.actorUserId ?? null,
-      source: "app",
-      metadata: auditMetadata(input.currentStatus, input.nextStatus),
-    },
-  });
-}
-
 /**
  * Persist an order transition only after validating the current state inside the
  * same database transaction. updateMany includes the observed current status so
@@ -63,14 +38,16 @@ export async function transitionBusinessOrderStatus(input: {
     });
     if (changed.count !== 1) throw new Error("Order changed concurrently; retry from the latest state");
 
-    await writeAudit(tx, {
-      accountId: input.accountId,
-      entityType: "business_order",
-      entityId: input.orderId,
-      action: "status_changed",
-      actorUserId: input.actorUserId,
-      currentStatus: order.status,
-      nextStatus: input.nextStatus,
+    await tx.accountAuditEvent.create({
+      data: {
+        accountId: input.accountId,
+        entityType: "business_order",
+        entityId: input.orderId,
+        action: "status_changed",
+        actorUserId: input.actorUserId ?? null,
+        source: "app",
+        metadata: auditMetadata(order.status, input.nextStatus),
+      },
     });
 
     return tx.businessOrder.findFirstOrThrow({
@@ -104,14 +81,16 @@ export async function transitionWorkOrderStatus(input: {
     });
     if (changed.count !== 1) throw new Error("Work order changed concurrently; retry from the latest state");
 
-    await writeAudit(tx, {
-      accountId: input.accountId,
-      entityType: "work_order",
-      entityId: input.workOrderId,
-      action: "status_changed",
-      actorUserId: input.actorUserId,
-      currentStatus: workOrder.status,
-      nextStatus: input.nextStatus,
+    await tx.accountAuditEvent.create({
+      data: {
+        accountId: input.accountId,
+        entityType: "work_order",
+        entityId: input.workOrderId,
+        action: "status_changed",
+        actorUserId: input.actorUserId ?? null,
+        source: "app",
+        metadata: auditMetadata(workOrder.status, input.nextStatus),
+      },
     });
 
     return tx.workOrder.findFirstOrThrow({
@@ -146,14 +125,16 @@ export async function transitionInvoiceStatus(input: {
     });
     if (changed.count !== 1) throw new Error("Invoice changed concurrently; retry from the latest state");
 
-    await writeAudit(tx, {
-      accountId: input.accountId,
-      entityType: "invoice",
-      entityId: input.invoiceId,
-      action: "status_changed",
-      actorUserId: input.actorUserId,
-      currentStatus: invoice.status,
-      nextStatus: input.nextStatus,
+    await tx.accountAuditEvent.create({
+      data: {
+        accountId: input.accountId,
+        entityType: "invoice",
+        entityId: input.invoiceId,
+        action: "status_changed",
+        actorUserId: input.actorUserId ?? null,
+        source: "app",
+        metadata: auditMetadata(invoice.status, input.nextStatus),
+      },
     });
 
     return tx.invoice.findFirstOrThrow({
@@ -188,14 +169,16 @@ export async function transitionInvoicePaymentStatus(input: {
     });
     if (changed.count !== 1) throw new Error("Invoice payment state changed concurrently; retry");
 
-    await writeAudit(tx, {
-      accountId: input.accountId,
-      entityType: "invoice",
-      entityId: input.invoiceId,
-      action: "payment_status_changed",
-      actorUserId: input.actorUserId,
-      currentStatus: invoice.paymentStatus,
-      nextStatus: input.nextPaymentStatus,
+    await tx.accountAuditEvent.create({
+      data: {
+        accountId: input.accountId,
+        entityType: "invoice",
+        entityId: input.invoiceId,
+        action: "payment_status_changed",
+        actorUserId: input.actorUserId ?? null,
+        source: "app",
+        metadata: auditMetadata(invoice.paymentStatus, input.nextPaymentStatus),
+      },
     });
 
     return tx.invoice.findFirstOrThrow({
