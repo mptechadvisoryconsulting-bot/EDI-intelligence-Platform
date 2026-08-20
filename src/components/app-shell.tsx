@@ -24,6 +24,7 @@ const navGroups = [
     items: [
       { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
       { href: "/trading-partners", label: "Trading Partners", icon: Building2 },
+      { href: "/account/field-service", label: "Field Service", icon: ClipboardCheck },
       { href: "/engineering-queue", label: "Engineering Queue", icon: ClipboardCheck },
       { href: "/production", label: "Production", icon: RadioTower },
       { href: "/reports", label: "Reports", icon: BarChart3 },
