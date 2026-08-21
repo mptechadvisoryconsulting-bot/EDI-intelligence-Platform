@@ -21,6 +21,7 @@ export type PropertyMediaEvidenceInput = {
 const MAX_ID_LENGTH = 160;
 const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
 const SHA256_HEX = /^[a-f0-9]{64}$/i;
+const CANONICAL_UTC_TIMESTAMP = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{3}))?Z$/;
 
 function requireText(value: unknown, label: string, maxLength = MAX_ID_LENGTH): string {
   if (typeof value !== "string") throw new Error(`${label} must be text`);
@@ -35,10 +36,36 @@ function optionalText(value: unknown, label: string): string | null | undefined 
   return requireText(value, label);
 }
 
+/**
+ * Accept only canonical UTC timestamps whose calendar components round-trip exactly.
+ * This prevents Date.parse from silently normalizing impossible dates such as Feb 31.
+ */
 function validateCapturedAt(value: unknown): string | null | undefined {
   if (value == null) return value as null | undefined;
   const normalized = requireText(value, "Property evidence captured timestamp", 80);
-  if (Number.isNaN(Date.parse(normalized))) throw new Error("Property evidence captured timestamp must be valid");
+  const match = CANONICAL_UTC_TIMESTAMP.exec(normalized);
+  if (!match) throw new Error("Property evidence captured timestamp must be a canonical UTC timestamp");
+
+  const [, yearText, monthText, dayText, hourText, minuteText, secondText, millisText = "000"] = match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const hour = Number(hourText);
+  const minute = Number(minuteText);
+  const second = Number(secondText);
+  const millis = Number(millisText);
+
+  const epoch = Date.UTC(year, month - 1, day, hour, minute, second, millis);
+  const parsed = new Date(epoch);
+  const isExact = parsed.getUTCFullYear() === year
+    && parsed.getUTCMonth() === month - 1
+    && parsed.getUTCDate() === day
+    && parsed.getUTCHours() === hour
+    && parsed.getUTCMinutes() === minute
+    && parsed.getUTCSeconds() === second
+    && parsed.getUTCMilliseconds() === millis;
+
+  if (!isExact) throw new Error("Property evidence captured timestamp must be valid");
   return normalized;
 }
 
