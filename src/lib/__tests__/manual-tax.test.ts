@@ -54,6 +54,15 @@ test("rejects fractional quantities before floating-point line rounding can alte
   );
 });
 
+test("rejects malformed runtime taxability values instead of coercing them", () => {
+  for (const taxable of ["false", 1, 0, null, undefined]) {
+    assert.throws(
+      () => calculateManualTax([{ quantity: 1, unitPriceMinor: 100, taxable } as never], 700),
+      /taxable flag must be a boolean/,
+    );
+  }
+});
+
 test("rejects unsupported configured rates instead of guessing", () => {
   assert.throws(() => validateTaxRateBasisPoints(-1), /Tax rate/);
   assert.throws(() => validateTaxRateBasisPoints(10_001), /Tax rate/);
