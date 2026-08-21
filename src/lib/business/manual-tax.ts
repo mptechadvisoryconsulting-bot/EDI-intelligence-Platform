@@ -25,6 +25,18 @@ export function validateTaxRateBasisPoints(value: number) {
   return value;
 }
 
+function roundedTaxMinor(taxableSubtotalMinor: number, rateBasisPoints: number) {
+  const numerator = BigInt(taxableSubtotalMinor) * BigInt(rateBasisPoints);
+  const divisor = 10_000n;
+  const rounded = (numerator + divisor / 2n) / divisor;
+
+  if (rounded > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new Error("Tax total is outside the supported range");
+  }
+
+  return Number(rounded);
+}
+
 /**
  * Calculates a deterministic manual tax snapshot from canonical minor-unit lines.
  * This helper does not infer nexus, jurisdiction, sourcing, exemptions, or legal taxability.
@@ -48,11 +60,7 @@ export function calculateManualTax(lines: ManualTaxLine[], taxRateBasisPoints: n
     }
   }
 
-  const taxTotalMinor = Math.round((taxableSubtotalMinor * rate) / 10_000);
-  if (!Number.isSafeInteger(taxTotalMinor) || taxTotalMinor < 0) {
-    throw new Error("Tax total is outside the supported range");
-  }
-
+  const taxTotalMinor = roundedTaxMinor(taxableSubtotalMinor, rate);
   const totalMinor = taxableSubtotalMinor + nonTaxableSubtotalMinor + taxTotalMinor;
   if (!Number.isSafeInteger(totalMinor) || totalMinor < 0) {
     throw new Error("Tax calculation total is outside the supported range");
