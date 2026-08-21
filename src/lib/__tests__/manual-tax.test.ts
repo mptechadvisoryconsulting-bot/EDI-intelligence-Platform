@@ -41,6 +41,19 @@ test("keeps tax rounding exact when subtotal times rate exceeds safe integer mul
   assert.equal(result.totalMinor, 2_000_000_000_000);
 });
 
+test("preserves the prior large-value rounding boundary exactly", () => {
+  const result = calculateManualTax([{ quantity: 1, unitPriceMinor: 9_004_497_905_368_333, taxable: true }], 3);
+  assert.equal(result.taxTotalMinor, 2_701_349_371_610);
+  assert.equal(result.totalMinor, 9_007_199_254_739_943);
+});
+
+test("rejects fractional quantities before floating-point line rounding can alter minor units", () => {
+  assert.throws(
+    () => calculateManualTax([{ quantity: 1.005, unitPriceMinor: 100, taxable: true }], 700),
+    /quantity must be a positive integer/,
+  );
+});
+
 test("rejects unsupported configured rates instead of guessing", () => {
   assert.throws(() => validateTaxRateBasisPoints(-1), /Tax rate/);
   assert.throws(() => validateTaxRateBasisPoints(10_001), /Tax rate/);
