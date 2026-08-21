@@ -41,6 +41,7 @@ function roundedTaxMinor(taxableSubtotalMinor: number, rateBasisPoints: number) 
  * Calculates a deterministic manual tax snapshot from canonical minor-unit lines.
  * Quantities are intentionally restricted to positive safe integers so line amounts
  * cannot lose minor-unit precision before the exact BigInt tax calculation begins.
+ * Runtime taxability must be an explicit boolean; malformed truthy/falsy values fail closed.
  * This helper does not infer nexus, jurisdiction, sourcing, exemptions, or legal taxability.
  */
 export function calculateManualTax(lines: ManualTaxLine[], taxRateBasisPoints: number): ManualTaxCalculation {
@@ -55,6 +56,9 @@ export function calculateManualTax(lines: ManualTaxLine[], taxRateBasisPoints: n
     validateMoneyMinor(line.unitPriceMinor, "Unit price");
     if (!Number.isSafeInteger(line.quantity) || line.quantity <= 0) {
       throw new Error("Tax line quantity must be a positive integer");
+    }
+    if (typeof line.taxable !== "boolean") {
+      throw new Error("Tax line taxable flag must be a boolean");
     }
     const amountMinor = lineAmountMinor(line.quantity, line.unitPriceMinor);
     if (line.taxable) taxableSubtotalMinor += amountMinor;
