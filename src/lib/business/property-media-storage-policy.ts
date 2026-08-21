@@ -40,8 +40,9 @@ function requireText(value: unknown, label: string, maxLength = MAX_ID_LENGTH): 
   if (typeof value !== "string") throw new Error(`${label} must be text`);
   const normalized = value.trim();
   if (!normalized) throw new Error(`${label} is required`);
-  if (normalized.length > maxLength) throw new Error(`${label} is too long`);
-  return normalized;
+  if (normalized !== value) throw new Error(`${label} must not contain leading or trailing whitespace`);
+  if (value.length > maxLength) throw new Error(`${label} is too long`);
+  return value;
 }
 
 function validateTenantBoundStorageKey(value: unknown, tenantId: string): string {
