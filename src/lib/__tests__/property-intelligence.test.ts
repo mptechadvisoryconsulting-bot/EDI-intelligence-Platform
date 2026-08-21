@@ -38,6 +38,25 @@ test("validates bounded property zone hierarchy and rejects duplicates, missing 
   );
 });
 
+test("canonicalizes parent ids before relationship and cycle validation", () => {
+  const zones = [
+    { id: "building-a", name: "Building A" },
+    { id: "loading-dock", name: "Loading Dock", parentId: "  building-a  " },
+  ];
+
+  validatePropertyZones(zones);
+  assert.equal(zones[1].parentId, "building-a");
+
+  assert.throws(
+    () =>
+      validatePropertyZones([
+        { id: "a", name: "A", parentId: "  b  " },
+        { id: "b", name: "B", parentId: " a " },
+      ]),
+    /cannot contain cycles/,
+  );
+});
+
 test("requires provider provenance for licensed address imagery", () => {
   assert.doesNotThrow(() =>
     validatePropertyImageDescriptor({
