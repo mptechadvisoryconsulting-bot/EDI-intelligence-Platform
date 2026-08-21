@@ -27,8 +27,8 @@ export function validateTaxRateBasisPoints(value: number) {
 
 function roundedTaxMinor(taxableSubtotalMinor: number, rateBasisPoints: number) {
   const numerator = BigInt(taxableSubtotalMinor) * BigInt(rateBasisPoints);
-  const divisor = 10_000n;
-  const rounded = (numerator + divisor / 2n) / divisor;
+  const divisor = BigInt(10_000);
+  const rounded = (numerator + divisor / BigInt(2)) / divisor;
 
   if (rounded > BigInt(Number.MAX_SAFE_INTEGER)) {
     throw new Error("Tax total is outside the supported range");
