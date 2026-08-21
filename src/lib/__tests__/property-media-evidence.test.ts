@@ -52,6 +52,10 @@ test("rejects malformed hashes and timestamps", () => {
   );
   assert.throws(
     () => validatePropertyMediaEvidenceInput({ ...valid, capturedAt: "not-a-date" }),
+    /captured timestamp must be a canonical UTC timestamp/,
+  );
+  assert.throws(
+    () => validatePropertyMediaEvidenceInput({ ...valid, capturedAt: "2026-02-31T12:00:00.000Z" }),
     /captured timestamp must be valid/,
   );
 });
