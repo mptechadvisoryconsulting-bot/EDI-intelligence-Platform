@@ -35,6 +35,12 @@ test("keeps non-taxable sales out of the taxable subtotal", () => {
   assert.equal(result.totalMinor, 3600);
 });
 
+test("keeps tax rounding exact when subtotal times rate exceeds safe integer multiplication", () => {
+  const result = calculateManualTax([{ quantity: 1, unitPriceMinor: 1_000_000_000_000, taxable: true }], 10_000);
+  assert.equal(result.taxTotalMinor, 1_000_000_000_000);
+  assert.equal(result.totalMinor, 2_000_000_000_000);
+});
+
 test("rejects unsupported configured rates instead of guessing", () => {
   assert.throws(() => validateTaxRateBasisPoints(-1), /Tax rate/);
   assert.throws(() => validateTaxRateBasisPoints(10_001), /Tax rate/);
