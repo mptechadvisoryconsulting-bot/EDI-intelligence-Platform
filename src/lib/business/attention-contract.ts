@@ -58,7 +58,7 @@ function optionalBoundedText(value: unknown, field: string, max = MAX_TEXT): str
 }
 
 function assertEnumValue<T extends readonly string[]>(value: unknown, allowed: T, field: string): T[number] {
-  if (typeof value !== "string" || !allowed.includes(value)) {
+  if (typeof value !== "string" || !(allowed as readonly string[]).includes(value)) {
     throw new Error(`${field} is invalid`);
   }
   return value as T[number];
@@ -94,10 +94,15 @@ function normalizeActions(value: unknown): AttentionRecommendedAction[] | undefi
   });
 }
 
+function encodeStableKeyPart(value: unknown): string {
+  const part = requireBoundedText(value, "stableKey part", 500);
+  return `${part.length}:${part}`;
+}
+
 export function buildAttentionStableKey(input: Pick<AttentionItemInput, "tenantId" | "sourceModule" | "sourceRecordType" | "sourceRecordId" | "reason">): string {
   return [input.tenantId, input.sourceModule, input.sourceRecordType, input.sourceRecordId, input.reason]
-    .map((part) => requireBoundedText(part, "stableKey part", 500))
-    .join("::");
+    .map(encodeStableKeyPart)
+    .join("|");
 }
 
 export function validateAttentionItemInput(value: unknown): AttentionItemInput {
