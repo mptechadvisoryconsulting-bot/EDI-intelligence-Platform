@@ -27,7 +27,7 @@ test("normalizes a tenant-scoped attention item and creates a stable dedupe key"
   assert.equal(item.status, "open");
   assert.equal(
     item.stableKey,
-    "tenant-1::field_service::work_order::wo-100::completed work is missing a billing rate",
+    "8:tenant-1|13:field_service|10:work_order|6:wo-100|40:completed work is missing a billing rate",
   );
   assert.equal(item.recommendedActions?.[0]?.requiresApproval, true);
 });
@@ -35,6 +35,20 @@ test("normalizes a tenant-scoped attention item and creates a stable dedupe key"
 test("stable key includes tenant and source identity so equivalent exceptions do not cross tenants", () => {
   const a = buildAttentionStableKey(validInput);
   const b = buildAttentionStableKey({ ...validInput, tenantId: "tenant-2" });
+  assert.notEqual(a, b);
+});
+
+test("stable key length-prefix encoding prevents delimiter collisions", () => {
+  const a = buildAttentionStableKey({
+    ...validInput,
+    sourceRecordType: "a::b",
+    sourceRecordId: "c",
+  });
+  const b = buildAttentionStableKey({
+    ...validInput,
+    sourceRecordType: "a",
+    sourceRecordId: "b::c",
+  });
   assert.notEqual(a, b);
 });
 
