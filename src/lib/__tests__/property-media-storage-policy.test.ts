@@ -99,6 +99,34 @@ test("validates short-lived same-tenant signed access requests", () => {
   assert.equal(request.purpose, "view");
 });
 
+test("rejects whitespace-normalized tenant identities", () => {
+  for (const tenantId of [" tenant-1", "tenant-1 "]) {
+    assert.throws(
+      () => validatePropertyMediaAccessRequest({
+        tenantId,
+        authenticatedTenantId: "tenant-1",
+        storageKey: "tenants/tenant-1/property-evidence/evidence-1/original.jpg",
+        purpose: "view",
+        expiresInSeconds: 300,
+      }),
+      /must not contain leading or trailing whitespace/,
+    );
+  }
+
+  for (const authenticatedTenantId of [" tenant-1", "tenant-1 "]) {
+    assert.throws(
+      () => validatePropertyMediaAccessRequest({
+        tenantId: "tenant-1",
+        authenticatedTenantId,
+        storageKey: "tenants/tenant-1/property-evidence/evidence-1/original.jpg",
+        purpose: "view",
+        expiresInSeconds: 300,
+      }),
+      /must not contain leading or trailing whitespace/,
+    );
+  }
+});
+
 test("rejects cross-tenant and overly long signed access", () => {
   assert.throws(
     () => validatePropertyMediaAccessRequest({
